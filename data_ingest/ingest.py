@@ -4,7 +4,7 @@ from django.utils.datastructures import SortedDict
 from django.contrib.auth.models import User
 import data_ingest.sheet_template
 from data_ingest.models import FileUpload, RawCatch
-from catch.models import Taxon, CatchType, Country_EEZ
+from catch.models import Taxon, CatchType, Country, EEZ
 
 
 class ContributedFile():
@@ -62,14 +62,14 @@ class ContributedFile():
                 except IndexError:  # no CatchType found
                     catch_type_id = 0
                 try:
-                    country = Country_EEZ.objects.filter(country_name__iexact=recon_datum['fishing entity'].strip())[0]
-                    fishing_entity_id = country.fishing_entity_id
-                except IndexError:  # no Country_EEZ found
+                    country = Country.objects.filter(name__iexact=recon_datum['fishing entity'].strip())[0]
+                    fishing_entity_id = country.id
+                except IndexError:  # no Country found
                     fishing_entity_id = 0
                 try:
-                    eez = Country_EEZ.objects.filter(eez_name__iexact=recon_datum['EEZ'].strip())[0]
-                    eez_id = eez.eez_id
-                except IndexError:  # no Country_EEZ found
+                    eez = EEZ.objects.filter(name__iexact=recon_datum['EEZ'].strip())[0]
+                    eez_id = eez.id
+                except IndexError:  # no EEZ found
                     eez_id = 0
 
                 recon_data = RawCatch(

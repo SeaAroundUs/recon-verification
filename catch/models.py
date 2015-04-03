@@ -5,19 +5,8 @@ from data_ingest.models import RawCatch
 class Reference(models.Model):
     name = models.CharField(max_length=200)
 
-
-class Country_EEZ(models.Model):
-    fishing_entity_id = models.IntegerField(primary_key=True)
-    country_name = models.CharField(max_length=200)
-    eez_id = models.IntegerField(null=True)
-    eez_name = models.CharField(max_length=200, null=True)
-    legacy_country_number = models.IntegerField(null=True)
-    geo_entity_id = models.IntegerField(null=True)
-    # sub_area = models.CharField(max_length=200)
-
     class Meta:
-        verbose_name = 'Country_EEZ'
-        verbose_name_plural = 'Country_EEZs'
+        db_table = 'reference'
 
 
 class Country(models.Model):
@@ -25,16 +14,17 @@ class Country(models.Model):
 
     class Meta:
         verbose_name_plural = 'Countries'
+        db_table = 'country'
 
 
 class EEZ(models.Model):
     country = models.ForeignKey(to=Country)
-    area = models.CharField(max_length=200)
-    sub_area = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
 
     class Meta:
         verbose_name = 'EEZ'
         verbose_name_plural = 'EEZs'
+        db_table = 'eez'
 
 
 class Taxon(models.Model):
@@ -45,6 +35,7 @@ class Taxon(models.Model):
     class Meta:
         verbose_name_plural = 'Taxa'
         ordering = ['scientific_name', 'name']
+        db_table = 'taxon'
 
     def __str__(self):
         return u"{0} - {1}  ({2})".format(self.taxon_key, self.scientific_name, self.name)
@@ -53,17 +44,23 @@ class Taxon(models.Model):
 class Sector(models.Model):
     name = models.CharField(max_length=200)
 
+    class Meta:
+        db_table = 'fishing_sector'
+
 
 class CatchType(models.Model):
     type = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'catch_type'
 
 
 class Catch(models.Model):
     year = models.IntegerField()
     amount = models.DecimalField(max_digits=20, decimal_places=12)
     raw_catch = models.ForeignKey(to=RawCatch)
-    fishing_entity = models.ForeignKey(to=Country_EEZ, related_name="fishing_entity")
-    original_country_fishing = models.ForeignKey(to=Country_EEZ, related_name="original_country_fishing")
+    fishing_entity = models.ForeignKey(to=Country, related_name="fishing_entity")
+    original_country_fishing = models.ForeignKey(to=Country, related_name="original_country_fishing")
     eez = models.ForeignKey(to=EEZ)
     fao_area = models.CharField(max_length=20, null=True)
     sub_regional_area = models.CharField(max_length=200, null=True)
@@ -81,3 +78,6 @@ class Catch(models.Model):
     adjustment_factor = models.CharField(max_length=200, null=True)
     gear = models.CharField(max_length=200, null=True)
     notes = models.CharField(max_length=2000, null=True)
+
+    class Meta:
+        db_table = 'reconstructed_catch'

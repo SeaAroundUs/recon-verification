@@ -1,4 +1,5 @@
 import os
+
 SITE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MEDIA_ROOT = os.path.join(SITE_ROOT, 'media')
@@ -46,13 +47,13 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'reconstruction_verification.urls'
 
-WSGI_APPLICATION = 'reconstruction.wsgi.application'
+WSGI_APPLICATION = 'reconstruction_verification.wsgi.application'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '',
-        'USER': '',
+        'NAME': 'recon',
+        'USER': 'recon',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '5432',

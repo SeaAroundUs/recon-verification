@@ -1,1 +1,1 @@
-"# recon-verification" 
+see /notes/reqs.txt
