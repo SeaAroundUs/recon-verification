@@ -1,0 +1,235 @@
+{% extends '_layouts/base.html' %}
+{% load staticfiles %}
+{% block title %}File Upload{% endblock %}
+{% block extra-head-style %}
+	<style type="text/css" class="init">
+	    body { font-size: 140%; }
+{#        .table-scrollable {#}
+{#            overflow: auto;#}
+{#        }#}
+	</style>
+{% endblock %}
+{% block content %}
+    <div class="panel-group" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form role="form">
+                    <div class="form-group">
+                        <span class="btn btn-success fileinput-button">
+                            <i class="glyphicon glyphicon-plus"></i>
+                            <span>Select file</span>
+                            <input id="fileupload" type="file" name="file" multiple>
+                        </span>
+                    </div>
+                </form>
+                <p><pre id="messageConsole" class="console">Upload reconstruction data file</pre></p>
+
+
+                <p>
+                    <button name="normalize" id="normalize">Normalize</button>
+                    <button name="save" id="save">Save</button>
+                    <label><input type="checkbox" name="autosave" id="autosave" checked="checked"
+                                  autocomplete="off"> Autosave</label>
+                    <input id='search_field' type="search" placeholder="Search" />
+                </p>
+                <div id="reconDataTableElement" class="table-scrollable"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var entityMap = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': '&quot;',
+            "'": '&#39;',
+            "/": '&#x2F;',
+            "\n": '<br>'
+        };
+
+        function escapeHtml(string) {
+            return String(string).replace(/[&<>"'\/]|[\n]/g, function (s) {
+                return entityMap[s];
+            });
+        }
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        function ajax(url, method, callback, params) {
+            var obj;
+            var csrftoken = $.cookie('csrftoken');
+            try {
+                obj = new XMLHttpRequest();
+            } catch (e) {
+                try {obj = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch (e) {
+                    try {
+                        obj = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e) {
+                        alert("Your browser does not support Ajax.");
+                        return false;
+                    }
+                }
+            }
+            obj.onreadystatechange = function () {
+
+                if (obj.readyState == 4) {
+                    callback(obj);
+                }
+            };
+            obj.open(method, url, true);
+            if (!csrfSafeMethod(method)) {
+                obj.setRequestHeader('X-CSRFToken', csrftoken);
+            }
+            obj.send(params);
+            return obj;
+        }
+
+        function provide_upload_feedback(){
+            messageConsole.innerText = 'Data loaded from file [name of uploaded file]';
+        }
+
+        function get_table_headers() {
+            var table_headers = [];
+            $.ajax({
+                    url:"{% url 'catch-fields-json' %}",
+                    type: 'GET',
+                    async: false,
+                    success: function(data, status) {
+                        table_headers = data;
+                    }
+            });
+            return table_headers;
+        }
+
+        function load_table_data() {
+            ajax(
+                    "{% url 'uploaded-data-json' %}",
+                    'GET',
+                    function (res) {
+                        var data = JSON.parse(res.response);
+                        dataTable.loadData(data.data);
+                    }
+            );
+        }
+
+        function zeroValueRenderer(instance, td, row, col, prop, value, cellProperties) {
+            Handsontable.renderers.TextRenderer.apply(this, arguments);
+            if (value === 0) {
+                td.style.background = '#FF0000';
+            }
+        }
+        // maps function to lookup string
+        Handsontable.renderers.registerRenderer('zeroValueRenderer', zeroValueRenderer);
+
+        var container = document.getElementById("reconDataTableElement"),
+                messageConsole = document.getElementById("messageConsole"),
+                autosave = document.getElementById('autosave'),
+                load = document.getElementById('load'),
+                save = document.getElementById('save'),
+                normalize = document.getElementById('normalize'),
+                autosaveNotification,
+                dataTable = new Handsontable(container, {
+                    colHeaders: get_table_headers(),
+                    columnSorting: true,
+                    startRows: 1,
+                    startCols: 32,
+                    minSpareRows: 0,
+                    contextMenu: true,
+                    search: true,
+                    afterChange: function (change, source) {
+                        if (source === 'loadData') {
+                            return; //don't save this change
+                        }
+                        if (autosave.checked) {
+                            clearTimeout(autosaveNotification);
+                            ajax(
+                                    "{% url 'uploaded-data-json' %}",
+                                    "POST",
+                                    function (data) {
+                                        messageConsole.innerText = 'Autosaved (' + change.length + ' ' + 'cell' + (change.length > 1 ? 's' : '') + ')';
+                                        autosaveNotification = setTimeout(function () {
+                                            messageConsole.innerText = 'Changes will be autosaved';
+                                        }, 1000);
+                                    },
+                                    JSON.stringify({data: change})
+                            );
+                        }
+                    },
+                    cells: function (row, col, prop) {
+                        var cellProperties = {};
+                        cellProperties.renderer = "zeroValueRenderer"; // uses lookup map to color cells
+                        return cellProperties;
+                    }
+                });
+
+        var searchField = document.getElementById('search_field');
+        Handsontable.Dom.addEvent(searchField, 'keyup', function (event) {
+            var queryResult = dataTable.search.query(this.value);
+            dataTable.render();
+        });
+
+
+        Handsontable.Dom.addEvent(save, 'click', function () {
+            ajax(
+                    "{% url 'uploaded-data-json' %}",
+                    'POST',
+                    function (res) {
+                        var response = JSON.parse(res.response);
+                        if (response.result === 'ok') {
+                            messageConsole.innerText = 'Data saved';
+                        }
+                        else {
+                            messageConsole.innerText = 'Save error';
+                        }
+                    },
+                    JSON.stringify({"data": dataTable.getData()}) //returns all cells' data
+            );
+        });
+
+        Handsontable.Dom.addEvent(autosave, 'click', function () {
+            if (autosave.checked) {
+                messageConsole.innerText = 'Changes will be autosaved';
+            }
+            else {
+                messageConsole.innerText = 'Changes will not be autosaved';
+            }
+        });
+
+        Handsontable.Dom.addEvent(normalize, 'click', function () {
+            ajax(
+                    "{% url 'normalize-data' %}",
+                    'POST',
+                    function (res) {
+                        var data = JSON.parse(res.response);
+                        dataTable.loadData(data.data);
+                    }
+            );
+        });
+
+        $(function () {
+            'use strict';
+            var url = "{% url 'recon-file-upload' %}";
+            var csrftoken = $.cookie('csrftoken');
+            $("#fileupload").fileupload({
+                url: url,
+                crossDomain: false,
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type)) {
+                        xhr.setRequestHeader('X-CSRFToken', csrftoken);
+                    }
+                },
+                dataType: 'json',
+                done: function (e, data) {
+                    load_table_data();
+                    provide_upload_feedback();
+                }
+            }).prop('disabled', !$.support.fileInput)
+                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+        });
+
+    </script>
+{% endblock %}

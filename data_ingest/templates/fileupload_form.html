@@ -1,0 +1,200 @@
+{% extends '_layouts/base.html' %}
+{% load staticfiles %}
+{% block title %}File Upload{% endblock %}
+{% block extra-head-style %}
+	<style type="text/css" class="init">
+	    body { font-size: 140%; }
+        .table-scrollable {
+            overflow: auto;
+        }
+	</style>
+{% endblock %}
+{% block extra-head-script %}
+    <script type="text/javascript" class="init">
+        var entityMap = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': '&quot;',
+            "'": '&#39;',
+            "/": '&#x2F;',
+            "\n": '<br>'
+        };
+        function escapeHtml(string) {
+            return String(string).replace(/[&<>"'\/]|[\n]/g, function (s) {
+                return entityMap[s];
+            });
+        }
+
+        $(document).ready( function() {
+            var reconUploadDataTable = $("#reconstruction-data-table").dataTable( {
+                "ajax": "{% url 'upload-data-json' %}",
+                "columns": [
+                    {"data": "id"},
+                    {"data": "year"},
+                    {"data": "amount"},
+                    {"data": "country_fishing"},
+                    {"data": "flag"},
+                    {"data": "country_id"},
+                    {"data": "eez_area"},
+                    {"data": "eez_area_id"},
+                    {"data": "eez_sub_area"},
+                    {"data": "eez_sub_area_id"},
+                    {"data": "fao_area"},
+                    {"data": "other_area"},
+                    {"data": "taxon_name"},
+                    {"data": "original_fao_name"},
+                    {"data": "taxon_key"},
+                    {"data": "sector"},
+                    {"data": "sector_id"},
+                    {"data": "catch_type"},
+                    {"data": "catch_type_id"},
+                    {"data": "notes"}
+                ],
+                "drawCallback": function( settings ) {
+                    var api = this.api();
+                    var alertCols = [5, 7, 9, 14, 16, 18];
+                    api.cells(
+                            function ( idx, data, node ) {
+                                return (data === null && $.inArray(idx.column, alertCols) > -1);
+                            }).nodes().to$().addClass('alert alert-warning');
+                    api.cells(
+                            function ( idx, data, node ) {
+                                return (data == 0 && $.inArray(idx.column, alertCols) > -1);
+                            }).nodes().to$().addClass('alert alert-danger');
+                    // activate any bootstrap popovers
+                    $('[data-toggle="popover"]').popover();
+                }
+            });
+        } );
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true"
+                       aria-controls="collapseOne">
+                        <h4>Step 1: Upload Standardised Reconstruction Data File</h4>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                <div class="panel-body">
+                    [upload an excel sheet that has been formatted for input]
+                    <form role="form">
+                        <div class="form-group">
+                    <span class="btn btn-success fileinput-button">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        <span>Select file</span>
+                        <input id="fileupload" type="file" name="file" multiple>
+                    </span>
+                        </div>
+                    </form>
+                    <!-- progress bar -->
+                    <div id="progress" class="progress">
+                        <div class="progress-bar progress-bar-success"></div>
+                    </div>
+                    [display success / fail message after file upload]
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingTwo">
+                <h4 class="panel-title">
+                    <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"
+                       aria-expanded="false" aria-controls="collapseTwo">
+                        <h4>Step 2: Review And Normalize Data</h4>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                <div class="panel-body">
+                    <table id="reconstruction-data-table" class="table table-striped table-bordered table-hover" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th id="id">ID</th>
+                                <th id="year">Year</th>
+                                <th id="amount">Amount</th>
+                                <th id="country_fishing">Country Fishing</th>
+                                <th id="flag">Flag</th>
+                                <th id="country_id">country_id</th>
+                                <th id="eez_area">EEZ Area</th>
+                                <th id="eez_area_id">eez_area_id</th>
+                                <th id="eez_sub_area">EEZ Subarea</th>
+                                <th id="eez_sub_area_id">eez_sub_area_id</th>
+                                <th id="fao_area">FAO Area</th>
+                                <th id="other_area">Other Area</th>
+                                <th id="taxon_name">Taxon Name</th>
+                                <th id="original_fao_name">Original FAO Name</th>
+                                <th id="taxon_key">taxon_key</th>
+                                <th id="sector">Sector</th>
+                                <th id="sector_id">sector_id</th>
+                                <th id="catch_type">Catch Type</th>
+                                <th id="catch_type_id">catch_type_id</th>
+                                <th id="notes">Notes</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <span class="btn btn-success normalize-button">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        <span>Normalize</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingThree">
+                <h4 class="panel-title">
+                    <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree"
+                       aria-expanded="false" aria-controls="collapseThree">
+                        <h4>Step 3: Finalize And Commit Data</h4>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                <div class="panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $(function () {
+            'use strict';
+            var url = '/ingest/file/';
+            var csrftoken = $.cookie('csrftoken');
+            $("#fileupload").fileupload({
+                url: url,
+                crossDomain: false,
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type)) {
+                        xhr.setRequestHeader('X-CSRFToken', csrftoken);
+                    }
+                },
+                dataType: 'json',
+                done: function (e, data) {
+                    put_files_for_survey_in_table();
+                },
+                progressall: function (e, data) {
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    $("#progress").find(".progress-bar").css(
+                            'width',
+                            progress + '%'
+                    );
+                }
+            }).prop('disabled', !$.support.fileInput)
+                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+        });
+
+        $(document).ready(function () {
+            $("#id_survey").trigger("change");
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,175 @@
+import logging
+import simplejson
+from django.shortcuts import render
+from django.views.generic.base import View
+from django.views.generic.edit import CreateView
+from django.http import HttpResponse
+from data_ingest.models import FileUpload, RawCatch
+from data_ingest.forms import FileUploadForm
+from data_ingest.ingest import ingest_file
+
+
+logger = logging.getLogger(__name__)
+
+
+def get_raw_catch_data():
+    raw_data = RawCatch.objects.all()
+    raw_data_list = {'data': []}
+    for data_row in raw_data:
+        raw_data_list['data'].append(
+            [
+                data_row.id,
+                data_row.fishing_entity,
+                data_row.original_country_fishing,
+                data_row.fishing_entity_id,
+                data_row.eez_area,
+                data_row.eez_sub_area,
+                data_row.eez_id,
+                data_row.fao_area,
+                data_row.sub_regional_area,
+                data_row.province_state,
+                data_row.ices_division,
+                data_row.ices_subdivision,
+                data_row.nafo_division,
+                data_row.ccamlr_area,
+                data_row.layer,
+                data_row.year,
+                data_row.amount,
+                data_row.adjustment_factor,
+                data_row.taxon_name,
+                data_row.original_fao_name,
+                data_row.taxon_key,
+                data_row.gear_type,
+                data_row.gear_type_id,
+                data_row.sector,
+                data_row.original_sector,
+                data_row.sector_id,
+                data_row.catch_type,
+                data_row.catch_type_id,
+                data_row.input_type,
+                data_row.forward_carry_rule,
+                data_row.reference_id,
+                data_row.notes,
+            ])
+    return raw_data_list
+
+
+class FileUploadCreateView(CreateView):
+    model = FileUpload
+    form_class = FileUploadForm
+    template_name = 'recon_ingest.html'
+
+    def get_form_kwargs(self):
+        kwargs = super(FileUploadCreateView, self).get_form_kwargs()
+        return kwargs
+
+    def form_valid(self, form):
+        # form.instance.user = self.request.user
+        # todo:  limit file types and *sizes*?
+
+        data = {
+            'files': []
+        }
+        self.object = form.save()
+        file_attributes = getattr(self.object, 'file')
+
+        # todo:  fragile.  sanity check file_attributes.
+        if file_attributes:
+            data['files'].append({
+                'name': file_attributes.name,
+                'url': file_attributes.url,
+                'size': file_attributes.size,
+            })
+            if len(data['files']) > 0:
+                logger.info(u'{0} uploaded {1}.'.format(self.request.user, data['files'][0]['url']))
+
+        response = HttpResponse(
+            content=simplejson.dumps(data),
+            content_type='application/json',
+        )
+        response['Content-Disposition'] = 'inline; filename=files.json'
+        return response
+
+    def form_invalid(self, form):
+        return HttpResponse(
+            content=simplejson.dumps(form.errors),
+            content_type='application/json',
+            status=400,
+        )
+
+
+class DataBrowseView(View):
+    template = 'recon_ingest.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request,
+                      self.template,
+                      {})
+
+
+class CatchFieldsJsonView(View):
+    def get(self, request):
+        catch_fields = [
+            "id",
+            "Fishing Entity",
+            "Original Country Fishing",
+            "fishing_entity_id",
+            "EEZ",
+            "EEZ Subarea",
+            "eez_area_id",
+            "FAO Area",
+            "Subregional Area",
+            "Province or State",
+            "ICES Division",
+            "ICES Subdivision",
+            "NAFO Division",
+            "CCAMLR Area",
+            "Layer",
+            "Year",
+            "Amount",
+            "Adjustment Factor",
+            "Taxon Name",
+            "Original FAO Name",
+            "Taxon Key",
+            "Gear Type",
+            "gear_type_id",
+            "Sector",
+            "Original Sector",
+            "sector_id",
+            "Catch Type",
+            "catch_type_id",
+            "Input",
+            "Forward Carry Rule",
+            "reference_id",
+            "Notes"
+        ]
+        return HttpResponse(simplejson.dumps(catch_fields), content_type='application/json')
+
+
+class UploadDataJsonView(View):
+    def get(self, request):
+        file_name = request.GET.get('file_name')
+        return HttpResponse(simplejson.dumps(get_raw_catch_data(), use_decimal=True), content_type='application/json')
+
+    def post(self, request):
+        # data changes come in as a list-of-lists, each of which is of the form [row, column, before, after]
+        #   row and column are zero-based.
+        data_changes = simplejson.loads(request.body)
+        for data_change in data_changes['data']:
+            print(data_change)
+        return HttpResponse(simplejson.dumps({"result": "ok"}, use_decimal=True), content_type='application/json')
+
+
+class DataNormalizationView(View):
+    def post(self, request):
+        return HttpResponse(simplejson.dumps(get_raw_catch_data(), use_decimal=True), content_type='application/json')
+
+
+class FileIngest(View):
+    def get(self, request):
+        if request.GET.get('file_path'):
+            file_path = request.GET.get('file_path')
+            username = request.GET.get('username')
+            ingest_file(file_path=file_path,
+                        username=username,)
+        return HttpResponse()

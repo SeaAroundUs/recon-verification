@@ -1,0 +1,33 @@
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#recon-navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <nav class="collapse navbar-collapse" id="recon-navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="{% url 'recon-home' %}">
+                    <span class="glyphicon glyphicon-home"></span> Reconstruction Data</a>
+                </li>
+
+                <li><a href="{% url 'recon-file-upload' %}">
+                    <span class="glyphicon glyphicon-upload"></span> Upload And Normalize </a>
+                </li>
+
+                <li><a href="{% url 'recon-data-browse' %}">
+                    <span class="glyphicon glyphicon-th-list"></span> Browse And Edit </a>
+                </li>
+
+                <li><a href="{% url 'admin:index' %}">
+                    <span class="glyphicon glyphicon-th-list"></span> Lookup Tables </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+</nav>

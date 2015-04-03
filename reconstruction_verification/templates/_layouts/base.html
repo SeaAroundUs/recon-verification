@@ -1,0 +1,18 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include '_includes/header.html' %}
+        <title>Reconstruction Data:  {% block title %}{% endblock %}</title>
+        {% block extra-head-style %}{% endblock %}
+        {% include '_includes/scripts.html' %}
+        {% block extra-head-script %}{% endblock %}
+    </head>
+    <body role="document">
+        <div id="maindiv">
+            {% include '_includes/nav_bar.html' %}
+            {% block content %}{% endblock %}
+        </div>
+        {% block extra-foot-script %}{% endblock %}
+    </body>
+</html>

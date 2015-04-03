@@ -1,0 +1,5 @@
+Django==1.7.7
+django-admin-bootstrapped==2.3.5
+pytz==2015.2
+simplejson==3.6.5
+xlrd==0.9.3
