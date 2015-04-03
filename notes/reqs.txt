@@ -13,15 +13,17 @@ Reqs, etc.:
     - we will work with Vicky and create a "standard sheet" Excel template.
         - the columns for the "standard sheet" will include all the data fields we wish to upload so it may be a superset of the data for many reconstructions.
         - the "standard sheet" fields will be a subset of the fields in the raw reconstruction data table.
+        * a sample of the sheet Vicky has given tentative agreement to is notes/recon_data_upload_template.xlsx
     - the tool will have functionality for the uploading of a "standard sheet" into the raw reconstruction data table.
 	- once data is uploaded the tool will provide a means for "looking up" internal ids for certain fields to normalize the uploaded data:
 		- fishing country id
-		- EEZ area id and sub-area id
+		- EEZ id
+		- (?? ... tbd ... follow up with Linh about this) sub-area id
 		- FishBase taxon key
 		- fishing sector id
 		- fishing catch type id
 	- the tool will allow the user to edit certain fields, e.g. correct a taxon name misspelling.
-	- once corrections are made the user can "re-normalize" the data. 
+	- once corrections are made the user can "re-normalize" the data (submit it for "looking up" internal ids again).
 	- the tool will offer a layer 1-3 breakdown of the data:
 		- layer 1 is a country fishing in their own EEZ (fishing country id = country with jurisdiction over EEZ area id).
 		- layer 2 is a country fishing in another countries EEZ.
@@ -30,25 +32,26 @@ Reqs, etc.:
 	- the user should have a means of abandoning the raw data (deleting the working set).
 	- the user should have a means of downloading the raw data (if, for instance, they want to work on it in Excel and re-upload).  [tbd:  "abandon and download"?]
 	- the raw data should be associated with a particular user.  [tbd: login?]
+    - raw data and "committed" data should be versioned [tbd:  perhaps a "batch id"?]
+    - [tbd:  cleanup raw data that has lingered?]
 
-	
 Implementation:
 	- a simple set of web pages:
 		- login 
 		- upload web page (or fragment thereof)
 		- raw data viewing and editing web page (or fragment thereof)
-		- controls to initiate lookup and normalization 
+		- control to initiate re-normalization
 		- control to "commit" data 
 		- control to "abandon" data 
 		- control to download data 		
 	- a database table to hold the raw data.
 	- database tables (*to be shared with catch allocation and website presentation) with fishing country, EEZ, taxon, sector and catch type data for lookup.
 	- other goodies:  
-		- web page to browse already committed data
+		- web page to browse already committed data [tbd:  by "batch id"?]
 		- web pages to maintain lookup tables
 
 Environment:
     - dev:
-        - python 3.4.1 w/ modules in requirements.txt
-        - postgresql 9.3 (or 9.4)
-        - js libraries as included in /static/
+        - python 3.4.x w/ modules in requirements.txt
+        - postgresql 9.x
+        - js libraries and versions as included in /static/
