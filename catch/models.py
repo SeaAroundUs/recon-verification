@@ -15,6 +15,10 @@ class Country(models.Model):
     class Meta:
         verbose_name_plural = 'Countries'
         db_table = 'country'
+        ordering = ['name']
+
+    def __str__(self):
+        return u"{0} - {1}".format(self.id, self.name)
 
 
 class EEZ(models.Model):
@@ -25,6 +29,10 @@ class EEZ(models.Model):
         verbose_name = 'EEZ'
         verbose_name_plural = 'EEZs'
         db_table = 'eez'
+        ordering = ['name']
+
+    def __str__(self):
+        return u"{0} - {1}".format(self.id, self.name)
 
 
 class Taxon(models.Model):
