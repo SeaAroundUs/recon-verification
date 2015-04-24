@@ -51,3 +51,90 @@ class RawCatch(models.Model):
     reference_id = models.IntegerField(null=True)
     forward_carry_rule = models.CharField(max_length=400, null=True)
     notes = models.CharField(max_length=2000, null=True)
+
+    @staticmethod
+    def update(id, column, new_value):
+        obj = RawCatch.objects.get(id=id)
+        column_name = RawCatch.get_column_name(column)
+        setattr(obj, column_name, new_value)
+        obj.save()
+        obj.refresh_from_db()
+        return {column_name: getattr(obj, column_name)}
+
+    @staticmethod
+    def get_column_name(col_num):
+        try:
+            return [
+                'id',
+                'fishing_entity',
+                'original_country_fishing',
+                'fishing_entity_id',
+                'eez_area',
+                'eez_sub_area',
+                'eez_area_id',
+                'fao_area',
+                'sub_regional_area',
+                'province_state',
+                'ices_division',
+                'ices_subdivision',
+                'nafo_division',
+                'ccamlr_area',
+                'layer',
+                'year',
+                'amount',
+                'adjustment_factor',
+                'taxon_name',
+                'original_fao_name',
+                'taxon_key',
+                'gear_type',
+                'gear_type_id',
+                'sector',
+                'original_sector',
+                'sector_id',
+                'catch_type',
+                'catch_type_id',
+                'input_type',
+                'forward_carry_rule',
+                'reference_id',
+                'notes'
+            ][col_num]
+        except IndexError:
+            return None
+
+
+    @staticmethod
+    def fields():
+        return [
+            'id',
+            'Fishing Entity',
+            'Original Country Fishing',
+            'fishing_entity_id',
+            'EEZ',
+            'EEZ Subarea',
+            'eez_area_id',
+            'FAO Area',
+            'Subregional Area',
+            'Province or State',
+            'ICES Division',
+            'ICES Subdivision',
+            'NAFO Division',
+            'CCAMLR Area',
+            'Layer',
+            'Year',
+            'Amount',
+            'Adjustment Factor',
+            'Taxon Name',
+            'Original FAO Name',
+            'Taxon Key',
+            'Gear Type',
+            'gear_type_id',
+            'Sector',
+            'Original Sector',
+            'sector_id',
+            'Catch Type',
+            'catch_type_id',
+            'Input',
+            'Forward Carry Rule',
+            'reference_id',
+            'Notes'
+        ]

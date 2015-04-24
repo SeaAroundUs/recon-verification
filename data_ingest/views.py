@@ -12,6 +12,11 @@ from data_ingest.ingest import ingest_file
 logger = logging.getLogger(__name__)
 
 
+class ReconResponse(object):
+    def __new__(cls, payload):
+        return HttpResponse(simplejson.dumps(payload, use_decimal=True), content_type='application/json')
+
+
 def get_raw_catch_data():
     raw_data = RawCatch.objects.all()
     raw_data_list = {'data': []}
@@ -109,60 +114,31 @@ class DataBrowseView(View):
 
 class CatchFieldsJsonView(View):
     def get(self, request):
-        catch_fields = [
-            "id",
-            "Fishing Entity",
-            "Original Country Fishing",
-            "fishing_entity_id",
-            "EEZ",
-            "EEZ Subarea",
-            "eez_area_id",
-            "FAO Area",
-            "Subregional Area",
-            "Province or State",
-            "ICES Division",
-            "ICES Subdivision",
-            "NAFO Division",
-            "CCAMLR Area",
-            "Layer",
-            "Year",
-            "Amount",
-            "Adjustment Factor",
-            "Taxon Name",
-            "Original FAO Name",
-            "Taxon Key",
-            "Gear Type",
-            "gear_type_id",
-            "Sector",
-            "Original Sector",
-            "sector_id",
-            "Catch Type",
-            "catch_type_id",
-            "Input",
-            "Forward Carry Rule",
-            "reference_id",
-            "Notes"
-        ]
-        return HttpResponse(simplejson.dumps(catch_fields), content_type='application/json')
+        return ReconResponse(RawCatch.fields())
 
 
 class UploadDataJsonView(View):
     def get(self, request):
         file_name = request.GET.get('file_name')
-        return HttpResponse(simplejson.dumps(get_raw_catch_data(), use_decimal=True), content_type='application/json')
+        return ReconResponse(get_raw_catch_data())
 
     def post(self, request):
         # data changes come in as a list-of-lists, each of which is of the form [row, column, before, after]
         #   row and column are zero-based.
         data_changes = simplejson.loads(request.body)
         for data_change in data_changes['data']:
-            print(data_change)
-        return HttpResponse(simplejson.dumps({"result": "ok"}, use_decimal=True), content_type='application/json')
+            try:
+                changed_data = RawCatch.update(**data_change)
+                response = {'result': 'ok'}
+                response.update(changed_data)
+                return ReconResponse(response)
+            except Exception as e:
+                return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
 
 class DataNormalizationView(View):
     def post(self, request):
-        return HttpResponse(simplejson.dumps(get_raw_catch_data(), use_decimal=True), content_type='application/json')
+        return ReconResponse(get_raw_catch_data())
 
 
 class FileIngest(View):
