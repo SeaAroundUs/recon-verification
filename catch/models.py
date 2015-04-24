@@ -55,12 +55,18 @@ class Sector(models.Model):
     class Meta:
         db_table = 'fishing_sector'
 
+    def __str__(self):
+        return u"{0}".format(self.name)
+
 
 class CatchType(models.Model):
     type = models.CharField(max_length=200)
 
     class Meta:
         db_table = 'catch_type'
+
+    def __str__(self):
+        return u"{0}".format(self.type)
 
 
 class Catch(models.Model):
