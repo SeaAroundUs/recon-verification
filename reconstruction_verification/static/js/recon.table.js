@@ -1,20 +1,42 @@
 'use strict';
 
 var Table = {
+    autosave: null,
     autosaveNotification: null,
     dataTable: null,
 
-    $autosave: null,
-    $container: null,
-    $normalize: null,
-    $save: null,
+    events: {
+        search: function() {
+            var queryResult = Table.dataTable.search.query(this.value); //TODO implement?
+            Table.dataTable.render();
+        },
+
+        save: function() {
+            var params = { data: Table.dataTable.getData() };
+            Util.$post(Util.urls.uploadedDataJSON, params, function(res) {
+                var message = res.result === 'ok'
+                        ? 'Data saved'
+                        : 'Save error';
+                Table.setMessage(message);
+            });
+        },
+
+        autosave: function() {
+            var message = Table.autosave.checked
+                    ? 'Changes will be autosaved'
+                    : 'Changes will not be autosaved';
+            Table.setMessage(message);
+        },
+
+        normalize: function() {
+            Util.$post(Util.urls.normalizeData, {}, function (res) { //TODO implement?
+                Table.dataTable.loadData(res.data);
+            });
+        }
+    },
 
     init: function() {
-        Table.$autosave = $('#autosave');
-        Table.$container = $('#reconDataTableElement');
-        Table.$normalize = $('#normalize');
-        Table.$save = $('#save');
-
+        Table.autosave = $('#autosave')[0];
         Table.initTable();
         Table.initUpload();
     },
@@ -29,35 +51,12 @@ var Table = {
                 }
         );
 
-        Table.dataTable = new Handsontable(Table.$container[0], Table.getTableOptions());
+        Table.dataTable = new Handsontable($('#reconDataTableElement')[0], Table.getTableOptions());
 
-        Handsontable.Dom.addEvent($('#search_field')[0], 'keyup', function() {
-            var queryResult = Table.dataTable.search.query(this.value); //TODO implement?
-            Table.dataTable.render();
-        });
-
-        Handsontable.Dom.addEvent(Table.$save[0], 'click', function() {
-            var params = { data: Table.dataTable.getData() };
-            Util.$post(Util.urls.uploadedDataJSON, params, function(res) {
-                var message = res.result === 'ok'
-                        ? 'Data saved'
-                        : 'Save error';
-                Table.setMessage(message);
-            });
-        });
-
-        Handsontable.Dom.addEvent(Table.$autosave[0], 'click', function() {
-            var message = Table.$autosave[0].checked
-                    ? 'Changes will be autosaved'
-                    : 'Changes will not be autosaved';
-            Table.setMessage(message);
-        });
-
-        Handsontable.Dom.addEvent(Table.$normalize[0], 'click', function() {
-            Util.$post(Util.urls.normalizeData, {}, function (res) { //TODO implement?
-                Table.dataTable.loadData(res.data);
-            });
-        });
+        Handsontable.Dom.addEvent($('#search_field')[0], 'keyup', Table.events.search);
+        Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
+        Handsontable.Dom.addEvent(Table.autosave, 'click', Table.events.autosave);
+        Handsontable.Dom.addEvent($('#normalize')[0], 'click', Table.events.normalize);
     },
 
     initUpload: function() {
@@ -93,7 +92,7 @@ var Table = {
             };
         });
 
-        if (Table.$autosave[0].checked) {
+        if (Table.autosave.checked) {
             clearTimeout(Table.autosaveNotification);
 
             Util.$post(Util.urls.uploadedDataJSON, { data: changes }, function() {
