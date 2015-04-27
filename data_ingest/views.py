@@ -6,7 +6,7 @@ from django.views.generic.edit import CreateView
 from django.http import HttpResponse
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
-from data_ingest.ingest import ingest_file
+from data_ingest.ingest import ingest_file, normalize
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class ReconResponse(object):
 
 
 def get_raw_catch_data():
-    raw_data = RawCatch.objects.all()
+    raw_data = RawCatch.objects.all().order_by('id')
     raw_data_list = {'data': []}
     for data_row in raw_data:
         raw_data_list['data'].append(
@@ -138,6 +138,7 @@ class UploadDataJsonView(View):
 
 class DataNormalizationView(View):
     def post(self, request):
+        normalize()
         return ReconResponse(get_raw_catch_data())
 
 

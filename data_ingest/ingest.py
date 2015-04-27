@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 import data_ingest.sheet_template
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import Taxon, CatchType, Country, EEZ
+from django.db import connection
 
 
 class ContributedFile():
@@ -51,33 +52,12 @@ class ContributedFile():
         for recon_datum in self.excel_file_dict['Catch Data']:
             if recon_datum['fishing entity']:
 
-                try:
-                    taxon = Taxon.objects.filter(name__iexact=recon_datum['taxon name'].strip()).order_by('-taxon_key')[0]
-                    taxon_key = taxon.taxon_key
-                except IndexError:  # no Taxon found
-                    taxon_key = 0
-                try:
-                    catch_type = CatchType.objects.filter(type__iexact=recon_datum['catch type'].strip())[0]
-                    catch_type_id = catch_type.id
-                except IndexError:  # no CatchType found
-                    catch_type_id = 0
-                try:
-                    country = Country.objects.filter(name__iexact=recon_datum['fishing entity'].strip())[0]
-                    fishing_entity_id = country.id
-                except IndexError:  # no Country found
-                    fishing_entity_id = 0
-                try:
-                    eez = EEZ.objects.filter(name__iexact=recon_datum['EEZ'].strip())[0]
-                    eez_id = eez.id
-                except IndexError:  # no EEZ found
-                    eez_id = 0
-
                 recon_data = RawCatch(
                     fishing_entity=recon_datum['fishing entity'],
-                    fishing_entity_id=fishing_entity_id,
+                    fishing_entity_id=0,
                     original_country_fishing=recon_datum['original country fishing'],
                     eez_area=recon_datum['EEZ'],
-                    eez_id=eez_id,
+                    eez_id=0,
                     eez_sub_area=recon_datum['EEZ sub area'],
                     fao_area=int(recon_datum['FAO area']) if recon_datum['FAO area'] and recon_datum['FAO area'] != '' else 0,
                     sub_regional_area=recon_datum['subregional area'],
@@ -90,12 +70,12 @@ class ContributedFile():
                     year=recon_datum['year'],
                     taxon_name=recon_datum['taxon name'],
                     original_fao_name=recon_datum['original FAO name'],
-                    taxon_key=taxon_key,
+                    taxon_key=0,
                     amount=recon_datum['amount'],
                     sector=recon_datum['sector'],
                     original_sector=recon_datum['original sector'],
                     catch_type=recon_datum['catch type'],
-                    catch_type_id=catch_type_id,
+                    catch_type_id=0,
                     input_type=recon_datum['input type'],
                     reference_id=recon_datum['reference id'],
                     forward_carry_rule=recon_datum['forward carry rule'],
@@ -111,7 +91,10 @@ class ContributedFile():
         RawCatch.objects.bulk_create(raw_catches)
 
     def _truncate_rawcatch_table(self):
-        RawCatch.objects.all().delete()
+        connection.cursor().execute('''
+        TRUNCATE TABLE "{0}" CASCADE;
+        ALTER SEQUENCE {0}_id_seq RESTART WITH 1;
+        '''.format(RawCatch._meta.db_table))
 
     def process(self):
         self._process_excel_file()
@@ -120,6 +103,39 @@ class ContributedFile():
             self._truncate_rawcatch_table()
             # insert new
             self._insert_reconstruction_data()
+            # normalize data
+            normalize()
+
+
+def normalize():
+    for row in RawCatch.objects.all():
+        try:
+            taxon = Taxon.objects.get(name__iexact=row.taxon_name.strip())
+            row.taxon_key = taxon.taxon_key
+        except Taxon.DoesNotExist:  # no Taxon found
+            row.taxon_key = 0
+
+        try:
+            catch_type = CatchType.objects.get(type__iexact=row.catch_type.strip())
+            row.catch_type_id = catch_type.id
+        except CatchType.DoesNotExist:  # no CatchType found
+            row.catch_type_id = 0
+
+        try:
+            country = Country.objects.get(name__iexact=row.fishing_entity.strip())
+            row.fishing_entity_id = country.id
+        except Country.DoesNotExist:  # no Country found
+            row.fishing_entity_id = 0
+
+        try:
+            eez = EEZ.objects.get(name__iexact=row.eez_area.strip())
+            row.eez_id = eez.id
+        except EEZ.DoesNotExist:  # no EEZ found
+            row.eez_id = 0
+
+        row.save()
+
+        # TODO more normalization
 
 
 def ingest_file(file_path, username):
