@@ -1,18 +1,26 @@
-{% load staticfiles %}
+{% load pipeline %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        {% include '_includes/header.html' %}
-        <title>Reconstruction Data:  {% block title %}{% endblock %}</title>
-        {% block extra-head-style %}{% endblock %}
-        {% include '_includes/scripts.html' %}
-        {% block extra-head-script %}{% endblock %}
+        <title>Reconstruction Data: {% block title %}{% endblock %}</title>
+        <meta http-equiv="Content-type" content="text/html">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% stylesheet 'styles' %}
     </head>
     <body role="document">
+        <input type="hidden" id="catchFieldsJSON" class="djangoURL" value="{% url 'catch-fields-json' %}" />
+        <input type="hidden" id="uploadedDataJSON" class="djangoURL" value="{% url 'uploaded-data-json' %}" />
+        <input type="hidden" id="normalizeData" class="djangoURL" value="{% url 'normalize-data' %}" />
+        <input type="hidden" id="reconFileUpload" class="djangoURL" value="{% url 'recon-file-upload' %}" />
+
         <div id="maindiv">
             {% include '_includes/nav_bar.html' %}
             {% block content %}{% endblock %}
         </div>
         {% block extra-foot-script %}{% endblock %}
+        {% javascript 'vendor' %}
+        {% javascript 'scripts' %}
     </body>
 </html>

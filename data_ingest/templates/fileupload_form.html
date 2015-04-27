@@ -1,74 +1,6 @@
 {% extends '_layouts/base.html' %}
 {% load staticfiles %}
 {% block title %}File Upload{% endblock %}
-{% block extra-head-style %}
-	<style type="text/css" class="init">
-	    body { font-size: 140%; }
-        .table-scrollable {
-            overflow: auto;
-        }
-	</style>
-{% endblock %}
-{% block extra-head-script %}
-    <script type="text/javascript" class="init">
-        var entityMap = {
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': '&quot;',
-            "'": '&#39;',
-            "/": '&#x2F;',
-            "\n": '<br>'
-        };
-        function escapeHtml(string) {
-            return String(string).replace(/[&<>"'\/]|[\n]/g, function (s) {
-                return entityMap[s];
-            });
-        }
-
-        $(document).ready( function() {
-            var reconUploadDataTable = $("#reconstruction-data-table").dataTable( {
-                "ajax": "{% url 'upload-data-json' %}",
-                "columns": [
-                    {"data": "id"},
-                    {"data": "year"},
-                    {"data": "amount"},
-                    {"data": "country_fishing"},
-                    {"data": "flag"},
-                    {"data": "country_id"},
-                    {"data": "eez_area"},
-                    {"data": "eez_area_id"},
-                    {"data": "eez_sub_area"},
-                    {"data": "eez_sub_area_id"},
-                    {"data": "fao_area"},
-                    {"data": "other_area"},
-                    {"data": "taxon_name"},
-                    {"data": "original_fao_name"},
-                    {"data": "taxon_key"},
-                    {"data": "sector"},
-                    {"data": "sector_id"},
-                    {"data": "catch_type"},
-                    {"data": "catch_type_id"},
-                    {"data": "notes"}
-                ],
-                "drawCallback": function( settings ) {
-                    var api = this.api();
-                    var alertCols = [5, 7, 9, 14, 16, 18];
-                    api.cells(
-                            function ( idx, data, node ) {
-                                return (data === null && $.inArray(idx.column, alertCols) > -1);
-                            }).nodes().to$().addClass('alert alert-warning');
-                    api.cells(
-                            function ( idx, data, node ) {
-                                return (data == 0 && $.inArray(idx.column, alertCols) > -1);
-                            }).nodes().to$().addClass('alert alert-danger');
-                    // activate any bootstrap popovers
-                    $('[data-toggle="popover"]').popover();
-                }
-            });
-        } );
-    </script>
-{% endblock %}
 {% block content %}
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default">
@@ -160,41 +92,4 @@
             </div>
         </div>
     </div>
-    <script>
-        function csrfSafeMethod(method) {
-            // these HTTP methods do not require CSRF protection
-            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-        }
-
-        $(function () {
-            'use strict';
-            var url = '/ingest/file/';
-            var csrftoken = $.cookie('csrftoken');
-            $("#fileupload").fileupload({
-                url: url,
-                crossDomain: false,
-                beforeSend: function (xhr, settings) {
-                    if (!csrfSafeMethod(settings.type)) {
-                        xhr.setRequestHeader('X-CSRFToken', csrftoken);
-                    }
-                },
-                dataType: 'json',
-                done: function (e, data) {
-                    put_files_for_survey_in_table();
-                },
-                progressall: function (e, data) {
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
-                    $("#progress").find(".progress-bar").css(
-                            'width',
-                            progress + '%'
-                    );
-                }
-            }).prop('disabled', !$.support.fileInput)
-                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
-        });
-
-        $(document).ready(function () {
-            $("#id_survey").trigger("change");
-        });
-    </script>
 {% endblock %}

@@ -1,4 +1,9 @@
 body {
+  font-size: 140%;
   padding-top: 75px;
   padding-bottom: 20px;
+}
+
+.table-scrollable {
+  overflow: auto;
 }

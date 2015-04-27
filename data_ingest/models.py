@@ -53,13 +53,17 @@ class RawCatch(models.Model):
     notes = models.CharField(max_length=2000, null=True)
 
     @staticmethod
-    def update(id, column, new_value):
+    def update(id, column, old_value, new_value):
         obj = RawCatch.objects.get(id=id)
         column_name = RawCatch.get_column_name(column)
         setattr(obj, column_name, new_value)
         obj.save()
         obj.refresh_from_db()
-        return {column_name: getattr(obj, column_name)}
+        return {
+            'field': column_name,
+            'old': old_value,
+            'newValue': getattr(obj, column_name)
+        }
 
     @staticmethod
     def get_column_name(col_num):

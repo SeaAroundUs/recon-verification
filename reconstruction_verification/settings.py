@@ -7,9 +7,12 @@ MEDIA_ROOT = os.path.join(SITE_ROOT, 'media')
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
 STATIC_URL = '/static/'
 
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
 )
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -33,7 +36,8 @@ INSTALLED_APPS = (
     'reconstruction_verification',
     'catch',
     'data_ingest',
-    'django_extensions'
+    'django_extensions',
+    'pipeline',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -123,3 +127,34 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
+PIPELINE_CSS = {
+    'styles': {
+        'source_filenames': (
+            'css/*.css',
+        ),
+        'output_filename': 'css/styles.css',
+        'extra_context': {
+            'media': 'all'
+        }
+    }
+}
+
+PIPELINE_JS = {
+    'scripts': {
+        'source_filenames': (
+            'js/recon.util.js',
+            'js/recon.table.js',
+        ),
+        'output_filename': 'js/scripts.js'
+    },
+    'vendor': {
+        'source_filenames': (
+            'js/vendor/jquery.min.js',
+            'js/vendor/jquery.ui.widget.js',
+            'js/vendor/jquery.*.js',
+            'js/vendor/*.js'
+        ),
+        'output_filename': 'js/vendor.js'
+    }
+}
