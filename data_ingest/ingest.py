@@ -110,9 +110,9 @@ class ContributedFile():
 def normalize():
     for row in RawCatch.objects.all():
         try:
-            taxon = Taxon.objects.get(name__iexact=row.taxon_name.strip())
+            taxon = Taxon.objects.filter(name__iexact=row.taxon_name.strip())[0]
             row.taxon_key = taxon.taxon_key
-        except Taxon.DoesNotExist:  # no Taxon found
+        except IndexError:  # no Taxon found
             row.taxon_key = 0
 
         try:

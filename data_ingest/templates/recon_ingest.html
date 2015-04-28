@@ -14,17 +14,18 @@
                         </span>
                     </div>
                 </form>
-                <p><pre id="messageConsole" class="console">Upload reconstruction data file</pre></p>
+                <pre id="messageConsole" class="console">Upload reconstruction data file</pre>
 
                 <div class="form-group table-controls">
-                    <button name="normalize" id="normalize" class="btn btn-default">Normalize</button>
-                    <button name="save" id="save" class="btn btn-default">Save</button>
+                    <button name="normalize" id="normalize" class="btn btn-default" disabled>Normalize</button>
+                    <span id="error-count">0</span>
+                    <button name="save" id="save" class="btn btn-default" disabled>Save</button>
                     <label><input type="checkbox" name="autosave" id="autosave" checked="checked"
-                                  autocomplete="off"> Autosave</label>
-                    <input id="search_field" type="search" class="form-control" placeholder="Search" />
+                                  autocomplete="off" disabled> Autosave</label>
+                    <input id="search_field" type="search" class="form-control" placeholder="Search" disabled />
                 </div>
 
-                <div id="reconDataTableElement" class="table-scrollable"></div>
+                <div id="reconDataTableElement" class="table-scrollable disabled"></div>
             </div>
         </div>
     </div>

@@ -4,10 +4,11 @@ var Table = {
     autosave: null,
     autosaveNotification: null,
     dataTable: null,
+    $table: null,
 
     events: {
         search: function() {
-            var queryResult = Table.dataTable.search.query(this.value); //TODO implement?
+            Table.dataTable.search.query(this.value);
             Table.dataTable.render();
         },
 
@@ -29,14 +30,16 @@ var Table = {
         },
 
         normalize: function() {
-            Util.$post(Util.urls.normalizeData, {}, function (res) { //TODO implement?
+            Util.$post(Util.urls.normalizeData, {}, function(res) {
                 Table.dataTable.loadData(res.data);
+                Table.updateErrorCount();
             });
         }
     },
 
     init: function() {
         Table.autosave = $('#autosave')[0];
+        Table.$table = $('#reconDataTableElement');
         Table.initTable();
         Table.initUpload();
     },
@@ -51,7 +54,7 @@ var Table = {
                 }
         );
 
-        Table.dataTable = new Handsontable($('#reconDataTableElement')[0], Table.getTableOptions());
+        Table.dataTable = new Handsontable(Table.$table[0], Table.getTableOptions());
 
         Handsontable.Dom.addEvent($('#search_field')[0], 'keyup', Table.events.search);
         Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
@@ -137,14 +140,43 @@ var Table = {
         };
     },
 
+    isEmpty: function() {
+        return Table.dataTable.isEmptyRow(0);
+    },
+
     loadTableData: function() {
+        Table.setMessage('Loading data...');
+
         $.get(Util.urls.uploadedDataJSON, function(res) {
             Table.dataTable.loadData(res.data);
+
+            if (Table.isEmpty()) {
+                $('.table-controls input, .table-controls button').attr('disabled', 'disabled');
+                Table.$table.addClass('disabled');
+                Table.setMessage('Error loading data');
+            } else {
+                $('.table-controls input, .table-controls button').removeAttr('disabled');
+                Table.$table.removeClass('disabled');
+                Table.setMessage('Data loaded');
+            }
+
+            Table.updateErrorCount();
         });
     },
 
     setMessage: function(text) {
         $('#messageConsole').text(text);
+    },
+
+    updateErrorCount: function() {
+        var data = Table.dataTable.getData();
+        var errorCount = 0;
+        data.forEach(function(row) {
+            row.forEach(function(cell) {
+                errorCount += cell === 0 ? 1 : 0;
+            });
+        });
+        $('#error-count').text(errorCount);
     }
 };
 
