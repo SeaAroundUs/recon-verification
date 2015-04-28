@@ -66,11 +66,15 @@ var Table = {
         var uploadOptions = {
             url: Util.urls.reconFileUpload,
             crossDomain: false,
-            beforeSend: Util.addToken,
+            beforeSend: function(xhr) {
+                Table.setMessage('Uploading file...');
+                Util.addToken(xhr);
+            },
             dataType: 'json',
             done: function (e, data) {
+                var filename = data.originalFiles[0].name;
                 Table.loadTableData();
-                Table.setMessage('Data loaded from file [name of uploaded file]'); //TODO implement
+                Table.setMessage('Data uploaded from ' + filename);
             }
         };
 
@@ -125,11 +129,13 @@ var Table = {
     },
 
     getTableOptions: function() {
+        var headers = Table.getTableHeaders();
+
         return {
-            colHeaders: Table.getTableHeaders(),
+            colHeaders: headers,
             columnSorting: true,
             startRows: 1,
-            startCols: 32,
+            startCols: headers.length,
             minSpareRows: 0,
             contextMenu: true,
             search: true,

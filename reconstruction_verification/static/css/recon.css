@@ -17,11 +17,16 @@ body {
   content: 'Errors: ';
 }
 
+.table-controls #error-count {
+  margin-right: 15px;
+}
+
 .table-controls > * {
   margin-right: 5px;
 }
 
 .table-controls input#search_field {
+  margin-left: 10px;
   display: inline-block;
   width: 30%;
 }
@@ -38,8 +43,4 @@ body {
   background: #ddd;
   opacity: 0.5;
   z-index: 1000;
-}
-
-#reconDataTableElement.loading:before {
-
 }
