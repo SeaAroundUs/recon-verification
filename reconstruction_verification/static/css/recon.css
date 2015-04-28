@@ -7,3 +7,12 @@ body {
 .table-scrollable {
   overflow: auto;
 }
+
+.table-controls > * {
+  margin-right: 5px;
+}
+
+.table-controls input#search_field {
+  display: inline-block;
+  width: 30%;
+}

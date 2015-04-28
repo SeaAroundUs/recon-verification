@@ -16,14 +16,14 @@
                 </form>
                 <p><pre id="messageConsole" class="console">Upload reconstruction data file</pre></p>
 
-
-                <p>
-                    <button name="normalize" id="normalize">Normalize</button>
-                    <button name="save" id="save">Save</button>
+                <div class="form-group table-controls">
+                    <button name="normalize" id="normalize" class="btn btn-default">Normalize</button>
+                    <button name="save" id="save" class="btn btn-default">Save</button>
                     <label><input type="checkbox" name="autosave" id="autosave" checked="checked"
                                   autocomplete="off"> Autosave</label>
-                    <input id='search_field' type="search" placeholder="Search" />
-                </p>
+                    <input id="search_field" type="search" class="form-control" placeholder="Search" />
+                </div>
+
                 <div id="reconDataTableElement" class="table-scrollable"></div>
             </div>
         </div>
