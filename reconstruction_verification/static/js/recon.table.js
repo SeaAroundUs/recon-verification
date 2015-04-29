@@ -24,14 +24,15 @@ var Table = {
 
         autosave: function() {
             var message = Table.autosave.checked
-                    ? 'Changes will be autosaved'
-                    : 'Changes will not be autosaved';
+                    ? '<span class="glyphicon glyphicon-floppy-disk"></span> Changes will be autosaved'
+                    : '<span class="glyphicon glyphicon-floppy-remove"></span> Changes will not be autosaved';
             Table.setMessage(message);
         },
 
         normalize: function() {
             Util.$post(Util.urls.normalizeData, {}, function(res) {
                 Table.dataTable.loadData(res.data);
+                Table.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
                 Table.updateErrorCount();
             });
         }
@@ -67,14 +68,14 @@ var Table = {
             url: Util.urls.reconFileUpload,
             crossDomain: false,
             beforeSend: function(xhr) {
-                Table.setMessage('Uploading file...');
+                Table.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Uploading file...');
                 Util.addToken(xhr);
             },
             dataType: 'json',
             done: function (e, data) {
                 var filename = data.originalFiles[0].name;
                 Table.loadTableData();
-                Table.setMessage('Data uploaded from ' + filename);
+                Table.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data uploaded from ' + filename);
             }
         };
 
@@ -103,11 +104,13 @@ var Table = {
             clearTimeout(Table.autosaveNotification);
 
             Util.$post(Util.urls.uploadedDataJSON, { data: changes }, function() {
-                Table.setMessage('Autosaved (' + changes.length + ' cell'
-                    + (changes.length > 1 ? 's)' : ')'));
+                Table.setMessage('<span class="glyphicon glyphicon glyphicon-floppy-saved"></span> Autosaved (' +
+                    changes.length + ' cell' +
+                    (changes.length > 1 ? 's)' : ')')
+                );
 
                 Table.autosaveNotification = setTimeout(function() {
-                    Table.setMessage('Changes will be autosaved');
+                    Table.setMessage('<span class="glyphicon glyphicon-floppy-disk"></span> Changes will be autosaved');
                 }, 1000);
             });
         }
@@ -151,7 +154,7 @@ var Table = {
     },
 
     loadTableData: function() {
-        Table.setMessage('Loading data...');
+        Table.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Loading data...');
 
         $.get(Util.urls.uploadedDataJSON, function(res) {
             Table.dataTable.loadData(res.data);
@@ -159,11 +162,11 @@ var Table = {
             if (Table.isEmpty()) {
                 $('.table-controls input, .table-controls button').attr('disabled', 'disabled');
                 Table.$table.addClass('disabled');
-                Table.setMessage('Error loading data');
+                Table.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> Error loading data');
             } else {
                 $('.table-controls input, .table-controls button').removeAttr('disabled');
                 Table.$table.removeClass('disabled');
-                Table.setMessage('Data loaded');
+                Table.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data loaded');
             }
 
             Table.updateErrorCount();
@@ -171,7 +174,7 @@ var Table = {
     },
 
     setMessage: function(text) {
-        $('#messageConsole').text(text);
+        $('#messageConsole').html(text);
     },
 
     updateErrorCount: function() {
