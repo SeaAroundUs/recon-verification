@@ -4,7 +4,7 @@ from django.utils.datastructures import SortedDict
 from django.contrib.auth.models import User
 import data_ingest.sheet_template
 from data_ingest.models import FileUpload, RawCatch
-from catch.models import Taxon, CatchType, Country, EEZ
+from catch.models import Taxon, CatchType, Country, EEZ, Sector
 from django.db import connection
 
 
@@ -133,9 +133,15 @@ def normalize():
         except EEZ.DoesNotExist:  # no EEZ found
             row.eez_id = 0
 
-        row.save()
+        try:
+            sector = Sector.objects.get(name__iexact=row.sector.strip())
+            row.sector_id = sector.id
+        except Sector.DoesNotExist:  # no Sector found
+            row.sector_id = 0
 
         # TODO more normalization
+
+        row.save()
 
 
 def ingest_file(file_path, username):

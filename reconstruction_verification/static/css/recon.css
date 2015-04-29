@@ -44,3 +44,8 @@ body {
   opacity: 0.5;
   z-index: 1000;
 }
+
+.ht_master.handsontable,
+.ht_master.handsontable .wtHolder {
+  overflow: visible;
+}
