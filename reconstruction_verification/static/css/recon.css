@@ -13,6 +13,10 @@ body {
   zoom: 1;
 }
 
+.table-controls label {
+  font-weight: normal;
+}
+
 .table-controls #error-count:before {
   content: 'Errors: ';
 }

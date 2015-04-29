@@ -16,8 +16,8 @@ var Table = {
             var params = { data: Table.dataTable.getData() };
             Util.$post(Util.urls.uploadedDataJSON, params, function(res) {
                 var message = res.result === 'ok'
-                        ? 'Data saved'
-                        : 'Save error';
+                        ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data saved'
+                        : '<span class="glyphicon glyphicon-floppy-remove"></span> Save error';
                 Table.setMessage(message);
             });
         },
