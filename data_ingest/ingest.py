@@ -139,6 +139,16 @@ def normalize():
         except Sector.DoesNotExist:  # no Sector found
             row.sector_id = 0
 
+        if row.eez_id != 0 and row.fishing_entity_id != 0:
+            try:
+                eez_country = EEZ.objects.get(id=row.eez_id).country
+                row.layer = 1 if eez_country.id == row.fishing_entity_id else 2
+                # TODO layer 3 logic based on taxon
+            except Exception:  # TODO more specific exception?
+                row.layer = 0
+        else:
+            row.layer = 0
+
         # TODO more normalization
 
         row.save()

@@ -43,6 +43,7 @@ var Table = {
         Table.$table = $('#reconDataTableElement');
         Table.initTable();
         Table.initUpload();
+        Table.loadTableData();
     },
 
     initTable: function() {
