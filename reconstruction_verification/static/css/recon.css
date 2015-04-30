@@ -21,7 +21,11 @@ body {
   content: 'Errors: ';
 }
 
-.table-controls #error-count {
+.table-controls #error-count.errors {
+  color: red;
+}
+
+.table-controls #commit {
   margin-right: 15px;
 }
 

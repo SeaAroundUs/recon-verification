@@ -161,11 +161,11 @@ var Table = {
             Table.dataTable.loadData(res.data);
 
             if (Table.isEmpty()) {
-                $('.table-controls input, .table-controls button').attr('disabled', 'disabled');
+                $('.table-controls input, .table-controls button').prop('disabled', true);
                 Table.$table.addClass('disabled');
                 Table.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> Error loading data');
             } else {
-                $('.table-controls input, .table-controls button').removeAttr('disabled');
+                $('.table-controls input, .table-controls button').not().prop('disabled', false);
                 Table.$table.removeClass('disabled');
                 Table.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data loaded');
             }
@@ -186,7 +186,11 @@ var Table = {
                 errorCount += cell === 0 ? 1 : 0;
             });
         });
-        $('#error-count').text(errorCount);
+        $('#error-count')
+                .text(errorCount)
+                .toggleClass('errors', errorCount > 0);
+
+        $('#commit').prop('disabled', function() { return errorCount > 0; });
     }
 };
 

@@ -19,7 +19,7 @@ templates = {
             "original FAO name",
             "amount",
             "adjustment factor",
-            # "gear type",
+            "gear type",
             "sector",
             "original sector",
             "catch type",
