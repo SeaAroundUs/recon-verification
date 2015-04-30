@@ -90,7 +90,7 @@ class Catch(models.Model):
     reference_id = models.IntegerField(null=True)
     forward_carry_rule = models.CharField(max_length=400, null=True)
     adjustment_factor = models.CharField(max_length=200, null=True)
-    gear = models.CharField(max_length=200, null=True)
+    # gear = models.CharField(max_length=200, null=True)
     notes = models.CharField(max_length=2000, null=True)
 
     class Meta:

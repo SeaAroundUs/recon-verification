@@ -80,7 +80,7 @@ class ContributedFile():
                     reference_id=recon_datum['reference id'],
                     forward_carry_rule=recon_datum['forward carry rule'],
                     adjustment_factor=recon_datum['adjustment factor'],
-                    gear_type=recon_datum['gear type'],
+                    # gear_type=recon_datum['gear type'],
                     notes=recon_datum['notes'],
 
                     source_file=FileUpload.objects.get(id=self.fileupload_id),

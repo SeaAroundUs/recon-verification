@@ -37,8 +37,8 @@ class RawCatch(models.Model):
     year = models.IntegerField()
     amount = models.DecimalField(max_digits=20, decimal_places=12)
     adjustment_factor = models.CharField(max_length=200, null=True)
-    gear_type = models.CharField(max_length=200, null=True)
-    gear_type_id = models.IntegerField(default=0)
+    # gear_type = models.CharField(max_length=200, null=True)
+    # gear_type_id = models.IntegerField(default=0)
     taxon_name = models.CharField(max_length=200)
     taxon_key = models.IntegerField(default=0)
     original_fao_name = models.CharField(max_length=200, null=True)
@@ -90,8 +90,8 @@ class RawCatch(models.Model):
                 'taxon_name',
                 'original_fao_name',
                 'taxon_key',
-                'gear_type',
-                'gear_type_id',
+                # 'gear_type',
+                # 'gear_type_id',
                 'sector',
                 'original_sector',
                 'sector_id',
@@ -130,8 +130,8 @@ class RawCatch(models.Model):
             'Taxon Name',
             'Original FAO Name',
             'Taxon Key',
-            'Gear Type',
-            'gear_type_id',
+            # 'Gear Type',
+            # 'gear_type_id',
             'Sector',
             'Original Sector',
             'sector_id',
