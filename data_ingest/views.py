@@ -126,14 +126,19 @@ class UploadDataJsonView(View):
         # data changes come in as a list-of-lists, each of which is of the form [row, column, before, after]
         #   row and column are zero-based.
         data_changes = simplejson.loads(request.body)
-        for data_change in data_changes['data']:
-            try:
-                changed_data = RawCatch.update(**data_change)
-                response = {'result': 'ok'}
-                response.update(changed_data)
-                return ReconResponse(response)
-            except Exception as e:
-                return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
+
+        try:
+            if isinstance(data_changes['data'][0], list):
+                RawCatch.bulk_save(data_changes['data'])
+                return ReconResponse({'result': 'ok'})
+            else:
+                for data_change in data_changes['data']:
+                        changed_data = RawCatch.update(**data_change)
+                        response = {'result': 'ok'}
+                        response.update(changed_data)
+                        return ReconResponse(response)
+        except Exception as e:
+            return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
 
 class DataNormalizationView(View):

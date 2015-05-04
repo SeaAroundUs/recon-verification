@@ -66,6 +66,13 @@ class RawCatch(models.Model):
         }
 
     @staticmethod
+    def bulk_save(changes):
+        for row in changes:
+            obj = RawCatch.objects.filter(id=row[0])
+            values = {RawCatch.get_column_name(idx): col for idx, col in enumerate(row) if idx > 0}
+            obj.update(**values)
+
+    @staticmethod
     def get_column_name(col_num):
         try:
             return [
@@ -75,7 +82,7 @@ class RawCatch(models.Model):
                 'fishing_entity_id',
                 'eez_area',
                 'eez_sub_area',
-                'eez_area_id',
+                'eez_id',
                 'fao_area',
                 'sub_regional_area',
                 'province_state',
@@ -90,8 +97,8 @@ class RawCatch(models.Model):
                 'taxon_name',
                 'original_fao_name',
                 'taxon_key',
-                'gear_type',
-                'gear_type_id',
+                # 'gear_type',
+                # 'gear_type_id',
                 'sector',
                 'original_sector',
                 'sector_id',
@@ -112,10 +119,10 @@ class RawCatch(models.Model):
             'id',
             'Fishing Entity',
             'Original Country Fishing',
-            'fishing_entity_id',
+            'Fishing Entity ID',
             'EEZ',
             'EEZ Subarea',
-            'eez_area_id',
+            'EEZ ID',
             'FAO Area',
             'Subregional Area',
             'Province or State',
@@ -131,14 +138,14 @@ class RawCatch(models.Model):
             'Original FAO Name',
             'Taxon Key',
             # 'Gear Type',
-            # 'gear_type_id',
+            # 'Gear Type ID',
             'Sector',
             'Original Sector',
-            'sector_id',
+            'Sector ID',
             'Catch Type',
-            'catch_type_id',
+            'Catch Type ID',
             'Input',
             'Forward Carry Rule',
-            'reference_id',
+            'Reference ID',
             'Notes'
         ]
