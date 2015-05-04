@@ -19,6 +19,11 @@ body {
 
 .table-controls #error-count:before {
   content: 'Errors: ';
+  color: #333;
+}
+
+.table-controls #error-count {
+  color: green;
 }
 
 .table-controls #error-count.errors {
