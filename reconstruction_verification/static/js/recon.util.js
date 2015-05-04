@@ -32,6 +32,10 @@ var Util = {
         return null;
     },
 
+    setMessage: function(text) {
+        $('#messageConsole').html(text);
+    },
+
     $post: function(url, params, callback) {
         $.ajax({
             beforeSend: Util.addToken,

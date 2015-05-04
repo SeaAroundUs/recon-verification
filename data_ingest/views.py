@@ -3,7 +3,7 @@ import simplejson
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.views.generic.edit import CreateView
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
 from data_ingest.ingest import ingest_file, normalize
@@ -17,8 +17,8 @@ class ReconResponse(object):
         return HttpResponse(simplejson.dumps(payload, use_decimal=True), content_type='application/json')
 
 
-def get_raw_catch_data():
-    raw_data = RawCatch.objects.all().order_by('id')
+def get_raw_catch_data(file_id):
+    raw_data = RawCatch.objects.filter(source_file_id=file_id).order_by('id')  # TODO also filter on current user
     raw_data_list = {'data': []}
     for data_row in raw_data:
         raw_data_list['data'].append(
@@ -62,7 +62,6 @@ def get_raw_catch_data():
 class FileUploadCreateView(CreateView):
     model = FileUpload
     form_class = FileUploadForm
-    template_name = 'recon_ingest.html'
 
     def get_form_kwargs(self):
         kwargs = super(FileUploadCreateView, self).get_form_kwargs()
@@ -104,12 +103,21 @@ class FileUploadCreateView(CreateView):
 
 
 class DataBrowseView(View):
-    template = 'recon_ingest.html'
+    template = 'browse_upload.html'
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         return render(request,
                       self.template,
                       {})
+
+
+class EditNormalizeView(View):
+    template = 'edit_normalize.html'
+
+    def get(self, request, file_id):
+        return render(request,
+                      self.template,
+                      {'file_id': file_id})
 
 
 class CatchFieldsJsonView(View):
@@ -118,9 +126,11 @@ class CatchFieldsJsonView(View):
 
 
 class UploadDataJsonView(View):
-    def get(self, request):
-        file_name = request.GET.get('file_name')
-        return ReconResponse(get_raw_catch_data())
+    def get(self, request, file_id):
+        if file_id is None or not RawCatch.objects.filter(source_file_id=file_id).exists():
+            return HttpResponseNotFound()
+        else:
+            return ReconResponse(get_raw_catch_data(file_id=file_id))
 
     def post(self, request):
         # data changes come in as a list-of-lists, each of which is of the form [row, column, before, after]
@@ -142,9 +152,9 @@ class UploadDataJsonView(View):
 
 
 class DataNormalizationView(View):
-    def post(self, request):
-        normalize()
-        return ReconResponse(get_raw_catch_data())
+    def post(self, request, file_id):
+        normalize(file_id=file_id)
+        return ReconResponse(get_raw_catch_data(file_id=file_id))
 
 
 class FileIngest(View):

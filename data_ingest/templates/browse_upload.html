@@ -1,0 +1,26 @@
+{% extends '_layouts/base.html' %}
+{% load staticfiles %}
+{% block title %}Browse & Upload{% endblock %}
+{% block content %}
+    <div id="browse-upload" class="panel-group" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3>Browse & Upload</h3>
+
+                <pre id="messageConsole" class="console"> </pre>
+
+                <form role="form">
+                    <div class="form-group">
+                        <span class="btn btn-success fileinput-button">
+                            <i class="glyphicon glyphicon-plus"></i>
+                            <span>Select file</span>
+                            <input id="fileupload" type="file" name="file" multiple>
+                        </span>
+                    </div>
+                </form>
+
+                <ul class="files"></ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

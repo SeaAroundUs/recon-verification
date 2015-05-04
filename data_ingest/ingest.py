@@ -100,15 +100,15 @@ class ContributedFile():
         self._process_excel_file()
         if 'Catch Data' in self.excel_file_dict:
             # purge data
-            self._truncate_rawcatch_table()
+            # self._truncate_rawcatch_table()
             # insert new
             self._insert_reconstruction_data()
             # normalize data
-            normalize()
+            normalize(self.fileupload_id)
 
 
-def normalize():
-    for row in RawCatch.objects.all():
+def normalize(file_id):
+    for row in RawCatch.objects.filter(source_file_id=file_id):
         try:
             taxon = Taxon.objects.filter(name__iexact=row.taxon_name.strip())[0]
             row.taxon_key = taxon.taxon_key
@@ -156,6 +156,5 @@ def normalize():
 
 def ingest_file(file_path, username):
     user = User.objects.get(username=username)
-    file_to_ingest = ContributedFile(file_path,
-                                     user,)
+    file_to_ingest = ContributedFile(file_path, user)
     ingest_result = file_to_ingest.process()

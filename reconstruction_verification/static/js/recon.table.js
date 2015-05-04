@@ -18,7 +18,7 @@ var Table = {
                 var message = res.result === 'ok'
                         ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data saved'
                         : '<span class="glyphicon glyphicon-floppy-remove"></span> Save error';
-                Table.setMessage(message);
+                Util.setMessage(message);
             });
         },
 
@@ -26,24 +26,25 @@ var Table = {
             var message = Table.autosave.checked
                     ? '<span class="glyphicon glyphicon-floppy-disk"></span> Changes will be autosaved'
                     : '<span class="glyphicon glyphicon-floppy-remove"></span> Changes will not be autosaved';
-            Table.setMessage(message);
+            Util.setMessage(message);
         },
 
         normalize: function() {
             Util.$post(Util.urls.normalizeData, {}, function(res) {
                 Table.dataTable.loadData(res.data);
-                Table.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
+                Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
                 Table.updateErrorCount();
             });
         }
     },
 
     init: function() {
-        Table.autosave = $('#autosave')[0];
-        Table.$table = $('#reconDataTableElement');
-        Table.initTable();
-        Table.initUpload();
-        Table.loadTableData();
+        if ($('#edit-normalize').length) {
+            Table.autosave = $('#autosave')[0];
+            Table.$table = $('#reconDataTableElement');
+            Table.initTable();
+            Table.loadTableData();
+        }
     },
 
     initTable: function() {
@@ -62,28 +63,6 @@ var Table = {
         Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
         Handsontable.Dom.addEvent(Table.autosave, 'click', Table.events.autosave);
         Handsontable.Dom.addEvent($('#normalize')[0], 'click', Table.events.normalize);
-    },
-
-    initUpload: function() {
-        var uploadOptions = {
-            url: Util.urls.reconFileUpload,
-            crossDomain: false,
-            beforeSend: function(xhr) {
-                Table.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Uploading file...');
-                Util.addToken(xhr);
-            },
-            dataType: 'json',
-            done: function (e, data) {
-                var filename = data.originalFiles[0].name;
-                Table.loadTableData();
-                Table.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data uploaded from ' + filename);
-            }
-        };
-
-        $("#fileupload").fileupload(uploadOptions)
-                .prop('disabled', !$.support.fileInput)
-                .parent()
-                    .addClass($.support.fileInput ? undefined : 'disabled');
     },
 
     afterChange: function (changes, source) {
@@ -105,13 +84,13 @@ var Table = {
             clearTimeout(Table.autosaveNotification);
 
             Util.$post(Util.urls.uploadedDataJSON, { data: changes }, function() {
-                Table.setMessage('<span class="glyphicon glyphicon glyphicon-floppy-saved"></span> Autosaved (' +
+                Util.setMessage('<span class="glyphicon glyphicon glyphicon-floppy-saved"></span> Autosaved (' +
                     changes.length + ' cell' +
                     (changes.length > 1 ? 's)' : ')')
                 );
 
                 Table.autosaveNotification = setTimeout(function() {
-                    Table.setMessage('<span class="glyphicon glyphicon-floppy-disk"></span> Changes will be autosaved');
+                    Util.setMessage('<span class="glyphicon glyphicon-floppy-disk"></span> Changes will be autosaved');
                 }, 1000);
             });
         }
@@ -155,7 +134,7 @@ var Table = {
     },
 
     loadTableData: function() {
-        Table.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Loading data...');
+        Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Loading data...');
 
         $.get(Util.urls.uploadedDataJSON, function(res) {
             Table.dataTable.loadData(res.data);
@@ -163,19 +142,15 @@ var Table = {
             if (Table.isEmpty()) {
                 $('.table-controls input, .table-controls button').prop('disabled', true);
                 Table.$table.addClass('disabled');
-                Table.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> Error loading data');
+                Util.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> Error loading data');
             } else {
                 $('.table-controls input, .table-controls button').not().prop('disabled', false);
                 Table.$table.removeClass('disabled');
-                Table.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data loaded');
+                Util.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data loaded');
             }
 
             Table.updateErrorCount();
         });
-    },
-
-    setMessage: function(text) {
-        $('#messageConsole').html(text);
     },
 
     updateErrorCount: function() {

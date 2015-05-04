@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Reconstruction Data: {% block title %}{% endblock %}</title>
+        <title>Reconstruction Data | {% block title %}{% endblock %}</title>
         <meta http-equiv="Content-type" content="text/html">
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,9 +11,8 @@
     </head>
     <body role="document">
         <input type="hidden" id="catchFieldsJSON" class="djangoURL" value="{% url 'catch-fields-json' %}" />
-        <input type="hidden" id="uploadedDataJSON" class="djangoURL" value="{% url 'uploaded-data-json' %}" />
-        <input type="hidden" id="normalizeData" class="djangoURL" value="{% url 'normalize-data' %}" />
-        <input type="hidden" id="reconFileUpload" class="djangoURL" value="{% url 'recon-file-upload' %}" />
+        <input type="hidden" id="uploadJSON" class="djangoURL" value="{% url 'upload-json' %}" />
+        {% block extra_urls %}{% endblock %}
 
         <div id="maindiv">
             {% include '_includes/nav_bar.html' %}

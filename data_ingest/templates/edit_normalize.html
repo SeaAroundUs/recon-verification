@@ -1,20 +1,17 @@
 {% extends '_layouts/base.html' %}
 {% load staticfiles %}
-{% block title %}File Upload{% endblock %}
+{% block title %}Edit & Normalize{% endblock %}
+{% block extra_urls %}
+<input type="hidden" id="uploadedDataJSON" class="djangoURL" value="{% url 'uploaded-data-json' file_id %}" />
+<input type="hidden" id="normalizeData" class="djangoURL" value="{% url 'normalize-data' file_id %}" />
+{% endblock %}
 {% block content %}
-    <div class="panel-group" role="tablist" aria-multiselectable="true">
+    <div id="edit-normalize" class="panel-group" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default">
             <div class="panel-body">
-                <form role="form">
-                    <div class="form-group">
-                        <span class="btn btn-success fileinput-button">
-                            <i class="glyphicon glyphicon-plus"></i>
-                            <span>Select file</span>
-                            <input id="fileupload" type="file" name="file" multiple>
-                        </span>
-                    </div>
-                </form>
-                <pre id="messageConsole" class="console"><span class="glyphicon glyphicon-th-list"></span> Upload reconstruction data file</pre>
+                <h3>Edit & Normalize</h3>
+
+                <pre id="messageConsole" class="console"> </pre>
 
                 <div class="form-group table-controls">
                     <button name="normalize" id="normalize" class="btn btn-default" disabled>Normalize</button>

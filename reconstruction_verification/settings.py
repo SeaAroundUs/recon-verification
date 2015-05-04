@@ -145,6 +145,7 @@ PIPELINE_JS = {
         'source_filenames': (
             'js/recon.util.js',
             'js/recon.table.js',
+            'js/recon.upload.js',
         ),
         'output_filename': 'js/scripts.js'
     },
