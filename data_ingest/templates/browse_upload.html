@@ -21,7 +21,9 @@
 
                 <ul class="files">
                     {% for file in files %}
-                        <li><a href="/data_ingest/edit-normalize/{{ file.id }}">{{ file }}</a></li>
+                        <li><a href="/data_ingest/edit-normalize/{{ file.id }}">
+                            {{ file }} ({{ file.create_datetime }})
+                        </a></li>
                     {% endfor %}
                 </ul>
             </div>
