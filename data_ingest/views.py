@@ -106,9 +106,10 @@ class DataBrowseView(View):
     template = 'browse_upload.html'
 
     def get(self, request):
+        files = FileUpload.objects.exclude(user_id=None).all()
         return render(request,
                       self.template,
-                      {})
+                      {'files': files})
 
 
 class EditNormalizeView(View):
