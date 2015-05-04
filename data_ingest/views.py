@@ -106,7 +106,7 @@ class DataBrowseView(View):
     template = 'browse_upload.html'
 
     def get(self, request):
-        files = FileUpload.objects.exclude(user_id=None).all()
+        files = FileUpload.objects.exclude(user_id=None).order_by('create_datetime')
         return render(request,
                       self.template,
                       {'files': files})
@@ -133,18 +133,18 @@ class UploadDataJsonView(View):
         else:
             return ReconResponse(get_raw_catch_data(file_id=file_id))
 
-    def post(self, request):
+    def post(self, request, file_id):
         # data changes come in as a list-of-lists, each of which is of the form [row, column, before, after]
         #   row and column are zero-based.
         data_changes = simplejson.loads(request.body)
 
         try:
             if isinstance(data_changes['data'][0], list):
-                RawCatch.bulk_save(data_changes['data'])
+                RawCatch.bulk_save(file_id, data_changes['data'])
                 return ReconResponse({'result': 'ok'})
             else:
                 for data_change in data_changes['data']:
-                        changed_data = RawCatch.update(**data_change)
+                        changed_data = RawCatch.update(file_id, **data_change)
                         response = {'result': 'ok'}
                         response.update(changed_data)
                         return ReconResponse(response)

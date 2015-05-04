@@ -53,8 +53,8 @@ class RawCatch(models.Model):
     notes = models.CharField(max_length=2000, null=True)
 
     @staticmethod
-    def update(id, column, old_value, new_value):
-        obj = RawCatch.objects.get(id=id)
+    def update(file_id, id, column, old_value, new_value):
+        obj = RawCatch.objects.get(id=id, source_file_id=file_id)
         column_name = RawCatch.get_column_name(column)
         setattr(obj, column_name, new_value)
         obj.save()
@@ -66,9 +66,9 @@ class RawCatch(models.Model):
         }
 
     @staticmethod
-    def bulk_save(changes):
+    def bulk_save(file_id, changes):
         for row in changes:
-            obj = RawCatch.objects.filter(id=row[0])
+            obj = RawCatch.objects.filter(id=row[0], source_file_id=file_id)
             values = {RawCatch.get_column_name(idx): col for idx, col in enumerate(row) if idx > 0}
             obj.update(**values)
 
