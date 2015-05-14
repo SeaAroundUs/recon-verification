@@ -6,6 +6,8 @@ import data_ingest.sheet_template
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import Taxon, CatchType, Country, EEZ, Sector
 from django.db import connection
+import re
+import time
 
 
 class ContributedFile():
@@ -19,6 +21,8 @@ class ContributedFile():
         if fileupload_id:
             self.fileupload_id = fileupload_id
         else:
+            new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
+            contributed_file.name = new_name
             fileupload = FileUpload(
                 file=self.contributed_file.name,
                 user=self.user,
