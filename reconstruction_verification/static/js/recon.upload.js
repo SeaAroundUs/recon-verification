@@ -19,6 +19,7 @@ var Upload = {
             done: function (e, data) {
                 var filename = data.originalFiles[0].name;
                 Util.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data uploaded from ' + filename);
+                window.location = window.location;
             }
         };
 
