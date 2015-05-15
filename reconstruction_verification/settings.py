@@ -15,6 +15,8 @@ STATICFILES_FINDERS = (
     'pipeline.finders.PipelineFinder',
 )
 
+LOGIN_URL = '/admin/login'
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'g&bd3isw+03%r^-f#o+p(%w&&sxzcp%gl9#++)fy0d^y!0n20e'
 

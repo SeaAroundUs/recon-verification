@@ -1,12 +1,13 @@
 from django.conf.urls import patterns, url
 from data_ingest.views import FileUploadCreateView, DataBrowseView, UploadDataJsonView, \
     CatchFieldsJsonView, FileIngest, DataNormalizationView, EditNormalizeView
+from django.contrib.auth.decorators import login_required
 
 
 urlpatterns = patterns(
     'data_ingest.views',
-    url(r'^edit-normalize/(?P<file_id>\d+)$', EditNormalizeView.as_view(), name='edit-normalize'),
-    url(r'^browse-upload/$', DataBrowseView.as_view(), name='browse-upload'),
+    url(r'^edit-normalize/(?P<file_id>\d+)$', login_required(EditNormalizeView.as_view()), name='edit-normalize'),
+    url(r'^browse-upload/$', login_required(DataBrowseView.as_view()), name='browse-upload'),
     url(r'^upload/$', FileUploadCreateView.as_view(), name='upload-json'),
     url(r'^data/(?P<file_id>\d+)$', UploadDataJsonView.as_view(), name='uploaded-data-json'),
     url(r'^fields/$', CatchFieldsJsonView.as_view(), name='catch-fields-json'),
