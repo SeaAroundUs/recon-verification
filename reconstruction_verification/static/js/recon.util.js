@@ -24,7 +24,7 @@ var Util = {
 
         for (i = 0; i < pairs.length; i++) {
             keyVal = pairs[i].split('=');
-            if (keyVal[0] === 'csrftoken') {
+            if (keyVal[0].trim() === 'csrftoken') {
                 return keyVal[1];
             }
         }
