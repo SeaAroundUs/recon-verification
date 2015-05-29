@@ -4,6 +4,7 @@
 {% block extra_urls %}
 <input type="hidden" id="uploadedDataJSON" class="djangoURL" value="{% url 'uploaded-data-json' file_id %}" />
 <input type="hidden" id="normalizeData" class="djangoURL" value="{% url 'normalize-data' file_id %}" />
+<input type="hidden" id="commitData" class="djangoURL" value="{% url 'commit-data' file_id %}" />
 {% endblock %}
 {% block content %}
     <div id="edit-normalize" class="panel-group" role="tablist" aria-multiselectable="true">

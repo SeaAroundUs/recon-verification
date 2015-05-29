@@ -35,6 +35,15 @@ var Table = {
                 Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
                 Table.updateErrorCount();
             });
+        },
+
+        commit: function() {
+            Util.$post(Util.urls.commitData, {}, function(res) {
+                var message = res.result === 'ok'
+                        ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data commited'
+                        : '<span class="glyphicon glyphicon-floppy-remove"></span> Commit error';
+                Util.setMessage(message);
+            });
         }
     },
 
@@ -63,6 +72,7 @@ var Table = {
         Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
         Handsontable.Dom.addEvent(Table.autosave, 'click', Table.events.autosave);
         Handsontable.Dom.addEvent($('#normalize')[0], 'click', Table.events.normalize);
+        Handsontable.Dom.addEvent($('#commit')[0], 'click', Table.events.commit);
     },
 
     afterChange: function (changes, source) {

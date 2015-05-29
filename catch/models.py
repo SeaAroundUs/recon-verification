@@ -1,5 +1,5 @@
 from django.db import models
-from data_ingest.models import RawCatch
+import data_ingest.models
 
 
 class Reference(models.Model):
@@ -72,7 +72,7 @@ class CatchType(models.Model):
 class Catch(models.Model):
     year = models.IntegerField()
     amount = models.DecimalField(max_digits=20, decimal_places=12)
-    raw_catch = models.ForeignKey(to=RawCatch)
+    raw_catch = models.ForeignKey(to=data_ingest.models.RawCatch)
     fishing_entity = models.ForeignKey(to=Country, related_name="fishing_entity")
     original_country_fishing = models.ForeignKey(to=Country, related_name="original_country_fishing")
     eez = models.ForeignKey(to=EEZ)

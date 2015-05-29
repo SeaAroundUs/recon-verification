@@ -1,7 +1,8 @@
 import os
 from time import strftime
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import User
+import catch.models
 
 
 def upload_file_path(instance, filename):
@@ -51,6 +52,39 @@ class RawCatch(models.Model):
     reference_id = models.IntegerField(null=True)
     forward_carry_rule = models.CharField(max_length=400, null=True)
     notes = models.CharField(max_length=2000, null=True)
+
+    @staticmethod
+    def commit(file_id):
+        with transaction.atomic():
+            for row in RawCatch.objects.filter(source_file=file_id):
+                # TODO check for existing row
+                values = {
+                    'year': row.year,
+                    'amount': row.amount,
+                    'fao_area': row.fao_area,
+                    'sub_regional_area': row.sub_regional_area,
+                    'province_state': row.province_state,
+                    'ices_division': row.ices_division,
+                    'ices_subdivision': row.ices_subdivision,
+                    'nafo_division': row.nafo_division,
+                    'ccamlr_area': row.ccamlr_area,
+                    'input_type': row.input_type,
+                    'reference_id': row.reference_id,
+                    'forward_carry_rule': row.forward_carry_rule,
+                    'adjustment_factor': row.adjustment_factor,
+                    # 'gear': catch.models.Gear.objects.get(row.gear_type_id),
+                    'notes': row.notes,
+                    'catch_type': catch.models.CatchType.objects.get(id=row.catch_type_id),
+                    'eez': catch.models.EEZ.objects.get(id=row.eez_id),
+                    'fishing_entity': catch.models.Country.objects.get(id=row.fishing_entity_id),
+                    'original_country_fishing': catch.models.Country.objects.get(id=2),  # TODO placeholder
+                    # 'original_country_fishing': catch.models.Country.objects.get(name=row.original_country_fishing),
+                    'raw_catch': row,
+                    'sector': catch.models.Sector.objects.get(id=row.sector_id),
+                    'taxon': catch.models.Taxon.objects.get(taxon_key=row.taxon_key),
+                }
+                row = catch.models.Catch(**values)
+                row.save()
 
     @staticmethod
     def update(file_id, id, column, old_value, new_value):

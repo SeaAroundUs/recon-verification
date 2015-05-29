@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 from data_ingest.views import FileUploadCreateView, DataBrowseView, UploadDataJsonView, \
-    CatchFieldsJsonView, FileIngest, DataNormalizationView, EditNormalizeView
+    CatchFieldsJsonView, FileIngest, DataNormalizationView, EditNormalizeView, CommitView
 from django.contrib.auth.decorators import login_required
 
 
@@ -12,5 +12,6 @@ urlpatterns = patterns(
     url(r'^data/(?P<file_id>\d+)$', UploadDataJsonView.as_view(), name='uploaded-data-json'),
     url(r'^fields/$', CatchFieldsJsonView.as_view(), name='catch-fields-json'),
     url(r'^normalize/(?P<file_id>\d+)$', DataNormalizationView.as_view(), name='normalize-data'),
+    url(r'^commit/(?P<file_id>\d+)$', CommitView.as_view(), name='commit-data'),
     url(r'^ingest/$', FileIngest.as_view(), name='file-ingest'),
     )

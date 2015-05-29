@@ -166,3 +166,12 @@ class FileIngest(View):
             ingest_file(file_path=file_path,
                         username=username,)
         return HttpResponse()
+
+
+class CommitView(View):
+    def post(self, request, file_id):
+        try:
+            RawCatch.commit(file_id)
+            return ReconResponse({'result': 'ok'})
+        except Exception as e:  # TODO more specific exception?
+            return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
