@@ -1,12 +1,5 @@
 from django.db import models
-import data_ingest.models
-
-
-class Reference(models.Model):
-    name = models.CharField(max_length=200)
-
-    class Meta:
-        db_table = 'reference'
+from data_ingest.models import RawCatch
 
 
 class Country(models.Model):
@@ -22,8 +15,8 @@ class Country(models.Model):
 
 
 class EEZ(models.Model):
-    country = models.ForeignKey(to=Country)
     name = models.CharField(max_length=200)
+    country = models.ForeignKey(to=Country)
 
     class Meta:
         verbose_name = 'EEZ'
@@ -35,18 +28,37 @@ class EEZ(models.Model):
         return u"{0} - {1}".format(self.id, self.name)
 
 
-class Taxon(models.Model):
-    taxon_key = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=255)
-    scientific_name = models.CharField(max_length=255)
+class FAO(models.Model):
+    name = models.CharField(max_length=200)
 
     class Meta:
-        verbose_name_plural = 'Taxa'
-        ordering = ['scientific_name', 'name']
-        db_table = 'taxon'
+        verbose_name = 'FAO'
+        verbose_name_plural = 'FAOs'
+        db_table = 'fao'
+        ordering = ['name']
 
     def __str__(self):
-        return u"{0} - {1}  ({2})".format(self.taxon_key, self.scientific_name, self.name)
+        return u"{0} - {1}".format(self.id, self.name)
+
+
+class ICES(models.Model):
+    name = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'ices_eez'
+
+    def __str__(self):
+        return u"{0} - {1}".format(self.id, self.name)
+
+
+class NAFO(models.Model):
+    name = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'nafo'
+
+    def __str__(self):
+        return u"{0} - {1}".format(self.id, self.name)
 
 
 class Sector(models.Model):
@@ -69,29 +81,60 @@ class CatchType(models.Model):
         return u"{0}".format(self.type)
 
 
-class Catch(models.Model):
-    year = models.IntegerField()
-    amount = models.DecimalField(max_digits=20, decimal_places=12)
-    raw_catch = models.ForeignKey(to=data_ingest.models.RawCatch)
-    fishing_entity = models.ForeignKey(to=Country, related_name="fishing_entity")
-    original_country_fishing = models.ForeignKey(to=Country, related_name="original_country_fishing")
-    eez = models.ForeignKey(to=EEZ)
-    fao_area = models.CharField(max_length=20, null=True)
-    sub_regional_area = models.CharField(max_length=200, null=True)
-    province_state = models.CharField(max_length=200, null=True)
-    ices_division = models.CharField(max_length=20, null=True)
-    ices_subdivision = models.CharField(max_length=20, null=True)
-    nafo_division = models.CharField(max_length=20, null=True)
-    ccamlr_area = models.CharField(max_length=20, null=True)
-    taxon = models.ForeignKey(to=Taxon)
-    sector = models.ForeignKey(to=Sector)
-    catch_type = models.ForeignKey(to=CatchType)
-    input_type = models.CharField(max_length=200, null=True)
-    reference_id = models.IntegerField(null=True)
-    forward_carry_rule = models.CharField(max_length=400, null=True)
-    adjustment_factor = models.CharField(max_length=200, null=True)
-    gear = models.CharField(max_length=200, null=True)
-    notes = models.CharField(max_length=2000, null=True)
+class Taxon(models.Model):
+    taxon_key = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=255)
+    scientific_name = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'reconstructed_catch'
+        verbose_name_plural = 'Taxa'
+        ordering = ['scientific_name', 'name']
+        db_table = 'taxon'
+
+    def __str__(self):
+        return u"{0} - {1}  ({2})".format(self.taxon_key, self.scientific_name, self.name)
+
+
+class Reference(models.Model):
+    name = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'reference'
+
+    def __str__(self):
+        return u"{0}".format(self.name)
+
+
+class Catch(models.Model):
+    fishing_entity = models.ForeignKey(to=Country, related_name='+')
+    original_country_fishing = models.ForeignKey(to=Country, related_name='+')
+    eez = models.ForeignKey(to=EEZ)
+    eez_sub_area = models.CharField(max_length=200, null=True)
+    fao_area = models.ForeignKey(to=FAO)
+    sub_regional_area = models.CharField(max_length=200, null=True)
+    province_state = models.CharField(max_length=200, null=True)
+    ices_division = models.ForeignKey(to=ICES, related_name='+')
+    ices_subdivision = models.ForeignKey(to=ICES, related_name='+')
+    nafo_division = models.ForeignKey(to=NAFO)
+    ccamlr_area = models.CharField(max_length=200, null=True)
+    layer = models.IntegerField(default=0)
+    sector = models.ForeignKey(to=Sector)
+    original_sector = models.CharField(max_length=200, null=True)
+    catch_type = models.ForeignKey(to=CatchType)
+    year = models.IntegerField(default=0)
+    taxon = models.ForeignKey(to=Taxon, related_name='+')
+    original_taxon_name = models.ForeignKey(to=Taxon, related_name='+')
+    original_fao_name = models.ForeignKey(to=Taxon, related_name='+')
+    amount = models.DecimalField(max_digits=20, decimal_places=12)
+    adjustment_factor = models.DecimalField(max_digits=20, decimal_places=12)
+    gear_type = models.IntegerField(default=0)  # TODO relate to gear table
+    input_type = models.IntegerField(default=0)  # TODO relate to input_type table
+    forward_carry_rule = models.IntegerField(default=0)  # TODO relate to forward_carry_rule table
+    disaggregation_rule = models.IntegerField(default=0)  # TODO relate to disaggregation_rule table
+    layer_rule = models.IntegerField(default=0)  # TODO relate to layer_rule table
+    reference_id = models.ForeignKey(to=Reference)
+    notes = models.TextField(null=True)
+    raw_catch = models.ForeignKey(to=RawCatch)
+
+    class Meta:
+        db_table = 'catch'
