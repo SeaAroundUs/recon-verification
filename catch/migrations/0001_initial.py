@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Catch',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('eez_sub_area', models.CharField(max_length=200, null=True)),
                 ('subregional_area', models.CharField(max_length=200, null=True)),
                 ('province_state', models.CharField(max_length=200, null=True)),
@@ -24,11 +24,11 @@ class Migration(migrations.Migration):
                 ('year', models.IntegerField(default=0)),
                 ('amount', models.DecimalField(decimal_places=12, max_digits=20)),
                 ('adjustment_factor', models.DecimalField(decimal_places=12, null=True, max_digits=20)),
-                ('gear_type', models.IntegerField(null=True, default=0)),
-                ('input_type', models.IntegerField(null=True, default=0)),
-                ('forward_carry_rule', models.IntegerField(null=True, default=0)),
-                ('disaggregation_rule', models.IntegerField(null=True, default=0)),
-                ('layer_rule', models.IntegerField(null=True, default=0)),
+                ('gear_type', models.IntegerField(default=0, null=True)),
+                ('input_type', models.IntegerField(default=0, null=True)),
+                ('forward_carry_rule', models.IntegerField(default=0, null=True)),
+                ('disaggregation_rule', models.IntegerField(default=0, null=True)),
+                ('layer_rule', models.IntegerField(default=0, null=True)),
                 ('notes', models.TextField(null=True)),
             ],
             options={
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CatchType',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('type', models.CharField(max_length=200)),
             ],
             options={
@@ -48,46 +48,46 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Country',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
             ],
             options={
+                'db_table': 'country',
                 'verbose_name_plural': 'Countries',
                 'ordering': ['name'],
-                'db_table': 'country',
             },
         ),
         migrations.CreateModel(
             name='EEZ',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
                 ('country', models.ForeignKey(to='catch.Country')),
             ],
             options={
-                'verbose_name_plural': 'EEZs',
                 'verbose_name': 'EEZ',
-                'ordering': ['name'],
                 'db_table': 'eez',
+                'verbose_name_plural': 'EEZs',
+                'ordering': ['name'],
             },
         ),
         migrations.CreateModel(
             name='FAO',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
             ],
             options={
-                'verbose_name_plural': 'FAOs',
                 'verbose_name': 'FAO',
-                'ordering': ['name'],
                 'db_table': 'fao',
+                'verbose_name_plural': 'FAOs',
+                'ordering': ['name'],
             },
         ),
         migrations.CreateModel(
             name='ICES',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
             ],
             options={
@@ -97,7 +97,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='NAFO',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
             ],
             options={
@@ -107,7 +107,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Reference',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
             ],
             options={
@@ -117,7 +117,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Sector',
             fields=[
-                ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('name', models.CharField(max_length=200)),
             ],
             options={
@@ -132,9 +132,9 @@ class Migration(migrations.Migration):
                 ('scientific_name', models.CharField(max_length=255)),
             ],
             options={
+                'db_table': 'taxon',
                 'verbose_name_plural': 'Taxa',
                 'ordering': ['scientific_name', 'name'],
-                'db_table': 'taxon',
             },
         ),
         migrations.AddField(

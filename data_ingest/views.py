@@ -18,7 +18,7 @@ class ReconResponse(object):
 
 
 def get_raw_catch_data(file_id):
-    raw_data = RawCatch.objects.filter(source_file_id=file_id).order_by('id')  # TODO also filter on current user
+    raw_data = RawCatch.objects.filter(source_file_id=file_id).order_by('id')
     raw_data_list = {'data': []}
     for data_row in raw_data:
         raw_data_list['data'].append(list(getattr(data_row, field) for field in RawCatch.fields()))
@@ -71,18 +71,14 @@ class DataBrowseView(View):
 
     def get(self, request):
         files = FileUpload.objects.exclude(user_id=None).order_by('create_datetime')
-        return render(request,
-                      self.template,
-                      {'files': files})
+        return render(request, self.template, {'files': files})
 
 
 class EditNormalizeView(View):
     template = 'edit_normalize.html'
 
     def get(self, request, file_id):
-        return render(request,
-                      self.template,
-                      {'file_id': file_id})
+        return render(request, self.template, {'file_id': file_id})
 
 
 class CatchFieldsJsonView(View):
