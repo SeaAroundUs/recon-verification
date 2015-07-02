@@ -1,37 +1,27 @@
-import xlrd
-from django.core.files.uploadedfile import UploadedFile
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import Taxon, CatchType, Country, EEZ, Sector
-from django.db import connection
+from decimal import Decimal
+import xlrd
 import re
 import time
 import logging
-from decimal import *
 
 
 logger = logging.getLogger(__name__)
 
 
 class ContributedFile:
-    def __init__(self, contributed_file, user, fileupload_id=None):
+    def __init__(self, contributed_file, user):
         self.user = user
+        self.contributed_file = contributed_file
 
-        # file can be a File or a file_path:
-        if isinstance(contributed_file, str):
-            self.contributed_file = open(contributed_file, 'rb')
-        elif isinstance(contributed_file, UploadedFile):
-            self.contributed_file = contributed_file
+        new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
+        contributed_file.name = new_name
+        fileupload = FileUpload(file=self.contributed_file.name, user=self.user)
+        fileupload.save()
 
-        if fileupload_id:
-            self.fileupload_id = fileupload_id
-        else:
-            new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
-            contributed_file.name = new_name
-            fileupload = FileUpload(file=self.contributed_file.name, user=self.user)
-            fileupload.save()
-            self.fileupload_id = FileUpload.objects.latest('id').id
-
+        self.fileupload_id = FileUpload.objects.latest('id').id
         self.excel_file_dict = {}
 
     def _convert_to_dict(self, sheet):
@@ -70,12 +60,6 @@ class ContributedFile:
 
         # create all the rows
         RawCatch.objects.bulk_create(raw_catches)
-
-    def _truncate_rawcatch_table(self):  # TODO do we still need this?
-        connection.cursor().execute('''
-        TRUNCATE TABLE "{0}" CASCADE;
-        ALTER SEQUENCE {0}_id_seq RESTART WITH 1;
-        '''.format(RawCatch._meta.db_table))
 
     def process(self):
         self._process_excel_file()
@@ -131,8 +115,3 @@ def normalize(file_id):
         # TODO more normalization
 
         row.save()
-
-
-def ingest_file(file_path, user):
-    file_to_ingest = ContributedFile(file_path, user)
-    return file_to_ingest.process()

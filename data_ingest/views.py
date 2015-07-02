@@ -1,12 +1,12 @@
-import logging
-import simplejson
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.views.generic.edit import CreateView
 from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
-from data_ingest.ingest import ingest_file, normalize
+from data_ingest.ingest import normalize
+import logging
+import simplejson
 
 
 logger = logging.getLogger(__name__)
@@ -38,8 +38,7 @@ class FileUploadCreateView(CreateView):
         # todo:  limit file types and *sizes*?
 
         data = {'files': []}
-        self.object = form.save()
-        file_attributes = getattr(self.object, 'file')
+        file_attributes = getattr(form.save(), 'file')
 
         # todo:  fragile.  sanity check file_attributes.
         if file_attributes:
@@ -94,20 +93,22 @@ class UploadDataJsonView(View):
             return ReconResponse(get_raw_catch_data(file_id=file_id))
 
     def post(self, request, file_id):
-        # data changes come in as a list-of-lists, each of which is of the form [row, column, before, after]
-        #   row and column are zero-based.
+        # data changes come in as a list-of-lists, each of which is of the form: [row, column, before, after]
+        # NOTE: row and column are zero-based
         data_changes = simplejson.loads(request.body)
 
         try:
             if isinstance(data_changes['data'][0], list):
                 RawCatch.bulk_save(file_id, data_changes['data'])
                 return ReconResponse({'result': 'ok'})
+
             else:
                 for data_change in data_changes['data']:
                         changed_data = RawCatch.update(file_id, **data_change)
                         response = {'result': 'ok'}
                         response.update(changed_data)
                         return ReconResponse(response)
+
         except Exception as e:
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
@@ -116,16 +117,6 @@ class DataNormalizationView(View):
     def post(self, request, file_id):
         normalize(file_id=file_id)
         return ReconResponse(get_raw_catch_data(file_id=file_id))
-
-
-class FileIngest(View):
-    def get(self, request):
-        file_path = request.GET.get('file_path', None)
-        if file_path:
-            ingest_file(file_path=file_path, user=request.user)
-            return ReconResponse({'result': 'ok'})
-        else:
-            return ReconResponse({'result': 'not ok'})
 
 
 class CommitView(View):

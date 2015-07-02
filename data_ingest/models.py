@@ -1,7 +1,8 @@
-import os
 from time import strftime
-from django.db import models, transaction
+from django.db import models
+from django.db.transaction import atomic
 from django.contrib.auth.models import User
+import os
 
 
 def upload_file_path(instance, filename):
@@ -73,9 +74,9 @@ class RawCatch(models.Model):
         db_table = 'raw_catch'
 
     @staticmethod
+    @atomic
     def commit(file_id):
-        with transaction.atomic():
-            pass  # TODO
+        pass  # TODO
 
     @classmethod
     def update(cls, file_id, id, column, old_value, new_value):
@@ -91,6 +92,7 @@ class RawCatch(models.Model):
         }
 
     @classmethod
+    @atomic
     def bulk_save(cls, file_id, changes):
         for row in changes:
             obj = cls.objects.filter(id=row[0], source_file_id=file_id)
