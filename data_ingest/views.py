@@ -64,16 +64,14 @@ class FileUploadCreateView(CreateView):
     form_class = FileUploadForm
 
     def get_form_kwargs(self):
-        kwargs = super(FileUploadCreateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
         return kwargs
 
     def form_valid(self, form):
-        # form.instance.user = self.request.user
         # todo:  limit file types and *sizes*?
 
-        data = {
-            'files': []
-        }
+        data = {'files': []}
         self.object = form.save()
         file_attributes = getattr(self.object, 'file')
 
@@ -160,12 +158,12 @@ class DataNormalizationView(View):
 
 class FileIngest(View):
     def get(self, request):
-        if request.GET.get('file_path'):
-            file_path = request.GET.get('file_path')
-            username = request.GET.get('username')
-            ingest_file(file_path=file_path,
-                        username=username,)
-        return HttpResponse()
+        file_path = request.GET.get('file_path', None)
+        if file_path:
+            ingest_file(file_path=file_path, user=request.user)
+            return ReconResponse({'result': 'ok'})
+        else:
+            return ReconResponse({'result': 'not ok'})
 
 
 class CommitView(View):

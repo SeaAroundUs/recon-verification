@@ -9,12 +9,12 @@
 
                 <pre id="messageConsole" class="console">Upload a new file or select an existing file for editing</pre>
 
-                <form role="form">
+                <form role="form" enctype="multipart/form-data">
                     <div class="form-group">
                         <span class="btn btn-success fileinput-button">
                             <i class="glyphicon glyphicon-plus"></i>
                             <span>Select file</span>
-                            <input id="fileupload" type="file" name="file" multiple>
+                            <input id="fileupload" type="file" name="file">
                         </span>
                     </div>
                 </form>

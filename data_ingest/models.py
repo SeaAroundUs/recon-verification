@@ -2,7 +2,6 @@ import os
 from time import strftime
 from django.db import models, transaction
 from django.contrib.auth.models import User
-import catch.models
 
 
 def upload_file_path(instance, filename):
@@ -28,7 +27,7 @@ class RawCatch(models.Model):
     eez_sub_area = models.CharField(max_length=200, null=True)
     fao_area = models.CharField(max_length=20, null=True)
     fao_area_id = models.IntegerField(default=0)
-    sub_regional_area = models.CharField(max_length=200, null=True)
+    subregional_area = models.CharField(max_length=200, null=True)
     province_state = models.CharField(max_length=200, null=True)
     ices_division = models.CharField(max_length=200, null=True)
     ices_division_id = models.IntegerField(default=0)
@@ -51,7 +50,7 @@ class RawCatch(models.Model):
     original_fao_name = models.CharField(max_length=200, null=True)
     original_fao_name_id = models.IntegerField(default=0)
     amount = models.DecimalField(max_digits=20, decimal_places=12)
-    adjustment_factor = models.DecimalField(max_digits=20, decimal_places=12)
+    adjustment_factor = models.DecimalField(max_digits=20, decimal_places=12, null=True)
     gear_type = models.CharField(max_length=200, null=True)
     gear_type_id = models.IntegerField(default=0)
     input_type = models.CharField(max_length=200, null=True)
@@ -101,4 +100,4 @@ class RawCatch(models.Model):
 
     @classmethod
     def fields(cls):
-        return cls._meta.fields
+        return list(map(lambda x: x.name, cls._meta.fields))[:-2]

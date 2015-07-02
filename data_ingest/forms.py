@@ -1,19 +1,18 @@
-from django.forms import ModelForm, CharField
-from django.contrib.auth.models import User
+from django.forms import ModelForm
 from data_ingest.models import FileUpload
 from data_ingest.ingest import ContributedFile
 
 
 class FileUploadForm(ModelForm):
-    directory_name = CharField(max_length=50, required=False)
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
 
     def clean(self):
-        cleaned_data = super(FileUploadForm, self).clean()
+        cleaned_data = super().clean()
         file = cleaned_data.get('file')
-        user = User.objects.get(username='recon')
-        file_to_ingest = ContributedFile(file,
-                                         user,)
-        ingest_result = file_to_ingest.process()
+        file_to_ingest = ContributedFile(file, self.request.user)
+        return file_to_ingest.process()
 
     class Meta:
         model = FileUpload

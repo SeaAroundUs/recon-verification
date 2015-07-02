@@ -8,10 +8,10 @@ urlpatterns = patterns(
     'data_ingest.views',
     url(r'^edit-normalize/(?P<file_id>\d+)$', login_required(EditNormalizeView.as_view()), name='edit-normalize'),
     url(r'^browse-upload/$', login_required(DataBrowseView.as_view()), name='browse-upload'),
-    url(r'^upload/$', FileUploadCreateView.as_view(), name='upload-json'),
-    url(r'^data/(?P<file_id>\d+)$', UploadDataJsonView.as_view(), name='uploaded-data-json'),
-    url(r'^fields/$', CatchFieldsJsonView.as_view(), name='catch-fields-json'),
-    url(r'^normalize/(?P<file_id>\d+)$', DataNormalizationView.as_view(), name='normalize-data'),
-    url(r'^commit/(?P<file_id>\d+)$', CommitView.as_view(), name='commit-data'),
-    url(r'^ingest/$', FileIngest.as_view(), name='file-ingest'),
-    )
+    url(r'^upload/$', login_required(FileUploadCreateView.as_view()), name='upload-json'),
+    url(r'^data/(?P<file_id>\d+)$', login_required(UploadDataJsonView.as_view()), name='uploaded-data-json'),
+    url(r'^fields/$', login_required(CatchFieldsJsonView.as_view()), name='catch-fields-json'),
+    url(r'^normalize/(?P<file_id>\d+)$', login_required(DataNormalizationView.as_view()), name='normalize-data'),
+    url(r'^commit/(?P<file_id>\d+)$', login_required(CommitView.as_view()), name='commit-data'),
+    url(r'^ingest/$', login_required(FileIngest.as_view()), name='file-ingest'),
+)
