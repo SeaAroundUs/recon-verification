@@ -50,6 +50,8 @@ class ContributedFile:
         raw_catches = []
         source_file = FileUpload.objects.get(id=self.fileupload_id)
         user = self.user
+
+        # iterate over every row in the file
         for recon_datum in self.excel_file_dict['Catch Data']:
             kwargs = {key.lower().strip().replace(' ', '_'): val for (key, val) in recon_datum.items()}
 
@@ -58,9 +60,15 @@ class ContributedFile:
 
             # ensure decimal fields are properly typed
             for decimal_field in ('amount', 'adjustment_factor'):
-                kwargs[decimal_field] = Decimal(kwargs[decimal_field]) if kwargs[decimal_field] else 0.0
+                val = kwargs[decimal_field]
+                if isinstance(val, str):
+                    val = val.strip()
+                kwargs[decimal_field] = Decimal(val) if val else None
 
+            # throw the row in the pile
             raw_catches.append(RawCatch(**kwargs))
+
+        # create all the rows
         RawCatch.objects.bulk_create(raw_catches)
 
     def _truncate_rawcatch_table(self):  # TODO do we still need this?
@@ -71,7 +79,7 @@ class ContributedFile:
 
     def process(self):
         self._process_excel_file()
-        if 'Catch Data' in self.excel_file_dict:  # TODO better check here
+        if 'Catch Data' in self.excel_file_dict:  # TODO need better check here
             self._insert_reconstruction_data()
             normalize(self.fileupload_id)
         else:

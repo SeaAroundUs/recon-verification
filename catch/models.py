@@ -132,7 +132,7 @@ class Catch(models.Model):
     forward_carry_rule = models.IntegerField(default=0, null=True)  # TODO relate to forward_carry_rule table
     disaggregation_rule = models.IntegerField(default=0, null=True)  # TODO relate to disaggregation_rule table
     layer_rule = models.IntegerField(default=0, null=True)  # TODO relate to layer_rule table
-    reference_id = models.ForeignKey(to=Reference)
+    reference = models.ForeignKey(to=Reference)
     notes = models.TextField(null=True)
     raw_catch = models.ForeignKey(to=RawCatch)
 

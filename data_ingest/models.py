@@ -13,6 +13,9 @@ class FileUpload(models.Model):
     user = models.ForeignKey(to=User, null=True)
     create_datetime = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'file_upload'
+
     def __str__(self):
         return self.file.name
 
@@ -65,6 +68,9 @@ class RawCatch(models.Model):
     notes = models.TextField(null=True)
     user = models.ForeignKey(to=User)
     source_file = models.ForeignKey(to=FileUpload)
+
+    class Meta:
+        db_table = 'raw_catch'
 
     @staticmethod
     def commit(file_id):
