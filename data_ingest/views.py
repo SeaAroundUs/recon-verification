@@ -21,41 +21,7 @@ def get_raw_catch_data(file_id):
     raw_data = RawCatch.objects.filter(source_file_id=file_id).order_by('id')  # TODO also filter on current user
     raw_data_list = {'data': []}
     for data_row in raw_data:
-        raw_data_list['data'].append(
-            [
-                data_row.id,
-                data_row.fishing_entity,
-                data_row.original_country_fishing,
-                data_row.fishing_entity_id,
-                data_row.eez_area,
-                data_row.eez_sub_area,
-                data_row.eez_id,
-                data_row.fao_area,
-                data_row.sub_regional_area,
-                data_row.province_state,
-                data_row.ices_division,
-                data_row.ices_subdivision,
-                data_row.nafo_division,
-                data_row.ccamlr_area,
-                data_row.layer,
-                data_row.year,
-                data_row.amount,
-                data_row.adjustment_factor,
-                data_row.taxon_name,
-                data_row.original_fao_name,
-                data_row.taxon_key,
-                # data_row.gear_type,
-                # data_row.gear_type_id,
-                data_row.sector,
-                data_row.original_sector,
-                data_row.sector_id,
-                data_row.catch_type,
-                data_row.catch_type_id,
-                data_row.input_type,
-                data_row.forward_carry_rule,
-                data_row.reference_id,
-                data_row.notes,
-            ])
+        raw_data_list['data'].append(list(getattr(data_row, field) for field in RawCatch.fields()))
     return raw_data_list
 
 
