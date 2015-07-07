@@ -123,10 +123,18 @@ var Table = {
 
     getTableOptions: function() {
         var headers = Table.getTableHeaders();
+        var columns = headers.map(function(col) {
+            return col === 'id' ? { readOnly: true } : {};
+        });
 
         return {
+            allowInsertColumn: false,
+            allowInsertRow: false,
+            allowRemoveColumn: false,
+            allowRemoveRow: false,
             colHeaders: headers,
             columnSorting: true,
+            columns: columns,
             startRows: 1,
             startCols: headers.length,
             minSpareRows: 0,
