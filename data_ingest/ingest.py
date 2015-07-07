@@ -19,7 +19,7 @@ class ContributedFile:
         new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
         contributed_file.name = new_name
         fileupload = FileUpload(file=self.contributed_file.name, user=self.user)
-        fileupload.save()
+        fileupload.save()  # TODO don't save row until file is 100% loaded (and also saved in S3?)
 
         self.fileupload_id = FileUpload.objects.latest('id').id
         self.excel_file_dict = {}
