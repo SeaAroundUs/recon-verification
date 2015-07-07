@@ -8,10 +8,6 @@ button:focus {
   outline: 0 !important;
 }
 
-.table-scrollable {
-  overflow: auto;
-}
-
 .table-controls {
   overflow: auto;
   zoom: 1;
@@ -46,25 +42,6 @@ button:focus {
   margin-left: 10px;
   display: inline-block;
   width: 30%;
-}
-
-#reconDataTableElement {
-  position: relative;
-}
-
-#reconDataTableElement.disabled:before {
-  position: absolute;
-  content: ' ';
-  width: 100%;
-  height: 100%;
-  background: #ddd;
-  opacity: 0.5;
-  z-index: 1000;
-}
-
-.ht_master.handsontable,
-.ht_master.handsontable .wtHolder {
-  overflow: visible;
 }
 
 @-moz-keyframes spin {

@@ -162,6 +162,9 @@ PIPELINE_JS = {
             'js/vendor/jquery.min.js',
             'js/vendor/jquery.ui.widget.js',
             'js/vendor/jquery.*.js',
+            'js/vendor/moment.min.js',
+            'js/vendor/pikaday.js',
+            'js/vendor/ZeroClipboard.js',
             'js/vendor/*.js'
         ),
         'output_filename': 'js/vendor.js'
