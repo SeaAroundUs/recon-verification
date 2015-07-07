@@ -45,6 +45,8 @@ class ICES(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        verbose_name = 'ICES'
+        verbose_name_plural = 'ICES'
         db_table = 'ices_eez'
 
     def __str__(self):
@@ -55,6 +57,8 @@ class NAFO(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        verbose_name = 'NAFO'
+        verbose_name_plural = 'NAFOs'
         db_table = 'nafo'
 
     def __str__(self):
