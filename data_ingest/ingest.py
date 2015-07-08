@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
-from catch.models import Taxon, CatchType, Country, EEZ, Sector
+from catch.models import Taxon, CatchType, FishingEntity, EEZ, Sector
 from decimal import Decimal
 import xlrd
 import re
@@ -85,9 +85,9 @@ def normalize(file_id):
             row.catch_type_id = 0
 
         try:
-            country = Country.objects.get(name__iexact=row.fishing_entity.strip())
+            country = FishingEntity.objects.get(name__iexact=row.fishing_entity.strip())
             row.fishing_entity_id = country.id
-        except Country.DoesNotExist:  # no Country found
+        except FishingEntity.DoesNotExist:  # no Country found
             row.fishing_entity_id = 0
 
         try:
