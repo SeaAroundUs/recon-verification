@@ -159,5 +159,5 @@ class Catch(models.Model):
     raw_catch = models.ForeignKey(to=RawCatch)
 
     class Meta:
-        db_table = 'catch'
+        db_table = 'recon.catch'
         managed = False
