@@ -16,6 +16,7 @@ class FileUpload(models.Model):
 
     class Meta:
         db_table = 'file_upload'
+        managed = False
 
     def __str__(self):
         return self.file.name
@@ -72,6 +73,7 @@ class RawCatch(models.Model):
 
     class Meta:
         db_table = 'raw_catch'
+        managed = False
 
     @staticmethod
     @atomic

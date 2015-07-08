@@ -9,6 +9,7 @@ class Country(models.Model):
         verbose_name_plural = 'Countries'
         db_table = 'country'
         ordering = ['name']
+        managed = False
 
     def __str__(self):
         return u"{0} - {1}".format(self.id, self.name)
@@ -23,6 +24,7 @@ class EEZ(models.Model):
         verbose_name_plural = 'EEZs'
         db_table = 'eez'
         ordering = ['name']
+        managed = False
 
     def __str__(self):
         return u"{0} - {1}".format(self.id, self.name)
@@ -36,6 +38,7 @@ class FAO(models.Model):
         verbose_name_plural = 'FAOs'
         db_table = 'fao'
         ordering = ['name']
+        managed = False
 
     def __str__(self):
         return u"{0} - {1}".format(self.id, self.name)
@@ -48,6 +51,7 @@ class ICES(models.Model):
         verbose_name = 'ICES'
         verbose_name_plural = 'ICES'
         db_table = 'ices_eez'
+        managed = False
 
     def __str__(self):
         return u"{0} - {1}".format(self.id, self.name)
@@ -60,6 +64,7 @@ class NAFO(models.Model):
         verbose_name = 'NAFO'
         verbose_name_plural = 'NAFOs'
         db_table = 'nafo'
+        managed = False
 
     def __str__(self):
         return u"{0} - {1}".format(self.id, self.name)
@@ -70,6 +75,7 @@ class Sector(models.Model):
 
     class Meta:
         db_table = 'fishing_sector'
+        managed = False
 
     def __str__(self):
         return u"{0}".format(self.name)
@@ -80,6 +86,7 @@ class CatchType(models.Model):
 
     class Meta:
         db_table = 'catch_type'
+        managed = False
 
     def __str__(self):
         return u"{0}".format(self.type)
@@ -94,6 +101,7 @@ class Taxon(models.Model):
         verbose_name_plural = 'Taxa'
         ordering = ['scientific_name', 'name']
         db_table = 'taxon'
+        managed = False
 
     def __str__(self):
         return u"{0} - {1}  ({2})".format(self.taxon_key, self.scientific_name, self.name)
@@ -104,6 +112,7 @@ class Reference(models.Model):
 
     class Meta:
         db_table = 'reference'
+        managed = False
 
     def __str__(self):
         return u"{0}".format(self.name)
@@ -142,3 +151,4 @@ class Catch(models.Model):
 
     class Meta:
         db_table = 'catch'
+        managed = False

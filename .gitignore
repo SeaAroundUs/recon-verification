@@ -71,3 +71,6 @@ Thumbs.db
 
 # Pipeline files
 /static/
+
+# Env settings
+local_settings.py
