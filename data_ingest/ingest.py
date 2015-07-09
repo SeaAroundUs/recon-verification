@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
-from catch.models import Taxon, CatchType, FishingEntity, EEZ, Sector
+from catch.models import Taxon, CatchType, FishingEntity, EEZ, FAO, Sector
 from decimal import Decimal
 import xlrd
 import re
@@ -78,6 +78,20 @@ def normalize(file_id):
         except IndexError:  # no Taxon found
             row.taxon_key = 0
 
+        if row.original_taxon_name:
+            try:
+                original_taxon = Taxon.objects.filter(scientific_name__iexact=row.original_taxon_name.strip())[0]
+                row.original_taxon_name_id = original_taxon.taxon_key
+            except IndexError:  # no Taxon found
+                row.original_taxon_name_id = 0
+
+        if row.original_fao_name:
+            try:
+                original_fao = Taxon.objects.filter(scientific_name__iexact=row.original_fao_name.strip())[0]
+                row.original_fao_name_id = original_fao.taxon_key
+            except IndexError:  # no Taxon found
+                row.original_fao_name_id = 0
+
         try:
             catch_type = CatchType.objects.get(name__iexact=row.catch_type.strip())
             row.catch_type_id = catch_type.catch_type_id
@@ -90,6 +104,13 @@ def normalize(file_id):
         except FishingEntity.DoesNotExist:  # no Country found
             row.fishing_entity_id = 0
 
+        if row.original_country_fishing:
+            try:
+                original_country_fishing = FishingEntity.objects.get(name__iexact=row.original_country_fishing.strip())
+                row.original_country_fishing_id = original_country_fishing.fishing_entity_id
+            except FishingEntity.DoesNotExist:  # no Country found
+                row.original_country_fishing_id = 0
+
         try:
             eez = EEZ.objects.get(name__iexact=row.eez.strip())
             row.eez_id = eez.eez_id
@@ -97,10 +118,16 @@ def normalize(file_id):
             row.eez_id = 0
 
         try:
+            fao_area = FAO.objects.get(name__iexact=row.fao_area.strip())
+            row.fao_area_id = fao_area.fao_area_id
+        except FAO.DoesNotExist:  # no FAO found
+            row.fao_area_id = 0
+
+        try:
             sector = Sector.objects.get(name__iexact=row.sector.strip())
-            row.sector_id = sector.sector_type_id
+            row.sector_type_id = sector.sector_type_id
         except Sector.DoesNotExist:  # no Sector found
-            row.sector_id = 0
+            row.sector_type_id = 0
 
         if row.eez_id != 0 and row.fishing_entity_id != 0:
             try:

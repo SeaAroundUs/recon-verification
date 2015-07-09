@@ -34,6 +34,7 @@ class EEZ(models.Model):
 
 
 class FAO(models.Model):
+    fao_area_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
     alternate_name = models.CharField(max_length=200)
 
