@@ -2,12 +2,14 @@ from django.db import models
 from data_ingest.models import RawCatch
 
 
-class FishingEntity(models.Model):
+class EEZ(models.Model):
     name = models.CharField(max_length=200)
+    alternate_name = models.CharField(max_length=200)
 
     class Meta:
-        verbose_name_plural = 'Fishing Entities'
-        db_table = 'master.fishing_entity'
+        verbose_name = 'EEZ'
+        verbose_name_plural = 'EEZs'
+        db_table = 'master.eez'
         ordering = ['name']
         managed = False
 
@@ -15,14 +17,13 @@ class FishingEntity(models.Model):
         return u"{0} - {1}".format(self.id, self.name)
 
 
-class EEZ(models.Model):
+class FishingEntity(models.Model):
     name = models.CharField(max_length=200)
-    # country = models.ForeignKey(to=Country)  # TODO need country
+    is_home_eez_of_fishing_entity_id = models.ForeignKey(to=EEZ)
 
     class Meta:
-        verbose_name = 'EEZ'
-        verbose_name_plural = 'EEZs'
-        db_table = 'master.eez'
+        verbose_name_plural = 'Fishing Entities'
+        db_table = 'master.fishing_entity'
         ordering = ['name']
         managed = False
 
@@ -159,5 +160,5 @@ class Catch(models.Model):
     raw_catch = models.ForeignKey(to=RawCatch)
 
     class Meta:
-        db_table = 'recon.catch'
+        db_table = 'catch'
         managed = False

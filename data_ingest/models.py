@@ -15,7 +15,7 @@ class FileUpload(models.Model):
     create_datetime = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'recon.file_upload'
+        db_table = 'file_upload'
         managed = False
 
     def __str__(self):
@@ -72,7 +72,7 @@ class RawCatch(models.Model):
     source_file = models.ForeignKey(to=FileUpload)
 
     class Meta:
-        db_table = 'recon.raw_catch'
+        db_table = 'raw_catch'
         managed = False
 
     @staticmethod
