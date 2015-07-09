@@ -2,14 +2,13 @@ from django.db import models
 from data_ingest.models import RawCatch
 
 
-class EEZ(models.Model):
+class FishingEntity(models.Model):
+    fishing_entity_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
-    alternate_name = models.CharField(max_length=200)
 
     class Meta:
-        verbose_name = 'EEZ'
-        verbose_name_plural = 'EEZs'
-        db_table = 'master.eez'
+        verbose_name_plural = 'Fishing Entities'
+        db_table = 'fishing_entity'
         ordering = ['name']
         managed = False
 
@@ -17,13 +16,16 @@ class EEZ(models.Model):
         return u"{0} - {1}".format(self.id, self.name)
 
 
-class FishingEntity(models.Model):
+class EEZ(models.Model):
+    eez_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
-    is_home_eez_of_fishing_entity_id = models.ForeignKey(to=EEZ)
+    alternate_name = models.CharField(max_length=200)
+    fishing_entity = models.ForeignKey(to=FishingEntity, db_column='is_home_eez_of_fishing_entity_id')
 
     class Meta:
-        verbose_name_plural = 'Fishing Entities'
-        db_table = 'master.fishing_entity'
+        verbose_name = 'EEZ'
+        verbose_name_plural = 'EEZs'
+        db_table = 'eez'
         ordering = ['name']
         managed = False
 
@@ -38,7 +40,7 @@ class FAO(models.Model):
     class Meta:
         verbose_name = 'FAO'
         verbose_name_plural = 'FAOs'
-        db_table = 'master.fao_area'
+        db_table = 'fao_area'
         ordering = ['name']
         managed = False
 
@@ -73,10 +75,11 @@ class NAFO(models.Model):
 
 
 class Sector(models.Model):
+    sector_type_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
 
     class Meta:
-        db_table = 'master.sector_type'
+        db_table = 'sector_type'
         managed = False
 
     def __str__(self):
@@ -84,10 +87,11 @@ class Sector(models.Model):
 
 
 class CatchType(models.Model):
+    catch_type_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
 
     class Meta:
-        db_table = 'master.catch_type'
+        db_table = 'catch_type'
         managed = False
 
     def __str__(self):
@@ -101,8 +105,8 @@ class Taxon(models.Model):
 
     class Meta:
         verbose_name_plural = 'Taxa'
-        ordering = ['scientific_name', 'common_name']
-        db_table = 'master.taxon'
+        ordering = ['common_name', 'scientific_name']
+        db_table = 'taxon'
         managed = False
 
     def __str__(self):
@@ -113,7 +117,7 @@ class Gear(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
-        db_table = 'master.gear'
+        db_table = 'gear'
         managed = False
 
 

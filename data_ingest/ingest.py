@@ -73,39 +73,39 @@ class ContributedFile:
 def normalize(file_id):
     for row in RawCatch.objects.filter(source_file_id=file_id):
         try:
-            taxon = Taxon.objects.filter(name__iexact=row.taxon_name.strip())[0]
+            taxon = Taxon.objects.filter(common_name__iexact=row.taxon_name.strip())[0]
             row.taxon_key = taxon.taxon_key
         except IndexError:  # no Taxon found
             row.taxon_key = 0
 
         try:
-            catch_type = CatchType.objects.get(type__iexact=row.catch_type.strip())
-            row.catch_type_id = catch_type.id
+            catch_type = CatchType.objects.get(name__iexact=row.catch_type.strip())
+            row.catch_type_id = catch_type.catch_type_id
         except CatchType.DoesNotExist:  # no CatchType found
             row.catch_type_id = 0
 
         try:
-            country = FishingEntity.objects.get(name__iexact=row.fishing_entity.strip())
-            row.fishing_entity_id = country.id
+            fishing_entity = FishingEntity.objects.get(name__iexact=row.fishing_entity.strip())
+            row.fishing_entity_id = fishing_entity.fishing_entity_id
         except FishingEntity.DoesNotExist:  # no Country found
             row.fishing_entity_id = 0
 
         try:
             eez = EEZ.objects.get(name__iexact=row.eez.strip())
-            row.eez_id = eez.id
+            row.eez_id = eez.eez_id
         except EEZ.DoesNotExist:  # no EEZ found
             row.eez_id = 0
 
         try:
             sector = Sector.objects.get(name__iexact=row.sector.strip())
-            row.sector_id = sector.id
+            row.sector_id = sector.sector_type_id
         except Sector.DoesNotExist:  # no Sector found
             row.sector_id = 0
 
         if row.eez_id != 0 and row.fishing_entity_id != 0:
             try:
-                eez_country = EEZ.objects.get(id=row.eez_id).country
-                row.layer = 1 if eez_country.id == row.fishing_entity_id else 2
+                eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
+                row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
                 # TODO layer 3 logic based on taxon
             except Exception:  # TODO more specific exception?
                 row.layer = 0
