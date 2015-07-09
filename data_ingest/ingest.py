@@ -73,7 +73,7 @@ class ContributedFile:
 def normalize(file_id):
     for row in RawCatch.objects.filter(source_file_id=file_id):
         try:
-            taxon = Taxon.objects.filter(common_name__iexact=row.taxon_name.strip())[0]
+            taxon = Taxon.objects.filter(scientific_name__iexact=row.taxon_name.strip())[0]
             row.taxon_key = taxon.taxon_key
         except IndexError:  # no Taxon found
             row.taxon_key = 0

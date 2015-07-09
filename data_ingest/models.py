@@ -49,7 +49,7 @@ class RawCatch(models.Model):
     catch_type_id = models.IntegerField(default=0)
     year = models.IntegerField(default=0)
     taxon_name = models.CharField(max_length=200, null=True)
-    taxon_id = models.IntegerField(default=0)
+    taxon_key = models.IntegerField(default=0)
     original_taxon_name = models.CharField(max_length=200, null=True)
     original_taxon_name_id = models.IntegerField(null=True)
     original_fao_name = models.CharField(max_length=200, null=True)
