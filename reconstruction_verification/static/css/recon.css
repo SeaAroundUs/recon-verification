@@ -76,3 +76,14 @@ span.spin {
 table td.warning {
   background-color: yellow;
 }
+
+span.warning-reason {
+  display: block;
+  position: absolute;
+  border: 1px solid #ccc;
+  border-radius: 0.15em;
+  background: #fefefe;
+  width: 200px;
+  padding: 5px 10px;
+  z-index: 10;
+}

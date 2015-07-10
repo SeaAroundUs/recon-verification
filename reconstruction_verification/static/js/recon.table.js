@@ -6,7 +6,7 @@ var Table = {
     dataTable: null,
     headers: null,
     $table: null,
-    warnings: [],
+    warnings: {},
 
     events: {
         search: function() {
@@ -63,12 +63,18 @@ var Table = {
     initTable: function() {
         Handsontable.renderers.registerRenderer('reconRenderer',
                 function(instance, td, row, col, prop, value, cellProperties) {
+                    var warningReason;
+
                     Handsontable.renderers.TextRenderer.apply(this, arguments);
                     if (value === 0) {
                         td.style.background = '#FF0000';
-                    } else if (Table.warnings.indexOf(row + ',' + col) !== -1) {
-                        console.log('test');
+                    } else if (warningReason = Table.warnings[row + ',' + col]) {
                         td.style.background = 'yellow';
+                        $(td).hover(function() {
+                            $(this).append('<span class="warning-reason">' + warningReason + '</span>');
+                        }, function() {
+                            $(this).children('span.warning-reason').remove();
+                        });
                     }
                 }
         );
@@ -145,7 +151,7 @@ var Table = {
             startRows: 1,
             startCols: headers.length,
             minSpareRows: 0,
-            contextMenu: true,
+            contextMenu: false,
             search: true,
             afterChange: Table.afterChange,
             cells: function () {
@@ -179,12 +185,18 @@ var Table = {
     },
 
     updateWarnings: function(warnings) {
+        var key;
         var headers = Table.getTableHeaders();
 
         Table.warnings = warnings.reduce(function(warnings, warning) {
-            warnings.push(warning.row + ',' + headers.indexOf(warning.col));
+            key = warning.row + ',' + headers.indexOf(warning.col);
+            if (warnings[key]) {
+                warnings[key] += "<br />" + warning.reason;
+            } else {
+                warnings[key] = warning.reason;
+            }
             return warnings;
-        }, []);
+        }, {});
 
         $('#warning-count').html(warnings.length);
     },
