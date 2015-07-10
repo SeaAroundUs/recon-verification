@@ -65,9 +65,14 @@ var Table = {
                 function(instance, td, row, col, prop, value, cellProperties) {
                     var warningReason;
 
+                    // extend TextRenderer
                     Handsontable.renderers.TextRenderer.apply(this, arguments);
+
+                    // red for zeros
                     if (value === 0) {
                         td.style.background = '#FF0000';
+
+                    // yellow for warnings
                     } else if (warningReason = Table.warnings[row + ',' + col]) {
                         td.style.background = 'yellow';
                         $(td).hover(function() {
@@ -75,6 +80,11 @@ var Table = {
                         }, function() {
                             $(this).children('span.warning-reason').remove();
                         });
+                    }
+
+                    // read only for _id and _key columns
+                    if (Table.isReadOnlyColumn(col)) {
+                        cellProperties.readOnly = true;
                     }
                 }
         );
@@ -162,6 +172,21 @@ var Table = {
 
     isEmpty: function() {
         return Table.dataTable.isEmptyRow(0);
+    },
+
+    //TODO this should come from MT
+    isReadOnlyColumn: function(col) {
+        var ro;
+        if (!ro) {
+            ro = Table.getTableHeaders().map(function(header) {
+                if (header === 'reference_id') {
+                    return false;
+                }
+
+                return header.indexOf('_id') !== -1 || header.indexOf('_key') !== -1;
+            });
+        }
+        return ro[col];
     },
 
     loadTableData: function() {

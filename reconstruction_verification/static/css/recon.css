@@ -87,3 +87,8 @@ span.warning-reason {
   padding: 5px 10px;
   z-index: 10;
 }
+
+.handsontable td.htDimmed {
+  color: #333;
+  background-color: #f3f3f3;
+}
