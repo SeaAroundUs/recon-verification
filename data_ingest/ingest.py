@@ -69,9 +69,22 @@ class ContributedFile:
         else:
             pass  # TODO raise some kind of error here
 
+def get_warnings(file_id):
+    warnings = []
+    for idx, row in enumerate(RawCatch.objects.filter(source_file_id=file_id).order_by('id')):
+
+        if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer != 0:
+            eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
+            expected_layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
+            # TODO layer 3 logic based on taxon
+            if row.layer != expected_layer:
+                warnings.append({'row': idx, 'col': 'layer', 'reason': 'Unexpected layer per rule'})
+
+    # TODO more warnings
+    return warnings
 
 def normalize(file_id):
-    for row in RawCatch.objects.filter(source_file_id=file_id):
+    for row in RawCatch.objects.filter(source_file_id=file_id).order_by('id'):
         try:
             taxon = Taxon.objects.filter(scientific_name__iexact=row.taxon_name.strip())[0]
             row.taxon_key = taxon.taxon_key
@@ -84,6 +97,8 @@ def normalize(file_id):
                 row.original_taxon_name_id = original_taxon.taxon_key
             except IndexError:  # no Taxon found
                 row.original_taxon_name_id = 0
+        else:
+            row.original_taxon_name_id = None
 
         if row.original_fao_name:
             try:
@@ -91,6 +106,8 @@ def normalize(file_id):
                 row.original_fao_name_id = original_fao.taxon_key
             except IndexError:  # no Taxon found
                 row.original_fao_name_id = 0
+        else:
+            row.original_fao_name = None
 
         try:
             catch_type = CatchType.objects.get(name__iexact=row.catch_type.strip())
@@ -110,6 +127,8 @@ def normalize(file_id):
                 row.original_country_fishing_id = original_country_fishing.fishing_entity_id
             except FishingEntity.DoesNotExist:  # no Country found
                 row.original_country_fishing_id = 0
+        else:
+            row.original_country_fishing_id = None
 
         try:
             eez = EEZ.objects.get(name__iexact=row.eez.strip())
@@ -129,15 +148,15 @@ def normalize(file_id):
         except Sector.DoesNotExist:  # no Sector found
             row.sector_type_id = 0
 
-        if row.eez_id != 0 and row.fishing_entity_id != 0:
+        # TODO check for non-1,2,3 as error
+
+        if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer == 0:
             try:
                 eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
                 row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
                 # TODO layer 3 logic based on taxon
             except Exception:  # TODO more specific exception?
                 row.layer = 0
-        else:
-            row.layer = 0
 
         # TODO more normalization
 

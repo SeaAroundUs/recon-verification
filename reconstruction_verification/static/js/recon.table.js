@@ -4,7 +4,9 @@ var Table = {
     autosave: null,
     autosaveNotification: null,
     dataTable: null,
+    headers: null,
     $table: null,
+    warnings: [],
 
     events: {
         search: function() {
@@ -31,6 +33,7 @@ var Table = {
 
         normalize: function() {
             Util.$post(Util.urls.normalizeData, {}, function(res) {
+                Table.updateWarnings(res.warnings);
                 Table.dataTable.loadData(res.data);
                 Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
                 Table.updateErrorCount();
@@ -53,15 +56,19 @@ var Table = {
             Table.$table = $('#reconDataTableElement');
             Table.initTable();
             Table.loadTableData();
+            Table.events.normalize();
         }
     },
 
     initTable: function() {
-        Handsontable.renderers.registerRenderer('zeroValueRenderer',
+        Handsontable.renderers.registerRenderer('reconRenderer',
                 function(instance, td, row, col, prop, value, cellProperties) {
                     Handsontable.renderers.TextRenderer.apply(this, arguments);
                     if (value === 0) {
                         td.style.background = '#FF0000';
+                    } else if (Table.warnings.indexOf(row + ',' + col) !== -1) {
+                        console.log('test');
+                        td.style.background = 'yellow';
                     }
                 }
         );
@@ -107,18 +114,18 @@ var Table = {
     },
 
     getTableHeaders: function() {
-        var tableHeaders = [];
+        if (Table.headers === null) {
+            $.ajax({
+                url: Util.urls.catchFieldsJSON,
+                type: 'GET',
+                async: false, //TODO don't use synch
+                success: function(data) {
+                    Table.headers = data;
+                }
+            });
+        }
 
-        $.ajax({
-            url: Util.urls.catchFieldsJSON,
-            type: 'GET',
-            async: false, //TODO don't use synch
-            success: function(data) {
-                tableHeaders = data;
-            }
-        });
-
-        return tableHeaders;
+        return Table.headers;
     },
 
     getTableOptions: function() {
@@ -142,7 +149,7 @@ var Table = {
             search: true,
             afterChange: Table.afterChange,
             cells: function () {
-                return { renderer: 'zeroValueRenderer' };
+                return { renderer: 'reconRenderer' };
             }
         };
     },
@@ -169,6 +176,17 @@ var Table = {
 
             Table.updateErrorCount();
         });
+    },
+
+    updateWarnings: function(warnings) {
+        var headers = Table.getTableHeaders();
+
+        Table.warnings = warnings.reduce(function(warnings, warning) {
+            warnings.push(warning.row + ',' + headers.indexOf(warning.col));
+            return warnings;
+        }, []);
+
+        $('#warning-count').html(warnings.length);
     },
 
     updateErrorCount: function() {

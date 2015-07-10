@@ -30,6 +30,11 @@ button:focus {
   color: red;
 }
 
+.table-controls #warning-count:before {
+  content: 'Warnings: ';
+  color: #333;
+}
+
 .table-controls #commit {
   margin-right: 15px;
 }
@@ -66,4 +71,8 @@ button:focus {
 span.spin {
   -webkit-animation: spin 2s infinite linear;
   animation: spin 2s infinite linear;
+}
+
+table td.warning {
+  background-color: yellow;
 }

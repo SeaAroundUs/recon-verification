@@ -4,7 +4,7 @@ from django.views.generic.edit import CreateView
 from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
-from data_ingest.ingest import normalize
+from data_ingest.ingest import normalize, get_warnings
 import logging
 import simplejson
 
@@ -19,7 +19,7 @@ class ReconResponse(object):
 
 def get_raw_catch_data(file_id):
     raw_data = RawCatch.objects.filter(source_file_id=file_id).order_by('id')
-    raw_data_list = {'data': []}
+    raw_data_list = {'data': [], 'warnings': get_warnings(file_id)}
     for data_row in raw_data:
         raw_data_list['data'].append(list(getattr(data_row, field) for field in RawCatch.fields()))
     return raw_data_list
