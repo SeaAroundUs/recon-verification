@@ -1,7 +1,7 @@
 from time import strftime
-from django.db import models
 from django.db.transaction import atomic
 from django.contrib.auth.models import User
+from catch.models import *
 import os
 
 
@@ -30,8 +30,8 @@ class RawCatch(models.Model):
     eez = models.CharField(max_length=200, null=True)
     eez_id = models.IntegerField(default=0)
     eez_sub_area = models.CharField(max_length=200, null=True)
-    fao_area = models.CharField(max_length=200, null=True)
-    fao_area_id = models.IntegerField(null=True)
+    fao_area = models.CharField(max_length=200)
+    fao_area_id = models.IntegerField(default=0)
     subregional_area = models.CharField(max_length=200, null=True)
     province_state = models.CharField(max_length=200, null=True)
     ices_division = models.CharField(max_length=200, null=True)
@@ -75,10 +75,41 @@ class RawCatch(models.Model):
         db_table = 'raw_catch'
         managed = False
 
-    @staticmethod
+    @classmethod
     @atomic
-    def commit(file_id):
-        pass  # TODO
+    def commit(cls, file_id):
+        rows = cls.objects.get(source_file_id=file_id)
+        for row in rows:
+            # required values
+            values = {
+                'fishing_entity': FishingEntity.objects.get(fishing_entity_id=row.fishing_entity_id),
+                'eez': EEZ.objects.get(eez_id=row.eez_id),
+                'fao_area': FAO.objects.get(fao_area_id=row.fao_area_id),
+                'layer': row.layer,
+                'sector': Sector.objects.get(sector_type_id=row.sector_type_id),
+                'catch_type': CatchType.objects.get(catch_type_id=row.catch_type_id),
+                'year': row.year,
+                'taxon': Taxon.objects.get(taxon_key=row.taxon_key),
+                'amount': row.amount,
+                'raw_catch': row
+            }
+
+            # optional flat values
+            values.update({
+                'eez_sub_area': row.eez_sub_area,
+                'subregional_area': row.subregional_area,
+                'province_state': row.province_state,
+                'ccamlr_area': row.ccamlr_area,
+                'original_sector': row.original_sector,
+                'adjustment_factor': row.adjustment_factor,
+                'notes': row.notes
+            })
+
+            # optional relations
+            values.update({})  # TODO
+
+            new_catch = Catch(values)
+            new_catch.save()
 
     @classmethod
     def update(cls, file_id, id, column, old_value, new_value):

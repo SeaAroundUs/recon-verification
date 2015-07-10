@@ -107,7 +107,7 @@ def normalize(file_id):
             except IndexError:  # no Taxon found
                 row.original_fao_name_id = 0
         else:
-            row.original_fao_name = None
+            row.original_fao_name_id = None
 
         try:
             catch_type = CatchType.objects.get(name__iexact=row.catch_type.strip())

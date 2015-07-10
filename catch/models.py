@@ -135,15 +135,15 @@ class Reference(models.Model):
 
 class Catch(models.Model):
     fishing_entity = models.ForeignKey(to=FishingEntity, related_name='+')
-    original_country_fishing = models.ForeignKey(to=FishingEntity, related_name='+')
+    original_country_fishing = models.ForeignKey(to=FishingEntity, related_name='+', null=True)
     eez = models.ForeignKey(to=EEZ)
     eez_sub_area = models.CharField(max_length=200, null=True)
     fao_area = models.ForeignKey(to=FAO)
     subregional_area = models.CharField(max_length=200, null=True)
     province_state = models.CharField(max_length=200, null=True)
-    ices_division = models.ForeignKey(to=ICES, related_name='+')
-    ices_subdivision = models.ForeignKey(to=ICES, related_name='+')
-    nafo_division = models.ForeignKey(to=NAFO)
+    ices_division = models.ForeignKey(to=ICES, related_name='+', null=True)
+    ices_subdivision = models.ForeignKey(to=ICES, related_name='+', null=True)
+    nafo_division = models.ForeignKey(to=NAFO, null=True)
     ccamlr_area = models.CharField(max_length=200, null=True)
     layer = models.IntegerField(default=0)
     sector = models.ForeignKey(to=Sector, db_column='sector_type_id')
@@ -151,16 +151,16 @@ class Catch(models.Model):
     catch_type = models.ForeignKey(to=CatchType)
     year = models.IntegerField(default=0)
     taxon = models.ForeignKey(to=Taxon, db_column='taxon_key', related_name='+')
-    original_taxon_name = models.ForeignKey(to=Taxon, related_name='+')
-    original_fao_name = models.ForeignKey(to=Taxon, related_name='+')
+    original_taxon_name = models.ForeignKey(to=Taxon, related_name='+', null=True)
+    original_fao_name = models.ForeignKey(to=Taxon, related_name='+', null=True)
     amount = models.DecimalField(max_digits=20, decimal_places=12)
     adjustment_factor = models.DecimalField(max_digits=20, decimal_places=12, null=True)
-    gear_type = models.ForeignKey(to=Gear)
-    input_type = models.IntegerField(default=0, null=True)  # TODO relate to input_type table
-    forward_carry_rule = models.IntegerField(default=0, null=True)  # TODO relate to forward_carry_rule table
-    disaggregation_rule = models.IntegerField(default=0, null=True)  # TODO relate to disaggregation_rule table
-    layer_rule = models.IntegerField(default=0, null=True)  # TODO relate to layer_rule table
-    reference = models.ForeignKey(to=Reference)
+    gear_type = models.ForeignKey(to=Gear, null=True)
+    input_type_id = models.IntegerField(default=0, null=True)  # TODO relate to input_type table
+    forward_carry_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to forward_carry_rule table
+    disaggregation_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to disaggregation_rule table
+    layer_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to layer_rule table
+    reference = models.ForeignKey(to=Reference, null=True)
     notes = models.TextField(null=True)
     raw_catch = models.ForeignKey(to=RawCatch)
 
