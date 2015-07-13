@@ -92,6 +92,7 @@ var Table = {
                     // read only for _id and _key columns
                     if (Table.isReadOnlyColumn(col)) {
                         cellProperties.readOnly = true;
+                        td.className = 'htDimmed'; // hack since handsontable isn't setting this class right
                     }
                 }
         );
