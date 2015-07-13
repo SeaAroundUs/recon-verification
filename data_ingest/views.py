@@ -123,10 +123,8 @@ class UploadDataJsonView(View):
 
             else:
                 for data_change in data_changes['data']:
-                        changed_data = RawCatch.update(**data_change)
-                        response = {'result': 'ok'}
-                        response.update(changed_data)
-                        return ReconResponse(response)
+                    RawCatch.update(**data_change)
+                return ReconResponse({'result': 'ok'})
 
         except Exception as e:
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})

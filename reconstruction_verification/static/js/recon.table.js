@@ -110,19 +110,20 @@ var Table = {
             return; // don't save this change
         }
 
-        // add primary key to changes objects
-        changes = changes.map(function(change) {
-            return {
-                id: Table.dataTable.getDataAtCell(change[0], 0),
-                column: change[1],
-                old_value: change[2],
-                new_value: change[3]
-            };
-        });
-
         if (Table.autosave.checked) {
             clearTimeout(Table.autosaveNotification);
 
+            // add primary key to changes objects
+            changes = changes.map(function(change) {
+                return {
+                    id: Table.dataTable.getDataAtCell(change[0], 0),
+                    column: change[1],
+                    old_value: change[2],
+                    new_value: change[3]
+                };
+            });
+
+            // save changes
             Util.$post(Util.urls.saveData, { data: changes }, function() {
                 Util.setMessage('<span class="glyphicon glyphicon glyphicon-floppy-saved"></span> Autosaved (' +
                     changes.length + ' cell' +
@@ -171,7 +172,10 @@ var Table = {
             columns: columns,
             startRows: 1,
             startCols: headers.length,
+            minSpareCols: 0,
             minSpareRows: 0,
+            maxCols: headers.length,
+            maxRows: 0,
             contextMenu: false,
             search: true,
             afterChange: Table.afterChange,
@@ -204,6 +208,7 @@ var Table = {
         Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Loading data...');
 
         $.get(Util.urls.uploadedDataJSON, function(res) {
+            Table.dataTable.updateSettings({ maxRows: res.data.length });
             Table.dataTable.loadData(res.data);
 
             if (Table.isEmpty()) {
