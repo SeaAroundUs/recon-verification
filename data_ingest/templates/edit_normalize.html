@@ -29,6 +29,33 @@
                 </div>
 
                 <div id="reconDataTableElement" class="table-scrollable disabled"></div>
+
+                {% if pages|length > 1 %}
+                <nav>
+                    <ul class="pagination">
+                        {% if previous_page %}
+                        <li>
+                            <a href="{% url 'edit-normalize' file_id previous_page %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% for linked_page in pages %}
+                            <li{% if linked_page == page %} class="active"{% endif %}>
+                                <a href="{% url 'edit-normalize' file_id linked_page %}">{{ linked_page }}</a>
+                            </li>
+                        {% endfor %}
+                        {% if next_page %}
+                            <li>
+                                <a href="{% url 'edit-normalize' file_id next_page %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
             </div>
         </div>
     </div>

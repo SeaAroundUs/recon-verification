@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
 from data_ingest.ingest import normalize, get_warnings
+from reconstruction_verification.settings import ROWS_PER_PAGE
 import logging
 import simplejson
 
@@ -19,8 +20,9 @@ class ReconResponse(object):
 
 def get_raw_catch_data(file_id=None, page=None, ids=None):
     if file_id and page:
-        offset = (int(page) - 1) * 50
-        raw_data = RawCatch.objects.filter(source_file_id=file_id).order_by('id')[offset:50]
+        offset = (int(page) - 1) * ROWS_PER_PAGE
+        query = RawCatch.objects.filter(source_file_id=file_id).order_by('id').all()
+        raw_data = query[offset:ROWS_PER_PAGE + offset]
         ids = list(map(lambda x: x.id, raw_data))
     elif ids:
         raw_data = RawCatch.objects.filter(id__in=ids).order_by('id')
@@ -87,7 +89,14 @@ class EditNormalizeView(View):
     template = 'edit_normalize.html'
 
     def get(self, request, file_id, page):
-        return render(request, self.template, {'file_id': file_id, 'page': page})
+        page = int(page)
+        last_page = RawCatch.last_page(file_id)
+        params = {'file_id': file_id, 'page': page, 'pages': list(range(1, last_page + 1))}
+        if page > 1:
+            params['previous_page'] = page - 1
+        if page < last_page:
+            params['next_page'] = page + 1
+        return render(request, self.template, params)
 
 
 class CatchFieldsJsonView(View):

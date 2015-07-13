@@ -65,7 +65,6 @@ class ContributedFile:
         self._process_excel_file()
         if 'Catch Data' in self.excel_file_dict:  # TODO need better check here
             self._insert_reconstruction_data()
-            normalize(self.fileupload_id)
         else:
             pass  # TODO raise some kind of error here
 

@@ -170,3 +170,6 @@ PIPELINE_JS = {
         'output_filename': 'js/vendor.js'
     }
 }
+
+ROWS_PER_PAGE = 10
+# ROWS_PER_PAGE = 50

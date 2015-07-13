@@ -2,6 +2,7 @@ from time import strftime
 from django.db.transaction import atomic
 from django.contrib.auth.models import User
 from catch.models import *
+from reconstruction_verification.settings import ROWS_PER_PAGE
 import os
 
 
@@ -142,6 +143,10 @@ class RawCatch(models.Model):
     @classmethod
     def fields(cls):
         return list(map(lambda x: x.name, cls._meta.fields))[:-2]
+
+    @classmethod
+    def last_page(cls, file_id):
+        return (cls.objects.filter(source_file_id=file_id).count() // ROWS_PER_PAGE) + 1
 
     @staticmethod
     def required_fields():
