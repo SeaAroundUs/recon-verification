@@ -112,8 +112,8 @@ class RawCatch(models.Model):
             new_catch.save()
 
     @classmethod
-    def update(cls, file_id, id, column, old_value, new_value):
-        obj = cls.objects.get(id=id, source_file_id=file_id)
+    def update(cls, id, column, old_value, new_value):
+        obj = cls.objects.get(id=id)
         column_name = cls.get_column_name(column)
         setattr(obj, column_name, new_value)
         obj.save()
@@ -126,9 +126,9 @@ class RawCatch(models.Model):
 
     @classmethod
     @atomic
-    def bulk_save(cls, file_id, changes):
+    def bulk_save(cls, changes):
         for row in changes:
-            obj = cls.objects.filter(id=row[0], source_file_id=file_id)
+            obj = cls.objects.filter(id=row[0])
             values = {cls.get_column_name(idx): col for idx, col in enumerate(row) if idx > 0}
             obj.update(**values)
 

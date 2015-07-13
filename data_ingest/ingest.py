@@ -69,9 +69,9 @@ class ContributedFile:
         else:
             pass  # TODO raise some kind of error here
 
-def get_warnings(file_id):
+def get_warnings(ids):
     warnings = []
-    for idx, row in enumerate(RawCatch.objects.filter(source_file_id=file_id).order_by('id')):
+    for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
 
         if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer != 0:
             eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
@@ -83,8 +83,8 @@ def get_warnings(file_id):
     # TODO more warnings
     return warnings
 
-def normalize(file_id):
-    for row in RawCatch.objects.filter(source_file_id=file_id).order_by('id'):
+def normalize(ids):
+    for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
         try:
             taxon = Taxon.objects.filter(scientific_name__iexact=row.taxon_name.strip())[0]
             row.taxon_key = taxon.taxon_key

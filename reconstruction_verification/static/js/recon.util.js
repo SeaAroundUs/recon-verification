@@ -39,6 +39,7 @@ var Util = {
     $post: function(url, params, callback) {
         $.ajax({
             beforeSend: Util.addToken,
+            contentType: 'application/json; charset=utf-8',
             data: JSON.stringify(params),
             dataType: 'json',
             method: 'POST',

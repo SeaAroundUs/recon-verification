@@ -16,7 +16,7 @@ var Table = {
 
         save: function() {
             var params = { data: Table.dataTable.getData() };
-            Util.$post(Util.urls.uploadedDataJSON, params, function(res) {
+            Util.$post(Util.urls.saveData, params, function(res) {
                 var message = res.result === 'ok'
                         ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data saved'
                         : '<span class="glyphicon glyphicon-floppy-remove"></span> Save error';
@@ -32,20 +32,28 @@ var Table = {
         },
 
         normalize: function() {
-            Util.$post(Util.urls.normalizeData, {}, function(res) {
+            $('#normalize').prop('disabled', true);
+            Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Normalizing data...');
+
+            Util.$post(Util.urls.normalizeData, { ids: Table.getDataIds() }, function(res) {
                 Table.updateWarnings(res.warnings);
                 Table.dataTable.loadData(res.data);
                 Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
                 Table.updateErrorCount();
+                $('#normalize').prop('disabled', false);
             });
         },
 
         commit: function() {
-            Util.$post(Util.urls.commitData, {}, function(res) {
+            $('#commit').prop('disabled', true);
+            Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Committing data...');
+
+            Util.$post(Util.urls.commitData, { ids: Table.getDataIds() }, function(res) {
                 var message = res.result === 'ok'
                         ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data commited'
                         : '<span class="glyphicon glyphicon-floppy-remove"></span> Commit error';
                 Util.setMessage(message);
+                $('#commit').prop('disabled', false);
             });
         }
     },
@@ -55,8 +63,7 @@ var Table = {
             Table.autosave = $('#autosave')[0];
             Table.$table = $('#reconDataTableElement');
             Table.initTable();
-            Table.loadTableData();
-            Table.events.normalize();
+            Table.loadTableData(Table.events.normalize);
         }
     },
 
@@ -116,7 +123,7 @@ var Table = {
         if (Table.autosave.checked) {
             clearTimeout(Table.autosaveNotification);
 
-            Util.$post(Util.urls.uploadedDataJSON, { data: changes }, function() {
+            Util.$post(Util.urls.saveData, { data: changes }, function() {
                 Util.setMessage('<span class="glyphicon glyphicon glyphicon-floppy-saved"></span> Autosaved (' +
                     changes.length + ' cell' +
                     (changes.length > 1 ? 's)' : ')')
@@ -127,6 +134,10 @@ var Table = {
                 }, 1000);
             });
         }
+    },
+
+    getDataIds: function() {
+        return Table.dataTable.getDataAtCol(0);
     },
 
     getTableHeaders: function() {
@@ -189,7 +200,7 @@ var Table = {
         return ro[col];
     },
 
-    loadTableData: function() {
+    loadTableData: function(callback) {
         Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Loading data...');
 
         $.get(Util.urls.uploadedDataJSON, function(res) {
@@ -206,6 +217,10 @@ var Table = {
             }
 
             Table.updateErrorCount();
+
+            if (callback) {
+                callback();
+            }
         });
     },
 
