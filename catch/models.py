@@ -111,7 +111,7 @@ class Taxon(models.Model):
         managed = False
 
     def __str__(self):
-        return u"{0} - {1}  ({2})".format(self.taxon_key, self.scientific_name, self.name)
+        return u"{0} - {1}  ({2})".format(self.taxon_key, self.scientific_name, self.common_name)
 
 
 class Gear(models.Model):
