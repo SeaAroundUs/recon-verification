@@ -25,16 +25,17 @@ def get_raw_catch_data(file_id=None, page=None, ids=None):
         raw_data = query[offset:ROWS_PER_PAGE + offset]
         ids = list(map(lambda x: x.id, raw_data))
     elif ids:
-        raw_data = RawCatch.objects.filter(id__in=ids).order_by('id')
+        raw_data = RawCatch.objects.filter(id__in=ids).order_by('id').all()
     else:
         return []  # TODO error
 
-    raw_data_list = {'data': [], 'warnings': get_warnings(ids), 'last_committed': get_last_committed(ids)}
+    raw_data_response = {
+        'data': list(map(lambda x: x.to_dict(), raw_data)),
+        'warnings': get_warnings(ids),
+        'last_committed': get_last_committed(ids)
+    }
 
-    for data_row in raw_data:
-        raw_data_list['data'].append(list(getattr(data_row, field) for field in RawCatch.fields()))
-
-    return raw_data_list
+    return raw_data_response
 
 
 class FileUploadCreateView(CreateView):
@@ -104,6 +105,17 @@ class CatchFieldsJsonView(View):
         return ReconResponse(RawCatch.fields())
 
 
+class AutoSaveView(View):
+    def post(self, request):
+        try:
+            for change in simplejson.loads(request.body)['data']:
+                RawCatch.update(**change)
+            return ReconResponse({'result': 'ok'})
+
+        except Exception as e:
+            return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
+
+
 class UploadDataJsonView(View):
     def get(self, request, file_id, page):
         if file_id is None or not RawCatch.objects.filter(source_file_id=file_id).exists():
@@ -112,19 +124,9 @@ class UploadDataJsonView(View):
             return ReconResponse(get_raw_catch_data(file_id=file_id, page=page))
 
     def post(self, request):
-        # data changes come in as a list-of-lists, each of which is of the form: [row, column, before, after]
-        # NOTE: row and column are zero-based
-        data_changes = simplejson.loads(request.body)
-
         try:
-            if isinstance(data_changes['data'][0], list):
-                RawCatch.bulk_save(data_changes['data'])
-                return ReconResponse({'result': 'ok'})
-
-            else:
-                for data_change in data_changes['data']:
-                    RawCatch.update(**data_change)
-                return ReconResponse({'result': 'ok'})
+            RawCatch.bulk_save(simplejson.loads(request.body)['data'])
+            return ReconResponse({'result': 'ok'})
 
         except Exception as e:
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})

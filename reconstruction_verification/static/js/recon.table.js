@@ -89,7 +89,7 @@ var Table = {
                         });
                     }
 
-                    // read only for _id and _key columns
+                    // read only for id , *_id and *_key columns
                     if (Table.isReadOnlyColumn(col)) {
                         cellProperties.readOnly = true;
                         td.className = 'htDimmed'; // hack since handsontable isn't setting this class right
@@ -125,7 +125,7 @@ var Table = {
             });
 
             // save changes
-            Util.$post(Util.urls.saveData, { data: changes }, function() {
+            Util.$post(Util.urls.autoSaveData, { data: changes }, function() {
                 Util.setMessage('<span class="glyphicon glyphicon glyphicon-floppy-saved"></span> Autosaved (' +
                     changes.length + ' cell' +
                     (changes.length > 1 ? 's)' : ')')
@@ -139,7 +139,7 @@ var Table = {
     },
 
     getDataIds: function() {
-        return Table.dataTable.getDataAtCol(0);
+        return Table.dataTable.getDataAtProp('id');
     },
 
     getTableHeaders: function() {
@@ -159,9 +159,6 @@ var Table = {
 
     getTableOptions: function() {
         var headers = Table.getTableHeaders();
-        var columns = headers.map(function(col) {
-            return col === 'id' ? { readOnly: true } : {};
-        });
 
         return {
             allowInsertColumn: false,
@@ -170,12 +167,9 @@ var Table = {
             allowRemoveRow: false,
             colHeaders: headers,
             columnSorting: true,
-            columns: columns,
             startRows: 1,
-            startCols: headers.length,
             minSpareCols: 0,
             minSpareRows: 0,
-            maxCols: headers.length,
             maxRows: 0,
             contextMenu: false,
             search: true,
@@ -195,6 +189,10 @@ var Table = {
         var ro;
         if (!ro) {
             ro = Table.getTableHeaders().map(function(header) {
+                if (header === 'id') {
+                    return true;
+                }
+
                 if (header === 'reference_id') {
                     return false;
                 }
@@ -214,11 +212,9 @@ var Table = {
 
             if (Table.isEmpty()) {
                 $('.table-controls input, .table-controls button').prop('disabled', true);
-                Table.$table.addClass('disabled');
                 Util.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> Error loading data');
             } else {
                 $('.table-controls input, .table-controls button').not().prop('disabled', false);
-                Table.$table.removeClass('disabled');
                 Util.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data loaded');
             }
 
@@ -248,13 +244,18 @@ var Table = {
     },
 
     updateErrorCount: function() {
+        var cell;
         var data = Table.dataTable.getData();
         var errorCount = 0;
+
         data.forEach(function(row) {
-            row.forEach(function(cell) {
-                errorCount += cell === 0 ? 1 : 0;
-            });
+            for (cell in row) {
+                if (row.hasOwnProperty(cell)) {
+                    errorCount += row[cell] === 0 ? 1 : 0;
+                }
+            }
         });
+
         $('#error-count')
                 .text(errorCount)
                 .toggleClass('errors', errorCount > 0);

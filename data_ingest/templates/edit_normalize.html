@@ -4,6 +4,7 @@
 {% block extra_urls %}
 <input type="hidden" id="uploadedDataJSON" class="djangoURL" value="{% url 'uploaded-data-json' file_id page %}" />
 <input type="hidden" id="saveData" class="djangoURL" value="{% url 'save-data' %}" />
+<input type="hidden" id="autoSaveData" class="djangoURL" value="{% url 'autosave' %}" />
 <input type="hidden" id="normalizeData" class="djangoURL" value="{% url 'normalize-data' %}" />
 <input type="hidden" id="commitData" class="djangoURL" value="{% url 'commit-data' %}" />
 {% endblock %}

@@ -3,6 +3,7 @@ from django.db.transaction import atomic
 from django.contrib.auth.models import User
 from catch.models import *
 from reconstruction_verification.settings import ROWS_PER_PAGE
+from collections import OrderedDict
 import os
 
 
@@ -116,17 +117,15 @@ class RawCatch(models.Model):
     @classmethod
     def update(cls, id, column, old_value, new_value):
         obj = cls.objects.get(id=id)
-        column_name = cls.get_column_name(column)
-        setattr(obj, column_name, new_value)
+        setattr(obj, column, new_value)
         obj.save()
 
     @classmethod
     @atomic
     def bulk_save(cls, changes):
         for row in changes:
-            obj = cls.objects.filter(id=row[0])
-            values = {cls.get_column_name(idx): col for idx, col in enumerate(row) if idx > 0}
-            obj.update(**values)
+            obj = cls.objects.filter(id=row.pop('id'))
+            obj.update(**row)
 
     @classmethod
     def get_column_name(cls, col_num):
@@ -142,6 +141,9 @@ class RawCatch(models.Model):
     @classmethod
     def last_page(cls, file_id):
         return (cls.objects.filter(source_file_id=file_id).count() // ROWS_PER_PAGE) + 1
+
+    def to_dict(self):
+        return OrderedDict((field, getattr(self, field)) for field in self.fields())
 
     @staticmethod
     def required_fields():
