@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'reconstruction_verification',
     'catch',
     'data_ingest',
+    'distribution',
     'django_extensions',
     'pipeline',
     'storages'
@@ -120,6 +121,10 @@ LOGGING = {
             'handlers': ['file'],
             'level': 'DEBUG',
         },
+        'species_distribution': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
     }
 }
 
@@ -151,6 +156,7 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'scripts': {
         'source_filenames': (
+            'js/recon.distribution.js',
             'js/recon.util.js',
             'js/recon.table.js',
             'js/recon.upload.js',

@@ -92,3 +92,7 @@ span.warning-reason {
   color: #333;
   background-color: #f3f3f3;
 }
+
+#distribution .glyphicon.run {
+  cursor: pointer;
+}
