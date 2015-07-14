@@ -1,21 +1,34 @@
+import logging
 import threading
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.generic.base import View
-import species_distribution
-from species_distribution.models.taxa import Taxon, TaxonExtent
+
+logger = logging.getLogger(__name__)
+
+
+FAILURE_MESSAGE = 'unable to import species_distribution, check your credentials in ~/.species_distribution/settings.json'
+
+try:
+    import species_distribution
+    from species_distribution.models.taxa import Taxon, TaxonExtent
+except:
+    logger.warning(FAILURE_MESSAGE)
 
 
 class DistributionView(View):
     template = 'distribution.html'
 
     def get(self, request):
-        with species_distribution.models.db.Session() as session:
-            taxa = session.query(Taxon) \
-                .join(TaxonExtent, Taxon.taxon_key == TaxonExtent.taxon_key) \
-                .order_by(Taxon.taxon_key)
-            return render(request, self.template, {'taxa': taxa})
+        try:
+            with species_distribution.models.db.Session() as session:
+                taxa = session.query(Taxon) \
+                    .join(TaxonExtent, Taxon.taxon_key == TaxonExtent.taxon_key) \
+                    .order_by(Taxon.taxon_key)
+                return render(request, self.template, {'taxa': taxa})
+        except:
+            return HttpResponse(FAILURE_MESSAGE)
 
     def post(self, request):
         taxon_key = request.POST['taxon_key']
