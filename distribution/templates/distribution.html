@@ -1,0 +1,29 @@
+{% extends '_layouts/base.html' %}
+{% load staticfiles %}
+{% block title %}Distribution{% endblock %}
+{% block content %}
+    <div id="distribution" class="panel-group" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3>Distribution</h3>
+
+                <pre id="messageConsole" class="console">Run distribution on selected taxa</pre>
+
+                <ul class="files">
+                    {% for taxon in taxa %}
+                        <li>
+                            <a href="/view-taxon/{{ taxon.taxon_key }}">
+                                {{ taxon.taxon_key}} - {{ taxon.common_name }} ({{ taxon.scientific_name }})
+                            </a>
+                            <span
+                                data-taxon_key="{{taxon.taxon_key}}"
+                                data-csrfmiddlewaretoken="{{csrf_token}}"
+                                class="glyphicon glyphicon-refresh run">
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
