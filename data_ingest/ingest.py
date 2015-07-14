@@ -82,6 +82,9 @@ def get_warnings(ids):
     # TODO more warnings
     return warnings
 
+def get_last_committed(ids):
+    return []  # TODO
+
 def normalize(ids):
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
         try:

@@ -71,6 +71,7 @@ class RawCatch(models.Model):
     notes = models.TextField(null=True)
     user = models.ForeignKey(to=User)
     source_file = models.ForeignKey(to=FileUpload)
+    last_committed = models.DateTimeField(null=True)
 
     class Meta:
         db_table = 'raw_catch'
@@ -78,8 +79,8 @@ class RawCatch(models.Model):
 
     @classmethod
     @atomic
-    def commit(cls, file_id):
-        rows = cls.objects.get(source_file_id=file_id)
+    def commit(cls, ids):
+        rows = cls.objects.get(ids__in=ids)
         for row in rows:
             # required values
             values = {
@@ -118,12 +119,6 @@ class RawCatch(models.Model):
         column_name = cls.get_column_name(column)
         setattr(obj, column_name, new_value)
         obj.save()
-        obj.refresh_from_db()
-        return {
-            'field': column_name,
-            'old': old_value,
-            'newValue': getattr(obj, column_name)
-        }
 
     @classmethod
     @atomic
@@ -142,7 +137,7 @@ class RawCatch(models.Model):
 
     @classmethod
     def fields(cls):
-        return list(map(lambda x: x.name, cls._meta.fields))[:-2]
+        return list(map(lambda x: x.name, cls._meta.fields))[:-3]
 
     @classmethod
     def last_page(cls, file_id):
