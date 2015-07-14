@@ -88,6 +88,12 @@ span.warning-reason {
   z-index: 10;
 }
 
+#reconDataTableElement {
+  overflow: hidden;
+  width: 1000px;
+  height: 500px;
+}
+
 .handsontable td.htDimmed {
   color: #333;
   background-color: #f3f3f3;
