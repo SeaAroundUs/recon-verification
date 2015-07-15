@@ -4,7 +4,7 @@ from django.views.generic.edit import CreateView
 from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
-from data_ingest.ingest import normalize, commit, get_warnings, get_last_committed
+from data_ingest.ingest import normalize, commit, get_warnings, get_committed_ids
 from reconstruction_verification.settings import ROWS_PER_PAGE
 import logging
 import simplejson
@@ -27,12 +27,12 @@ def get_raw_catch_data(file_id=None, page=None, ids=None):
     elif ids:
         raw_data = RawCatch.objects.filter(id__in=ids).order_by('id').all()
     else:
-        return []  # TODO error
+        raise Exception('Expected file_id and page or ids')
 
     raw_data_response = {
         'data': list(map(lambda x: x.to_dict(), raw_data)),
         'warnings': get_warnings(ids),
-        'last_committed': get_last_committed(ids)
+        'committed': get_committed_ids(ids)
     }
 
     return raw_data_response
@@ -145,5 +145,5 @@ class CommitView(View):
         try:
             commit(ids)
             return ReconResponse({'result': 'ok'})
-        except Exception as e:  # TODO more specific exception?
+        except Exception as e:
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})

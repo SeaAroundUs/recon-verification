@@ -4,6 +4,7 @@ from catch.models import FishingEntity, EEZ, FAO, ICES, NAFO, Sector, CatchType,
     Taxon, Gear, Reference, Catch
 from decimal import Decimal
 from datetime import datetime
+from django.db.models import F
 import xlrd
 import re
 import time
@@ -84,8 +85,11 @@ def get_warnings(ids):
     # TODO more warnings
     return warnings
 
-def get_last_committed(ids):
-    return []  # TODO
+def get_committed_ids(ids):
+    return RawCatch.objects.filter(
+        id__in=ids,
+        last_committed__gte=F('last_modified')
+    ).values_list('id', flat=True)
 
 def normalize(ids):
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
