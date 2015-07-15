@@ -1,7 +1,9 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
-from catch.models import Taxon, CatchType, FishingEntity, EEZ, FAO, Sector
+from catch.models import FishingEntity, EEZ, FAO, ICES, NAFO, Sector, CatchType, \
+    Taxon, Gear, Reference, Catch
 from decimal import Decimal
+from datetime import datetime
 import xlrd
 import re
 import time
@@ -151,6 +153,7 @@ def normalize(ids):
             row.sector_type_id = 0
 
         # TODO check for non-1,2,3 as error
+        # TODO check for empty required fields as error
 
         if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer == 0:
             try:
@@ -162,4 +165,84 @@ def normalize(ids):
 
         # TODO more normalization
 
+        row.save()
+
+def commit(ids):
+    rows = RawCatch.objects.filter(id__in=ids)
+    for row in rows:
+        # required values
+        values = {
+            'fishing_entity': FishingEntity.objects.get(fishing_entity_id=row.fishing_entity_id),
+            'eez': EEZ.objects.get(eez_id=row.eez_id),
+            'fao_area': FAO.objects.get(fao_area_id=row.fao_area_id),
+            'layer': row.layer,
+            'sector': Sector.objects.get(sector_type_id=row.sector_type_id),
+            'catch_type': CatchType.objects.get(catch_type_id=row.catch_type_id),
+            'year': row.year,
+            'taxon': Taxon.objects.get(taxon_key=row.taxon_key),
+            'amount': row.amount,
+            'raw_catch': row
+        }
+        # TODO input type
+
+        # optional flat values
+        values.update({
+            'eez_sub_area': row.eez_sub_area,
+            'subregional_area': row.subregional_area,
+            'province_state': row.province_state,
+            'ccamlr_area': row.ccamlr_area,
+            'original_sector': row.original_sector,
+            'adjustment_factor': row.adjustment_factor,
+            'notes': row.notes
+        })
+
+        # optional relations
+        try:
+            values.update({'original_country_fishing': FishingEntity.objects.get(fishing_entity_id=row.original_country_fishing_id)})
+        except FishingEntity.DoesNotExist:
+            values.update({'original_country_fishing': None})
+
+        try:
+            values.update({'ices_division': ICES.objects.get(id=row.ices_division_id)})
+        except ICES.DoesNotExist:
+            values.update({'ices_division': None})
+
+        try:
+            values.update({'ices_subdivision': ICES.objects.get(id=row.ices_subdivision_id)})
+        except ICES.DoesNotExist:
+            values.update({'ices_subdivision': None})
+
+        try:
+            values.update({'nafo_division': NAFO.objects.get(id=row.nafo_division_id)})
+        except NAFO.DoesNotExist:
+            values.update({'nafo_division': None})
+
+        try:
+            values.update({'original_taxon_name': Taxon.objects.get(taxon_key=row.original_taxon_name_id)})
+        except Taxon.DoesNotExist:
+            values.update({'original_taxon_name': None})
+
+        try:
+            values.update({'original_fao_name': Taxon.objects.get(taxon_key=row.original_fao_name_id)})
+        except Taxon.DoesNotExist:
+            values.update({'original_fao_name': None})
+
+        try:
+            values.update({'gear_type': Gear.objects.get(gear_id=row.gear_type_id)})
+        except Gear.DoesNotExist:
+            values.update({'gear_type': None})
+
+        # TODO forward_carry_rule
+        # TODO disaggregation_rule
+        # TODO layer_rule
+
+        try:
+            values.update({'reference': Reference.objects.get(id=row.reference_id)})
+        except Reference.DoesNotExist:
+            values.update({'reference': None})
+
+        new_catch = Catch(**values)
+        new_catch.save()
+
+        row.last_committed = datetime.now()
         row.save()

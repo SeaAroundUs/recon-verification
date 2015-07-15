@@ -167,6 +167,7 @@ var Table = {
             allowRemoveRow: false,
             colHeaders: headers,
             columnSorting: true,
+            startCols: 46,
             startRows: 1,
             minSpareCols: 0,
             minSpareRows: 0,

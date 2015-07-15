@@ -1,7 +1,7 @@
 from time import strftime
+from django.db import models
 from django.db.transaction import atomic
 from django.contrib.auth.models import User
-from catch.models import *
 from reconstruction_verification.settings import ROWS_PER_PAGE
 from collections import OrderedDict
 import os
@@ -73,70 +73,34 @@ class RawCatch(models.Model):
     user = models.ForeignKey(to=User)
     source_file = models.ForeignKey(to=FileUpload)
     last_committed = models.DateTimeField(null=True)
+    last_modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'raw_catch'
         managed = False
 
     @classmethod
-    @atomic
-    def commit(cls, ids):
-        rows = cls.objects.get(ids__in=ids)
-        for row in rows:
-            # required values
-            values = {
-                'fishing_entity': FishingEntity.objects.get(fishing_entity_id=row.fishing_entity_id),
-                'eez': EEZ.objects.get(eez_id=row.eez_id),
-                'fao_area': FAO.objects.get(fao_area_id=row.fao_area_id),
-                'layer': row.layer,
-                'sector': Sector.objects.get(sector_type_id=row.sector_type_id),
-                'catch_type': CatchType.objects.get(catch_type_id=row.catch_type_id),
-                'year': row.year,
-                'taxon': Taxon.objects.get(taxon_key=row.taxon_key),
-                'amount': row.amount,
-                'raw_catch': row
-            }
-
-            # optional flat values
-            values.update({
-                'eez_sub_area': row.eez_sub_area,
-                'subregional_area': row.subregional_area,
-                'province_state': row.province_state,
-                'ccamlr_area': row.ccamlr_area,
-                'original_sector': row.original_sector,
-                'adjustment_factor': row.adjustment_factor,
-                'notes': row.notes
-            })
-
-            # optional relations
-            values.update({})  # TODO
-
-            new_catch = Catch(values)
-            new_catch.save()
-
-    @classmethod
     def update(cls, id, column, old_value, new_value):
         obj = cls.objects.get(id=id)
-        setattr(obj, column, new_value)
-        obj.save()
+        if getattr(obj, column) != new_value:
+            setattr(obj, column, new_value)
+            obj.save()
 
     @classmethod
     @atomic
     def bulk_save(cls, changes):
         for row in changes:
+            changed = False
             obj = cls.objects.filter(id=row.pop('id'))
-            obj.update(**row)
-
-    @classmethod
-    def get_column_name(cls, col_num):
-        try:
-            return cls.fields()[col_num]
-        except IndexError:
-            return None
+            for field, new_value in row.items():
+                if getattr(obj, field) != new_value:
+                    changed = True
+            if changed:
+                obj.update(**row)
 
     @classmethod
     def fields(cls):
-        return list(map(lambda x: x.name, cls._meta.fields))[:-3]
+        return list(map(lambda x: x.name, cls._meta.fields))[:-4]
 
     @classmethod
     def last_page(cls, file_id):
@@ -150,7 +114,12 @@ class RawCatch(models.Model):
         return [
             'fishing_entity',
             'eez',
+            'fao_area',
+            'layer',
+            'sector',
+            'catch_type',
             'year',
             'taxon_name',
-            'amount'
+            'amount',
+            'input_type'  # TODO update logic for this one
         ]  # TODO get real required fields

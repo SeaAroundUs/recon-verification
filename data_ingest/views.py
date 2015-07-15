@@ -4,7 +4,7 @@ from django.views.generic.edit import CreateView
 from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
-from data_ingest.ingest import normalize, get_warnings, get_last_committed
+from data_ingest.ingest import normalize, commit, get_warnings, get_last_committed
 from reconstruction_verification.settings import ROWS_PER_PAGE
 import logging
 import simplejson
@@ -143,7 +143,7 @@ class CommitView(View):
     def post(self, request):
         ids = simplejson.loads(request.body).get('ids', '')
         try:
-            RawCatch.commit(ids)
+            commit(ids)
             return ReconResponse({'result': 'ok'})
         except Exception as e:  # TODO more specific exception?
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
