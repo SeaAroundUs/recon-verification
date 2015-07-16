@@ -86,10 +86,10 @@ def get_warnings(ids):
     return warnings
 
 def get_committed_ids(ids):
-    return RawCatch.objects.filter(
+    return list(RawCatch.objects.filter(
         id__in=ids,
         last_committed__gte=F('last_modified')
-    ).values_list('id', flat=True)
+    ).values_list('id', flat=True))
 
 def normalize(ids):
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
