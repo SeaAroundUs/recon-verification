@@ -4,8 +4,11 @@ from django.db.transaction import atomic
 from django.contrib.auth.models import User
 from reconstruction_verification.settings import ROWS_PER_PAGE
 from collections import OrderedDict
+from datetime import datetime
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 def upload_file_path(instance, filename):
     return os.path.join('recon_files', strftime('%Y%m%d'), filename)
@@ -80,22 +83,25 @@ class RawCatch(models.Model):
         managed = False
 
     @classmethod
-    def update(cls, id, column, old_value, new_value):
+    def autosave(cls, id, column, old_value, new_value):
         obj = cls.objects.get(id=id)
         if getattr(obj, column) != new_value:
             setattr(obj, column, new_value)
+            obj.last_modified = datetime.now()
             obj.save()
 
     @classmethod
     @atomic
     def bulk_save(cls, changes):
+        now = datetime.now()
         for row in changes:
             changed = False
             obj = cls.objects.filter(id=row.pop('id'))
             for field, new_value in row.items():
-                if getattr(obj, field) != new_value:
+                if getattr(obj[0], field) != new_value:
                     changed = True
             if changed:
+                row['last_modified'] = now
                 obj.update(**row)
 
     @classmethod

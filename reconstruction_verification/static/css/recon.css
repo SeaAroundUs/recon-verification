@@ -94,9 +94,26 @@ span.warning-reason {
   height: 500px;
 }
 
-.handsontable td.htDimmed {
+.handsontable td.error,
+.handsontable td.warning.error,
+.handsontable td.readOnly.error,
+.handsontable td.readOnly.warning.error {
+  background-color: #f9abab;
+}
+
+.handsontable td.warning,
+.handsontable td.readOnly.warning {
+  background-color: #EEE8AA;
+}
+
+.handsontable td.committed,
+.handsontable td.readOnly.committed {
+  background-color: #D5F7E9;
+}
+
+.handsontable td.readOnly {
   color: #333;
-  background-color: #f3f3f3;
+  background-color: #eaeaea;
 }
 
 #distribution .glyphicon.run {

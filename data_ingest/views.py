@@ -8,6 +8,7 @@ from data_ingest.ingest import normalize, commit, get_warnings, get_committed_id
 from reconstruction_verification.settings import ROWS_PER_PAGE
 import logging
 import simplejson
+import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -109,10 +110,11 @@ class AutoSaveView(View):
     def post(self, request):
         try:
             for change in simplejson.loads(request.body)['data']:
-                RawCatch.update(**change)
+                RawCatch.autosave(**change)
             return ReconResponse({'result': 'ok'})
 
         except Exception as e:
+            logger.exception('Autosave error')
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
 
@@ -129,6 +131,7 @@ class UploadDataJsonView(View):
             return ReconResponse({'result': 'ok'})
 
         except Exception as e:
+            logger.exception('Save error')
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
 
@@ -146,4 +149,5 @@ class CommitView(View):
             commit(ids)
             return ReconResponse({'result': 'ok'})
         except Exception as e:
+            logger.exception('Commit error')
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})

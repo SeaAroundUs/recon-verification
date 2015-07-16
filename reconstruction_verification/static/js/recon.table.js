@@ -7,6 +7,7 @@ var Table = {
     headers: null,
     $table: null,
     warnings: {},
+    committed: [],
 
     events: {
         search: function() {
@@ -14,13 +15,17 @@ var Table = {
             Table.dataTable.render();
         },
 
-        save: function() {
+        save: function(callback) {
             var params = { data: Table.dataTable.getData() };
             Util.$post(Util.urls.saveData, params, function(res) {
                 var message = res.result === 'ok'
                         ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data saved'
                         : '<span class="glyphicon glyphicon-floppy-remove"></span> Save error';
                 Util.setMessage(message);
+
+                if ($.isFunction(callback)) {
+                    callback();
+                }
             });
         },
 
@@ -32,29 +37,84 @@ var Table = {
         },
 
         normalize: function() {
-            $('#normalize').prop('disabled', true);
+            var $normalize = $('#normalize');
+
+            $normalize.prop('disabled', true);
             Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Normalizing data...');
 
             Util.$post(Util.urls.normalizeData, { ids: Table.getDataIds() }, function(res) {
                 Table.updateWarnings(res.warnings);
+                Table.updateCommitted(res.committed);
+
                 Table.dataTable.loadData(res.data);
                 Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
+
                 Table.updateErrorCount();
-                $('#normalize').prop('disabled', false);
+
+                $normalize.prop('disabled', false);
             });
         },
 
         commit: function() {
-            $('#commit').prop('disabled', true);
+            var $commit = $('#commit');
+            var ids = Table.getDataIds();
+
+            $commit.prop('disabled', true);
             Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Committing data...');
 
-            Util.$post(Util.urls.commitData, { ids: Table.getDataIds() }, function(res) {
-                var message = res.result === 'ok'
-                        ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data commited'
-                        : '<span class="glyphicon glyphicon-floppy-remove"></span> Commit error';
+            Util.$post(Util.urls.commitData, { ids: ids }, function(res) {
+                var message;
+
+                if (res.result === 'ok') {
+                    message = '<span class="glyphicon glyphicon-floppy-saved"></span> Data commited';
+                    Table.updateCommitted(ids);
+                } else {
+                    message = '<span class="glyphicon glyphicon-floppy-remove"></span> Commit error';
+                }
+
                 Util.setMessage(message);
-                $('#commit').prop('disabled', false);
+                $commit.prop('disabled', false);
             });
+        }
+    },
+
+    renderer: function(instance, td, row, col, prop, value, cellProperties) {
+        var warningReason;
+        var $td = $(td);
+        var id = Table.dataTable ? Table.dataTable.getDataAtRowProp(row, 'id') : 0;
+
+        // extend TextRenderer
+        Handsontable.renderers.TextRenderer.apply(this, arguments);
+
+        // clear existing marks
+        $td.removeClass(['warning', 'error', 'committed']);
+
+        // red for zeros
+        if (value === 0) {
+            $td.addClass('error');
+
+            // yellow for warnings
+        } else if (warningReason = Table.warnings[row + ',' + prop]) {
+            $td.addClass('warning');
+            // disable this for now
+            /*
+             $td.hover(function() {
+                $(this).append('<span class="warning-reason">' + warningReason + '</span>');
+             }, function() {
+                $(this).children('span.warning-reason').remove();
+             });
+             */
+        }
+
+        // green for committed
+        if (Table.committed.indexOf(id) !== -1) {
+            $td.addClass('committed');
+        }
+
+        // read only for id , *_id and *_key columns
+        if (Table.isReadOnlyColumn(col)) {
+            cellProperties.readOnly = true;
+            $td.addClass('readOnly');
         }
     },
 
@@ -68,41 +128,16 @@ var Table = {
     },
 
     initTable: function() {
-        Handsontable.renderers.registerRenderer('reconRenderer',
-                function(instance, td, row, col, prop, value, cellProperties) {
-                    var warningReason;
-
-                    // extend TextRenderer
-                    Handsontable.renderers.TextRenderer.apply(this, arguments);
-
-                    // red for zeros
-                    if (value === 0) {
-                        td.style.background = '#FF0000';
-
-                    // yellow for warnings
-                    } else if (warningReason = Table.warnings[row + ',' + col]) {
-                        td.style.background = 'yellow';
-                        $(td).hover(function() {
-                            $(this).append('<span class="warning-reason">' + warningReason + '</span>');
-                        }, function() {
-                            $(this).children('span.warning-reason').remove();
-                        });
-                    }
-
-                    // read only for id , *_id and *_key columns
-                    if (Table.isReadOnlyColumn(col)) {
-                        cellProperties.readOnly = true;
-                        td.className = 'htDimmed'; // hack since handsontable isn't setting this class right
-                    }
-                }
-        );
+        Handsontable.renderers.registerRenderer('reconRenderer', Table.renderer);
 
         Table.dataTable = new Handsontable(Table.$table[0], Table.getTableOptions());
 
         Handsontable.Dom.addEvent($('#search_field')[0], 'keyup', Table.events.search);
         Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
         Handsontable.Dom.addEvent(Table.autosave, 'click', Table.events.autosave);
-        Handsontable.Dom.addEvent($('#normalize')[0], 'click', Table.events.normalize);
+        Handsontable.Dom.addEvent($('#normalize')[0], 'click', function() {
+            Table.events.save(Table.events.normalize); // save before normalize
+        });
         Handsontable.Dom.addEvent($('#commit')[0], 'click', Table.events.commit);
     },
 
@@ -220,8 +255,9 @@ var Table = {
             }
 
             Table.updateErrorCount();
+            Table.updateCommitted();
 
-            if (callback) {
+            if ($.isFunction(callback)) {
                 callback();
             }
         });
@@ -229,10 +265,9 @@ var Table = {
 
     updateWarnings: function(warnings) {
         var key;
-        var headers = Table.getTableHeaders();
 
         Table.warnings = warnings.reduce(function(warnings, warning) {
-            key = warning.row + ',' + headers.indexOf(warning.col);
+            key = warning.row + ',' + warning.col;
             if (warnings[key]) {
                 warnings[key] += "<br />" + warning.reason;
             } else {
@@ -262,6 +297,10 @@ var Table = {
                 .toggleClass('errors', errorCount > 0);
 
         $('#commit').prop('disabled', function() { return errorCount > 0; });
+    },
+
+    updateCommitted: function(ids) {
+        Table.committed = ids || [];
     }
 };
 
