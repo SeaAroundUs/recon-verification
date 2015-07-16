@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
-from catch.models import FishingEntity, EEZ, FAO, ICES, NAFO, Sector, CatchType, \
-    Taxon, Gear, Reference, Catch
+from catch.models import FishingEntity, EEZ, FAO, ICESDivision, ICESSubDivision, NAFO, \
+    Sector, CatchType, Taxon, Gear, Reference, Catch
 from decimal import Decimal
 from datetime import datetime
 from django.db.models import F
@@ -207,17 +207,17 @@ def commit(ids):
             values.update({'original_country_fishing': None})
 
         try:
-            values.update({'ices_division': ICES.objects.get(id=row.ices_division_id)})
-        except ICES.DoesNotExist:
+            values.update({'ices_division': ICESDivision.objects.get(ices_division_id=row.ices_division_id)})
+        except ICESDivision.DoesNotExist:
             values.update({'ices_division': None})
 
         try:
-            values.update({'ices_subdivision': ICES.objects.get(id=row.ices_subdivision_id)})
-        except ICES.DoesNotExist:
+            values.update({'ices_subdivision': ICESSubDivision.objects.get(ices_subdivision_id=row.ices_subdivision_id)})
+        except ICESSubDivision.DoesNotExist:
             values.update({'ices_subdivision': None})
 
         try:
-            values.update({'nafo_division': NAFO.objects.get(id=row.nafo_division_id)})
+            values.update({'nafo_division': NAFO.objects.get(nafo_division_id=row.nafo_division_id)})
         except NAFO.DoesNotExist:
             values.update({'nafo_division': None})
 
@@ -241,7 +241,7 @@ def commit(ids):
         # TODO layer_rule
 
         try:
-            values.update({'reference': Reference.objects.get(id=row.reference_id)})
+            values.update({'reference': Reference.objects.get(reference_id=row.reference_id)})
         except Reference.DoesNotExist:
             values.update({'reference': None})
 

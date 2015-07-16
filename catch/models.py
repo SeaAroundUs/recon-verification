@@ -13,7 +13,7 @@ class FishingEntity(models.Model):
         managed = False
 
     def __str__(self):
-        return u"{0} - {1}".format(self.id, self.name)
+        return u"{0} - {1}".format(self.fishing_entity_id, self.name)
 
 
 class EEZ(models.Model):
@@ -30,7 +30,7 @@ class EEZ(models.Model):
         managed = False
 
     def __str__(self):
-        return u"{0} - {1}".format(self.id, self.name)
+        return u"{0} - {1}".format(self.eez_id, self.name)
 
 
 class FAO(models.Model):
@@ -46,33 +46,50 @@ class FAO(models.Model):
         managed = False
 
     def __str__(self):
-        return u"{0} - {1}".format(self.id, self.name)
+        return u"{0} - {1}".format(self.fao_area_id, self.name)
 
 
-class ICES(models.Model):
-    name = models.CharField(max_length=200)
+class ICESDivision(models.Model):
+    ices_division_id = models.IntegerField(primary_key=True)
+    ices_division = models.CharField(max_length=200)
 
     class Meta:
-        verbose_name = 'ICES'
-        verbose_name_plural = 'ICES'
-        db_table = 'ices_eez'
+        verbose_name = 'ICES Division'
+        verbose_name_plural = 'ICES Division'
+        db_table = 'ices_division'
         managed = False
 
     def __str__(self):
-        return u"{0} - {1}".format(self.id, self.name)
+        return u"{0} - {1}".format(self.ices_division_id, self.ices_division)
+
+
+class ICESSubDivision(models.Model):
+    ices_subdivision_id = models.IntegerField(primary_key=True)
+    ices_division = models.ForeignKey(to=ICESDivision)
+    ices_subdivision = models.CharField(max_length=200)
+
+    class Meta:
+        verbose_name = 'ICES Subdivision'
+        verbose_name_plural = 'ICES Subdivisions'
+        db_table = 'ices_subdivision'
+        managed = False
+
+    def __str__(self):
+        return u"{0} - {1}".format(self.ices_subdivision_id, self.ices_subdivision)
 
 
 class NAFO(models.Model):
-    name = models.CharField(max_length=200)
+    nafo_division_id = models.IntegerField(primary_key=True)
+    nafo_division = models.CharField(max_length=200)
 
     class Meta:
-        verbose_name = 'NAFO'
-        verbose_name_plural = 'NAFOs'
+        verbose_name = 'NAFO Division'
+        verbose_name_plural = 'NAFO Divisions'
         db_table = 'nafo'
         managed = False
 
     def __str__(self):
-        return u"{0} - {1}".format(self.id, self.name)
+        return u"{0} - {1}".format(self.nafo_id, self.nafo_division)
 
 
 class Sector(models.Model):
@@ -96,7 +113,7 @@ class CatchType(models.Model):
         managed = False
 
     def __str__(self):
-        return u"{0}".format(self.type)
+        return u"{0}".format(self.name)
 
 
 class Taxon(models.Model):
@@ -124,7 +141,8 @@ class Gear(models.Model):
 
 
 class Reference(models.Model):
-    name = models.CharField(max_length=200)
+    reference_id = models.IntegerField(primary_key=True)
+    reference = models.CharField(max_length=200)
 
     class Meta:
         db_table = 'reference'
@@ -142,8 +160,8 @@ class Catch(models.Model):
     fao_area = models.ForeignKey(to=FAO)
     subregional_area = models.CharField(max_length=200, null=True)
     province_state = models.CharField(max_length=200, null=True)
-    ices_division = models.ForeignKey(to=ICES, related_name='+', null=True)
-    ices_subdivision = models.ForeignKey(to=ICES, related_name='+', null=True)
+    ices_division = models.ForeignKey(to=ICESDivision, related_name='+', null=True)
+    ices_subdivision = models.ForeignKey(to=ICESSubDivision, related_name='+', null=True)
     nafo_division = models.ForeignKey(to=NAFO, null=True)
     ccamlr_area = models.CharField(max_length=200, null=True)
     layer = models.IntegerField(default=0)
