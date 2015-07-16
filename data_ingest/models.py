@@ -4,7 +4,7 @@ from django.db.transaction import atomic
 from django.contrib.auth.models import User
 from reconstruction_verification.settings import ROWS_PER_PAGE
 from collections import OrderedDict
-from datetime import datetime
+from dirtyfields import DirtyFieldsMixin
 import os
 import logging
 
@@ -27,7 +27,7 @@ class FileUpload(models.Model):
         return self.file.name
 
 
-class RawCatch(models.Model):
+class RawCatch(DirtyFieldsMixin, models.Model):
     fishing_entity = models.CharField(max_length=200, null=True)
     fishing_entity_id = models.IntegerField(default=0)
     original_country_fishing = models.CharField(max_length=200, null=True)
@@ -87,13 +87,11 @@ class RawCatch(models.Model):
         obj = cls.objects.get(id=id)
         if getattr(obj, column) != new_value:
             setattr(obj, column, new_value)
-            obj.last_modified = datetime.now()
             obj.save()
 
     @classmethod
     @atomic
     def bulk_save(cls, changes):
-        now = datetime.now()
         for row in changes:
             changed = False
             obj = cls.objects.filter(id=row.pop('id'))
@@ -101,7 +99,6 @@ class RawCatch(models.Model):
                 if getattr(obj[0], field) != new_value:
                     changed = True
             if changed:
-                row['last_modified'] = now
                 obj.update(**row)
 
     @classmethod

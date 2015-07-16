@@ -68,6 +68,7 @@ var Table = {
                 if (res.result === 'ok') {
                     message = '<span class="glyphicon glyphicon-floppy-saved"></span> Data commited';
                     Table.updateCommitted(ids);
+                    Table.dataTable.render();
                 } else {
                     message = '<span class="glyphicon glyphicon-floppy-remove"></span> Commit error';
                 }

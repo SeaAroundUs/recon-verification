@@ -88,7 +88,7 @@ def get_warnings(ids):
 def get_committed_ids(ids):
     return list(RawCatch.objects.filter(
         id__in=ids,
-        last_committed__gte=F('last_modified')
+        last_committed__lte=F('last_modified')
     ).values_list('id', flat=True))
 
 def normalize(ids):
@@ -169,7 +169,9 @@ def normalize(ids):
 
         # TODO more normalization
 
-        row.save()
+        # only save rows that change
+        if row.is_dirty():
+            row.save()
 
 def commit(ids):
     rows = RawCatch.objects.filter(id__in=ids)
