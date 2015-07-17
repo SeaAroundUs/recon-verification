@@ -134,8 +134,8 @@ var Table = {
         Table.dataTable = new Handsontable(Table.$table[0], Table.getTableOptions());
 
         Handsontable.Dom.addEvent($('#search_field')[0], 'keyup', Table.events.search);
-        Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
-        Handsontable.Dom.addEvent(Table.autosave, 'click', Table.events.autosave);
+        //Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
+        //Handsontable.Dom.addEvent(Table.autosave, 'click', Table.events.autosave);
         Handsontable.Dom.addEvent($('#normalize')[0], 'click', function() {
             Table.events.save(Table.events.normalize); // save before normalize
         });
