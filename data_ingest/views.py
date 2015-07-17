@@ -8,7 +8,6 @@ from data_ingest.ingest import normalize, commit, get_warnings, get_committed_id
 from reconstruction_verification.settings import ROWS_PER_PAGE
 import logging
 import simplejson
-import traceback
 
 
 logger = logging.getLogger(__name__)
