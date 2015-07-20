@@ -89,7 +89,7 @@ def get_committed_ids(ids):
     return list(RawCatch.objects.filter(
         id__in=ids,
         last_committed__lte=F('last_modified')
-    ).values_list('id', flat=True))
+    ).order_by('id').values_list('id', flat=True))
 
 def normalize(ids):
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
@@ -250,5 +250,7 @@ def commit(ids):
         new_catch = Catch(**values)
         new_catch.save()
 
-        row.last_committed = datetime.now()
+        now = datetime.now()
+        row.last_committed = now
+        row.last_modified = now
         row.save()

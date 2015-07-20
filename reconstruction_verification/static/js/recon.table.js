@@ -1,8 +1,6 @@
 'use strict';
 
 var Table = {
-    autosave: null,
-    autosaveNotification: null,
     dataTable: null,
     headers: null,
     $table: null,
@@ -15,44 +13,49 @@ var Table = {
             Table.dataTable.render();
         },
 
-        save: function(callback) {
-            var params = { data: Table.dataTable.getData() };
-            Util.$post(Util.urls.saveData, params, function(res) {
-                var message = res.result === 'ok'
-                        ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data saved'
-                        : '<span class="glyphicon glyphicon-floppy-remove"></span> Save error';
-                Util.setMessage(message);
-
-                if ($.isFunction(callback)) {
-                    callback();
-                }
-            });
-        },
-
-        autosave: function() {
-            var message = Table.autosave.checked
-                    ? '<span class="glyphicon glyphicon-floppy-disk"></span> Changes will be autosaved'
-                    : '<span class="glyphicon glyphicon-floppy-remove"></span> Changes will not be autosaved';
-            Util.setMessage(message);
-        },
-
-        normalize: function() {
+        saveAndNormalize: function(firstLoad) {
             var $normalize = $('#normalize');
+            var $commit = $('#commit');
+            var saveParams = { data: Table.dataTable.getData() };
+            var normalizeParams = { ids: Table.getDataIds() };
+
+            var normalizeFunc = function() {
+                Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Normalizing data...');
+
+                Util.$post(Util.urls.normalizeData, normalizeParams, function(res) {
+                    Table.updateWarnings(res.warnings);
+                    Table.updateCommitted(res.committed);
+
+                    Table.dataTable.loadData(res.data);
+                    Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
+
+                    Table.updateErrorCount();
+
+                    $normalize.prop('disabled', false);
+                });
+            };
 
             $normalize.prop('disabled', true);
-            Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Normalizing data...');
+            $commit.prop('disabled', true);
 
-            Util.$post(Util.urls.normalizeData, { ids: Table.getDataIds() }, function(res) {
-                Table.updateWarnings(res.warnings);
-                Table.updateCommitted(res.committed);
+            if (firstLoad === true) {
+                normalizeFunc(); // don't save on first load
+            } else {
+                Util.setMessage('<span class="glyphicon glyphicon-refresh spin"></span> Saving data...');
 
-                Table.dataTable.loadData(res.data);
-                Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
+                Util.$post(Util.urls.saveData, saveParams, function(res) {
+                    var message = res.result === 'ok'
+                            ? '<span class="glyphicon glyphicon-floppy-saved"></span> Data saved'
+                            : '<span class="glyphicon glyphicon-floppy-remove"></span> Save error';
+                    Util.setMessage(message);
 
-                Table.updateErrorCount();
-
-                $normalize.prop('disabled', false);
-            });
+                    if (res.result === 'ok') {
+                        normalizeFunc();
+                    } else {
+                        $normalize.prop('disabled', false);
+                    }
+                });
+            }
         },
 
         commit: function() {
@@ -121,10 +124,9 @@ var Table = {
 
     init: function() {
         if ($('#edit-normalize').length) {
-            Table.autosave = $('#autosave')[0];
             Table.$table = $('#reconDataTableElement');
             Table.initTable();
-            Table.loadTableData(Table.events.normalize);
+            Table.loadTableData(function() { Table.events.saveAndNormalize(true); });
         }
     },
 
@@ -134,44 +136,31 @@ var Table = {
         Table.dataTable = new Handsontable(Table.$table[0], Table.getTableOptions());
 
         Handsontable.Dom.addEvent($('#search_field')[0], 'keyup', Table.events.search);
-        //Handsontable.Dom.addEvent($('#save')[0], 'click', Table.events.save);
-        //Handsontable.Dom.addEvent(Table.autosave, 'click', Table.events.autosave);
-        Handsontable.Dom.addEvent($('#normalize')[0], 'click', function() {
-            Table.events.save(Table.events.normalize); // save before normalize
-        });
+        Handsontable.Dom.addEvent($('#normalize')[0], 'click', Table.events.saveAndNormalize);
         Handsontable.Dom.addEvent($('#commit')[0], 'click', Table.events.commit);
     },
 
     afterChange: function (changes, source) {
         if (source === 'loadData') {
-            return; // don't save this change
+            return null; // don't need to do anything on initial table load
         }
 
-        if (Table.autosave.checked) {
-            clearTimeout(Table.autosaveNotification);
+        // mark changed rows as dirty/uncommitted
+        changes.forEach(function(change) {
+            if (change[2] === change[3]) { // make sure the value actually changed
+                return;
+            }
 
-            // add primary key to changes objects
-            changes = changes.map(function(change) {
-                return {
-                    id: Table.dataTable.getDataAtCell(change[0], 0),
-                    column: change[1],
-                    old_value: change[2],
-                    new_value: change[3]
-                };
-            });
+            var rowId = Table.dataTable.getDataAtRowProp(change[0], 'id');
+            var idx = Table.committed.indexOf(rowId);
 
-            // save changes
-            Util.$post(Util.urls.autoSaveData, { data: changes }, function() {
-                Util.setMessage('<span class="glyphicon glyphicon glyphicon-floppy-saved"></span> Autosaved (' +
-                    changes.length + ' cell' +
-                    (changes.length > 1 ? 's)' : ')')
-                );
+            $('#commit').prop('disabled', true);
 
-                Table.autosaveNotification = setTimeout(function() {
-                    Util.setMessage('<span class="glyphicon glyphicon-floppy-disk"></span> Changes will be autosaved');
-                }, 1000);
-            });
-        }
+            if (idx !== -1) {
+                Table.committed.splice(idx, 1);
+                Table.dataTable.render();
+            }
+        });
     },
 
     getDataIds: function() {
