@@ -102,6 +102,8 @@ span.warning-reason {
 }
 
 .handsontable td.warning,
+.handsontable td.readOnly.committed.warning,
+.handsontable td.committed.warning,
 .handsontable td.readOnly.warning {
   background-color: #EEE8AA;
 }

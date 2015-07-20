@@ -5,6 +5,7 @@ var Table = {
     headers: null,
     $table: null,
     warnings: {},
+    errors: {},
     committed: [],
 
     events: {
@@ -24,12 +25,11 @@ var Table = {
 
                 Util.$post(Util.urls.normalizeData, normalizeParams, function(res) {
                     Table.updateWarnings(res.warnings);
+                    Table.updateErrors(res.errors);
                     Table.updateCommitted(res.committed);
 
                     Table.dataTable.loadData(res.data);
                     Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
-
-                    Table.updateErrorCount();
 
                     $normalize.prop('disabled', false);
                 });
@@ -83,7 +83,7 @@ var Table = {
     },
 
     renderer: function(instance, td, row, col, prop, value, cellProperties) {
-        var warningReason;
+        var errorReason, warningReason;
         var $td = $(td);
         var id = Table.dataTable ? Table.dataTable.getDataAtRowProp(row, 'id') : 0;
 
@@ -94,14 +94,14 @@ var Table = {
         $td.removeClass(['warning', 'error', 'committed']);
 
         // red for zeros
-        if (value === 0) {
+        if (errorReason = Table.errors[row + ',' + prop]) {
             $td.addClass('error');
 
             // yellow for warnings
         } else if (warningReason = Table.warnings[row + ',' + prop]) {
             $td.addClass('warning');
-            // disable this for now
-            /*
+
+            /* // disable this for now
              $td.hover(function() {
                 $(this).append('<span class="warning-reason">' + warningReason + '</span>');
              }, function() {
@@ -244,7 +244,8 @@ var Table = {
                 Util.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data loaded');
             }
 
-            Table.updateErrorCount();
+            Table.updateErrors(res.errors);
+            Table.updateWarnings(res.warnings);
             Table.updateCommitted();
 
             if ($.isFunction(callback)) {
@@ -269,24 +270,24 @@ var Table = {
         $('#warning-count').html(warnings.length);
     },
 
-    updateErrorCount: function() {
-        var cell;
-        var data = Table.dataTable.getData();
-        var errorCount = 0;
+    updateErrors: function(errors) {
+        var key;
 
-        data.forEach(function(row) {
-            for (cell in row) {
-                if (row.hasOwnProperty(cell)) {
-                    errorCount += row[cell] === 0 ? 1 : 0;
-                }
+        Table.errors = errors.reduce(function(errors, error) {
+            key = error.row + ',' + error.col;
+            if (errors[key]) {
+                errors[key] += "<br />" + error.reason;
+            } else {
+                errors[key] = error.reason;
             }
-        });
+            return errors;
+        }, {});
 
         $('#error-count')
-                .text(errorCount)
-                .toggleClass('errors', errorCount > 0);
+                .text(errors.length)
+                .toggleClass('errors', errors.length > 0);
 
-        $('#commit').prop('disabled', function() { return errorCount > 0; });
+        $('#commit').prop('disabled', function() { return errors.length > 0; });
     },
 
     updateCommitted: function(ids) {

@@ -4,7 +4,7 @@ from django.views.generic.edit import CreateView
 from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
-from data_ingest.ingest import normalize, commit, get_warnings, get_committed_ids
+from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
 from reconstruction_verification.settings import ROWS_PER_PAGE
 import logging
 import simplejson
@@ -32,6 +32,7 @@ def get_raw_catch_data(file_id=None, page=None, ids=None):
     raw_data_response = {
         'data': list(map(lambda x: x.to_dict(), raw_data)),
         'warnings': get_warnings(ids),
+        'errors': get_errors(ids),
         'committed': get_committed_ids(ids)
     }
 

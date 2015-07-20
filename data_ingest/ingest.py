@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESDivision, ICESSubDivision, NAFO, \
-    Sector, CatchType, Taxon, Gear, Reference, Catch
+    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch
 from decimal import Decimal
 from datetime import datetime
 from django.db.models import F
@@ -82,8 +82,43 @@ def get_warnings(ids):
             if row.layer != expected_layer:
                 warnings.append({'row': idx, 'col': 'layer', 'reason': 'Unexpected layer per rule'})
 
+        if row.input_type_id == 2 and row.catch_type_id == 3:
+            warnings.append({'row': idx, 'col': 'input_type_id', 'reason': 'Input type/catch type mismatch'})
+
     # TODO more warnings
     return warnings
+
+def get_errors(ids):
+    errors = []
+    for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
+
+        if row.input_type_id == 1 and row.catch_type_id == 1:
+            errors.append({'row': idx, 'col': 'input_type',  'reason': 'Input type/catch type mismatch'})
+
+        if row.input_type_id in [2, 4, 5, 6] and row.catch_type_id in [2, 3]:
+            errors.append({'row': idx, 'col': 'input_type',  'reason': 'Input type/catch type mismatch'})
+
+        id_fields = [
+            'taxon_key',
+            'original_taxon_name_id',
+            'original_fao_name_id',
+            'catch_type_id',
+            'fishing_entity_id',
+            'original_country_fishing_id',
+            'eez_id',
+            'fao_area_id',
+            'sector_type_id',
+            'input_type_id',
+        ]
+
+        for field in id_fields:
+            if getattr(row, field) == 0:
+                errors.append({'row': idx, 'col': field,  'reason': 'Unknown value'})
+
+        # TODO check for layer non-1,2,3 as error
+        # TODO check for empty required fields as error
+
+    return errors
 
 def get_committed_ids(ids):
     return list(RawCatch.objects.filter(
@@ -156,16 +191,15 @@ def normalize(ids):
         except Sector.DoesNotExist:  # no Sector found
             row.sector_type_id = 0
 
-        # TODO check for non-1,2,3 as error
-        # TODO check for empty required fields as error
+        try:
+            input_type = InputType.objects.get(name__iexact=row.input_type.strip())
+            row.input_type_id = input_type.input_type_id
+        except InputType.DoesNotExist:  # no Input Type found
+            row.input_type_id = 0
 
         if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer == 0:
-            try:
-                eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
-                row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
-                # TODO layer 3 logic based on taxon
-            except Exception:  # TODO more specific exception?
-                row.layer = 0
+            eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
+            row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
 
         # TODO more normalization
 

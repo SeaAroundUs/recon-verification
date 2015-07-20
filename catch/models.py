@@ -140,6 +140,18 @@ class Gear(models.Model):
         managed = False
 
 
+class InputType(models.Model):
+    input_type_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=200)
+
+    class Meta:
+        db_table = 'input_type'
+        managed = False
+
+    def __str__(self):
+        return u"{0}".format(self.name)
+
+
 class Reference(models.Model):
     reference_id = models.IntegerField(primary_key=True)
     reference = models.CharField(max_length=200)
@@ -175,7 +187,7 @@ class Catch(models.Model):
     amount = models.DecimalField(max_digits=20, decimal_places=12)
     adjustment_factor = models.DecimalField(max_digits=20, decimal_places=12, null=True)
     gear_type = models.ForeignKey(to=Gear, null=True)
-    input_type_id = models.IntegerField(default=0, null=True)  # TODO relate to input_type table
+    input_type = models.ForeignKey(to=InputType)
     forward_carry_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to forward_carry_rule table
     disaggregation_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to disaggregation_rule table
     layer_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to layer_rule table
