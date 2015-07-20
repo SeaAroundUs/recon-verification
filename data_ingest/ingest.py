@@ -86,6 +86,7 @@ def get_warnings(ids):
             warnings.append({'row': idx, 'col': 'input_type_id', 'reason': 'Input type/catch type mismatch'})
 
     # TODO more warnings
+
     return warnings
 
 def get_errors(ids):
@@ -97,6 +98,9 @@ def get_errors(ids):
 
         if row.input_type_id in [2, 4, 5, 6] and row.catch_type_id in [2, 3]:
             errors.append({'row': idx, 'col': 'input_type',  'reason': 'Input type/catch type mismatch'})
+
+        if row.layer not in [1, 2, 3]:
+            errors.append({'row': idx, 'col': 'layer', 'reason': 'Unknown layer'})
 
         id_fields = [
             'taxon_key',
@@ -115,8 +119,9 @@ def get_errors(ids):
             if getattr(row, field) == 0:
                 errors.append({'row': idx, 'col': field,  'reason': 'Unknown value'})
 
-        # TODO check for layer non-1,2,3 as error
-        # TODO check for empty required fields as error
+        for field in RawCatch.required_fields():
+            if not str(getattr(row, field)).strip():
+                errors.append({'row': idx, 'col': field,  'reason': 'Required field is empty'})
 
     return errors
 

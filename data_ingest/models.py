@@ -124,5 +124,5 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'year',
             'taxon_name',
             'amount',
-            'input_type'  # TODO update logic for this one
-        ]  # TODO get real required fields
+            'input_type'
+        ]
