@@ -16,3 +16,5 @@ DATABASES = {
 }
 
 SECRET_KEY = ''
+
+LOGGING['handlers']['file']['filename'] = os.path.normpath('/var/log/recon-site/recon.log')
