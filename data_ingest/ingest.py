@@ -286,6 +286,8 @@ def commit(ids):
         except Reference.DoesNotExist:
             values.update({'reference': None})
 
+        # TODO update instead of isnert if raw_catch already exists (already been commit)
+
         new_catch = Catch(**values)
         new_catch.save()
 
