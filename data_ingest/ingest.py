@@ -287,12 +287,14 @@ def commit(ids):
         except Reference.DoesNotExist:
             values.update({'reference': None})
 
-        # TODO update instead of insert if raw_catch already exists (already been commit)
+        try:
+            catch = Catch.objects.get(raw_catch_id=row.id)
+            for field, value in values.items():
+                setattr(catch, field, value)
+        except Catch.DoesNotExist:
+            catch = Catch(**values)
 
-        new_catch = Catch(**values)
-        new_catch.save()
+        catch.save()
 
-        now = datetime.now()
-        row.last_committed = now
-        row.last_modified = now
+        row.last_committed = datetime.now()
         row.save()

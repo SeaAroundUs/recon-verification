@@ -77,7 +77,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     user = models.ForeignKey(to=User)
     source_file = models.ForeignKey(to=FileUpload)
     last_committed = models.DateTimeField(null=True)
-    last_modified = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(null=True)
 
     class Meta:
         db_table = 'raw_catch'
