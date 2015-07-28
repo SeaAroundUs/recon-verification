@@ -3,7 +3,7 @@ from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESDivision, ICESSubDivision, NAFO, \
     Sector, CatchType, Taxon, Gear, InputType, Reference, Catch
 from decimal import Decimal
-from datetime import datetime
+from django.utils import timezone
 from django.db.models import F
 import xlrd
 import re
@@ -210,7 +210,7 @@ def normalize(ids):
 
         # only save rows that change
         if row.is_dirty():
-            row.last_modified = datetime.now()
+            row.last_modified = timezone.now()
             row.save()
 
 def commit(ids):
@@ -227,9 +227,9 @@ def commit(ids):
             'year': row.year,
             'taxon': Taxon.objects.get(taxon_key=row.taxon_key),
             'amount': row.amount,
+            'input_type': InputType.objects.get(input_type_id=row.input_type_id),
             'raw_catch': row
         }
-        # TODO input type
 
         # optional flat values
         values.update({
@@ -296,5 +296,5 @@ def commit(ids):
 
         catch.save()
 
-        row.last_committed = datetime.now()
+        row.last_committed = timezone.now()
         row.save()

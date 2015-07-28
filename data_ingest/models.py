@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from reconstruction_verification.settings import ROWS_PER_PAGE
 from collections import OrderedDict
 from dirtyfields import DirtyFieldsMixin
-from datetime import datetime
+from django.utils import timezone
+from decimal import *
 import os
 import logging
 
@@ -88,7 +89,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
         obj = cls.objects.get(id=id)
         if getattr(obj, column) != new_value:
             setattr(obj, column, new_value)
-            obj.last_modified = datetime.now()
+            obj.last_modified = timezone.now()
             obj.save()
 
     @classmethod
@@ -97,9 +98,12 @@ class RawCatch(DirtyFieldsMixin, models.Model):
         for row in changes:
             obj = cls.objects.get(id=row.pop('id'))
             for field, new_value in row.items():
-                setattr(obj, field, new_value)
+                if field == 'amount' and Decimal.from_float(new_value) == getattr(obj, field):
+                    setattr(obj, field, new_value)
+                elif field != 'amount':
+                    setattr(obj, field, new_value)
             if obj.is_dirty():
-                obj.last_modified = datetime.now()
+                obj.last_modified = timezone.now()
                 obj.save()
 
     @classmethod
