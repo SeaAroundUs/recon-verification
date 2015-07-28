@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from reconstruction_verification.settings import ROWS_PER_PAGE
 from collections import OrderedDict
 from dirtyfields import DirtyFieldsMixin
+from datetime import datetime
 import os
 import logging
 
@@ -87,19 +88,19 @@ class RawCatch(DirtyFieldsMixin, models.Model):
         obj = cls.objects.get(id=id)
         if getattr(obj, column) != new_value:
             setattr(obj, column, new_value)
+            obj.last_modified = datetime.now()
             obj.save()
 
     @classmethod
     @atomic
     def bulk_save(cls, changes):
         for row in changes:
-            changed = False
-            obj = cls.objects.filter(id=row.pop('id'))
+            obj = cls.objects.get(id=row.pop('id'))
             for field, new_value in row.items():
-                if getattr(obj[0], field) != new_value:
-                    changed = True
-            if changed:
-                obj.update(**row)
+                setattr(obj, field, new_value)
+            if obj.is_dirty():
+                obj.last_modified = datetime.now()
+                obj.save()
 
     @classmethod
     def fields(cls):

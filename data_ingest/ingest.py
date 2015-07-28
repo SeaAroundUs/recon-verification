@@ -210,6 +210,7 @@ def normalize(ids):
 
         # only save rows that change
         if row.is_dirty():
+            row.last_modified = datetime.now()
             row.save()
 
 def commit(ids):
@@ -286,7 +287,7 @@ def commit(ids):
         except Reference.DoesNotExist:
             values.update({'reference': None})
 
-        # TODO update instead of isnert if raw_catch already exists (already been commit)
+        # TODO update instead of insert if raw_catch already exists (already been commit)
 
         new_catch = Catch(**values)
         new_catch.save()
