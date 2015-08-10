@@ -13,8 +13,8 @@ FAILURE_MESSAGE = 'unable to import species_distribution, check your credentials
 try:
     import species_distribution
     from species_distribution.models.taxa import Taxon, TaxonExtent
-except:
-    logger.warning(FAILURE_MESSAGE)
+except Exception as e:
+    logger.warning(FAILURE_MESSAGE + str(e))
 
 
 class DistributionView(View):
@@ -27,8 +27,8 @@ class DistributionView(View):
                     .join(TaxonExtent, Taxon.taxon_key == TaxonExtent.taxon_key) \
                     .order_by(Taxon.taxon_key)
                 return render(request, self.template, {'taxa': taxa})
-        except:
-            return HttpResponse(FAILURE_MESSAGE)
+        except Exception as e:
+            return HttpResponse('{}  Error: {}'.format(FAILURE_MESSAGE, str(e)))
 
     def post(self, request):
         taxon_key = request.POST['taxon_key']
