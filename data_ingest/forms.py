@@ -11,8 +11,7 @@ class FileUploadForm(ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         file = cleaned_data.get('file')
-        file_to_ingest = ContributedFile(file, self.request.user)
-        return file_to_ingest.process()
+        ContributedFile(file, self.request.user)
 
     class Meta:
         model = FileUpload

@@ -21,13 +21,23 @@ var Upload = {
                 Util.addToken(xhr);
             },
             dataType: 'json',
-            done: function (e, data) {
+            done: function(e, data) {
                 clearInterval(progressInterval);
 
-                Util.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data uploaded from ' +
-                        data.originalFiles[0].name);
+                Util.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Data uploaded from "' +
+                        data.originalFiles[0].name + '"');
 
                 window.location = window.location;
+            },
+            fail: function(e, data) {
+                console.log(e);
+                console.log(data.response());
+
+                clearInterval(progressInterval);
+
+                Util.setMessage('<span class="glyphicon glyphicon-ban-circle"></span> Failed to upload "' +
+                        data.originalFiles[0].name + '": ' + data.response().jqXHR.responseJSON['__all__'][0]
+                );
             }
         };
 

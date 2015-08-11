@@ -3,6 +3,7 @@ from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESDivision, ICESSubDivision, NAFO, \
     Sector, CatchType, Taxon, Gear, InputType, Reference, Catch
 from decimal import Decimal
+from django.forms import ValidationError
 from django.utils import timezone
 from django.db.models import F
 import xlrd
@@ -21,31 +22,36 @@ class ContributedFile:
 
         new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
         contributed_file.name = new_name
-        fileupload = FileUpload(file=self.contributed_file.name, user=self.user)
-        fileupload.save()  # TODO don't save row until file is 100% loaded (and also saved in S3?)
+        source_file = FileUpload(file=self.contributed_file.name, user=self.user)
 
-        self.fileupload_id = FileUpload.objects.latest('id').id
-        self.excel_file_dict = {}
+        self._process_excel_file()
+        if self._is_valid():
+            source_file.save()
+            self._insert_reconstruction_data(source_file)
+        else:
+            raise ValidationError('uploaded file does not match template')
+
+    def _is_valid(self):
+        return list(self.excel_data[0].keys()) == RawCatch.template_fields()
 
     def _convert_to_dict(self, sheet):
-        fields = sheet.row_values(0)
-        return (OrderedDict(zip(fields, sheet.row_values(rx))) for rx in range(1, sheet.nrows))
+        fields = list(map(str.strip, sheet.row_values(0)))
+        return list(OrderedDict(zip(fields, sheet.row_values(rx))) for rx in range(1, sheet.nrows))
 
     def _process_excel_file(self):
         book = xlrd.open_workbook(
             file_contents=self.contributed_file.read(),
             encoding_override='utf-8'
         )
-        for sheet in book.sheets():
-            self.excel_file_dict[sheet.name] = self._convert_to_dict(sheet)
+        sheet = book.sheet_by_index(0)
+        self.excel_data = self._convert_to_dict(sheet)
 
-    def _insert_reconstruction_data(self):
+    def _insert_reconstruction_data(self, source_file):
         raw_catches = []
-        source_file = FileUpload.objects.get(id=self.fileupload_id)
         user = self.user
 
         # iterate over every row in the file
-        for recon_datum in self.excel_file_dict['Catch Data']:
+        for recon_datum in self.excel_data:
             kwargs = {key.lower().strip().replace(' ', '_'): val for (key, val) in recon_datum.items()}
 
             # add special fields
@@ -64,12 +70,6 @@ class ContributedFile:
         # create all the rows
         RawCatch.objects.bulk_create(raw_catches)
 
-    def process(self):
-        self._process_excel_file()
-        if 'Catch Data' in self.excel_file_dict:  # TODO need better check here
-            self._insert_reconstruction_data()
-        else:
-            pass  # TODO raise some kind of error here
 
 def get_warnings(ids):
     warnings = []

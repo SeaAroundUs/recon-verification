@@ -131,3 +131,36 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'amount',
             'input_type'
         ]
+
+    @staticmethod
+    def template_fields():
+        return [
+            'fishing entity',
+            'original country fishing',
+            'EEZ',
+            'EEZ sub area',
+            'FAO area',
+            'subregional area',
+            'province state',
+            'ICES division',
+            'ICES subdivision',
+            'NAFO division',
+            'CCAMLR area',
+            'layer',
+            'sector',
+            'original sector',
+            'catch type',
+            'year',
+            'taxon name',
+            'original taxon name',
+            'original FAO name',
+            'amount',
+            'adjustment factor',
+            'gear type',
+            'input type',
+            'forward carry rule',
+            'disaggregation rule',
+            'layer rule',
+            'reference id',
+            'notes'
+        ]
