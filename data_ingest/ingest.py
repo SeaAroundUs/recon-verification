@@ -89,6 +89,9 @@ def get_warnings(ids):
         if row.input_type_id == 2 and row.catch_type_id == 3:
             warnings.append({'row': idx, 'col': 'input_type_id', 'reason': 'Input type/catch type mismatch'})
 
+        if row.year > 2010:
+            warnings.append({'row': idx, 'col': 'year', 'reason': 'Year after 2010'})
+
     # TODO more warnings
 
     return warnings
