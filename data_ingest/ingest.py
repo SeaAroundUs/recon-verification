@@ -29,6 +29,7 @@ class ContributedFile:
             source_file.save()
             self._insert_reconstruction_data(source_file)
         else:
+            source_file.delete()
             raise ValidationError('uploaded file does not match template')
 
     def _is_valid(self):
@@ -52,7 +53,10 @@ class ContributedFile:
 
         # iterate over every row in the file
         for recon_datum in self.excel_data:
-            kwargs = {key.lower().strip().replace(' ', '_'): val for (key, val) in recon_datum.items()}
+            kwargs = {
+                key.lower().strip().replace(' ', '_'): val if val != '' else None
+                for (key, val) in recon_datum.items()
+            }
 
             # add special fields
             kwargs.update({'user': user, 'source_file': source_file})
