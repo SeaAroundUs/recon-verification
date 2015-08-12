@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESDivision, ICESSubDivision, NAFO, \
-    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch
+    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year
 from decimal import Decimal
 from django.forms import ValidationError
 from django.utils import timezone
@@ -105,6 +105,9 @@ def get_errors(ids):
 
         if row.layer not in [1, 2, 3]:
             errors.append({'row': idx, 'col': 'layer', 'reason': 'Unknown layer'})
+
+        if row.year not in Year.valid_years():
+            errors.append({'row': idx, 'col': 'year', 'reason': 'Invalid year'})
 
         id_fields = [
             'taxon_key',

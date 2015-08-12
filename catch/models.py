@@ -164,6 +164,22 @@ class Reference(models.Model):
         return u"{0}".format(self.name)
 
 
+class Year(models.Model):
+    id = models.IntegerField(db_column='time_key', primary_key=True)
+    year = models.IntegerField()
+
+    class Meta:
+        db_table = 'time'
+        managed = False
+
+    def __str__(self):
+        return u"{0}".format(self.year)
+
+    @classmethod
+    def valid_years(cls):
+        return cls.objects.values_list('year', flat=True)
+
+
 class Catch(models.Model):
     fishing_entity = models.ForeignKey(to=FishingEntity, related_name='+')
     original_country_fishing = models.ForeignKey(to=FishingEntity, related_name='+', null=True)
