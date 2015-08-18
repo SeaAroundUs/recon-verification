@@ -121,3 +121,10 @@ span.warning-reason {
 #distribution .glyphicon.run {
   cursor: pointer;
 }
+#distribution .modal-content {
+  text-align: center;
+}
+#distribution #gridMap {
+  width: 100%;
+  height: 600px;
+}

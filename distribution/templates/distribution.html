@@ -9,17 +9,29 @@
 
                 <pre id="messageConsole" class="console">Run distribution on selected taxa</pre>
 
-                <ul class="files">
+                <div id="modal" class="modal">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">test</div>
+                    </div>
+                </div>
+
+                <ul class="">
                     {% for taxon in taxa %}
                         <li>
-                            <a href="/view-taxon/{{ taxon.taxon_key }}">
-                                {{ taxon.taxon_key}} - {{ taxon.common_name }} ({{ taxon.scientific_name }})
-                            </a>
+                            {{ taxon.taxon_key}} - {{ taxon.common_name }} ({{ taxon.scientific_name }})
                             <span
                                 data-taxon_key="{{taxon.taxon_key}}"
                                 data-csrfmiddlewaretoken="{{csrf_token}}"
                                 class="glyphicon glyphicon-refresh run">
                             </span>
+
+                            <a
+                                data-taxon_key="{{taxon.taxon_key}}"
+                                data-taxon_name="{{taxon.common_name}}"
+                                href="#" class="view-taxon-link">
+                                (view)
+                            </a>
+
                         </li>
                     {% endfor %}
                 </ul>
