@@ -118,11 +118,22 @@ span.warning-reason {
   background-color: #eaeaea;
 }
 
+#distribution .modal .x {
+  float:left;
+  z-index: 2;
+  font-size: 2em;
+  top: 10px;
+  left: 10px;
+}
+.x:hover {
+  cursor: pointer;
+}
 #distribution .glyphicon.run {
   cursor: pointer;
 }
 #distribution .modal-content {
   text-align: center;
+  padding-bottom: 10px;
 }
 #distribution #gridMap {
   width: 100%;

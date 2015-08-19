@@ -43,9 +43,14 @@ var Distribution = {
       var taxon_name = $(event.target).data().taxon_name;
 
       modal_content.empty();
-      var content = '<h1>Distribution for ' + taxon_name + ' (' + taxon_key + ')</h1><div id="gridMap"></div>';
+      var content = '<span class="x glyphicon glyphicon-remove"></span>' +
+        '<h1>Distribution for ' + taxon_name +
+        ' (' + taxon_key + ')</h1>' +
+        '<div id="gridMap"></div>';
       modal_content.html(content);
       modal.modal('show');
+
+      $('.modal .x').click(function() {modal.modal('hide'); });
 
       d3.json('../static/geo/countries.topojson', function(error, countries) {
         var options = {
