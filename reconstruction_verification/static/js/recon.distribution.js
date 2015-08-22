@@ -54,7 +54,13 @@ var Distribution = {
 
       d3.json('../static/geo/countries.topojson', function(error, countries) {
         var options = {
-          countries: countries
+          countries: countries,
+          hud: {
+            fontSize: 20,
+            fontColor: 'white',
+            verticalOffset: 5
+          },
+          onCellHover: function(feature) { console.debug('hovering over ', feature);}
         };
         var gridSize = [720, 360];
         $('#gridMap').html('');
