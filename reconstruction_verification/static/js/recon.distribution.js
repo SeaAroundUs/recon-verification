@@ -53,6 +53,9 @@ var Distribution = {
       $('.modal .x').click(function() {modal.modal('hide'); });
 
       d3.json('../static/geo/countries.topojson', function(error, countries) {
+        var colorScale = d3.scale.quantize()
+          .domain([0,255])
+          .range(colorbrewer.RdYlGn[10]);
         var options = {
           countries: countries,
           hud: {
@@ -60,6 +63,8 @@ var Distribution = {
             fontColor: 'white',
             verticalOffset: 5
           },
+          colorScale: colorScale,
+          geoJsonColor: 'rgba(255,255,255,0.5)',
           onCellHover: function(feature) { console.debug('hovering over ', feature);}
         };
         var gridSize = [720, 360];
@@ -71,7 +76,7 @@ var Distribution = {
           .get(function(error, xhr) {
             var buff = xhr.response;
             map.setDataArrayBuffer(buff);
-            map.resize();
+            map.panToCentroid();
           });
       });
     });
