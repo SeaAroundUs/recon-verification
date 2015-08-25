@@ -9,6 +9,7 @@ from django.utils import timezone
 from decimal import *
 import os
 import logging
+import catch.models
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,20 @@ class FileUpload(models.Model):
 
     def __str__(self):
         return self.file.name
+
+
+class RawCatchQuerySet(models.QuerySet):
+    def last_page(self):
+        return (self.count() // ROWS_PER_PAGE) + 1
+
+    def page(self, page):
+        offset = (int(page) - 1) * ROWS_PER_PAGE
+        return self.all()[offset:ROWS_PER_PAGE + offset]
+
+    def from_request(self, request):
+        allowed_params = [f[0] for f in self.model.allowed_query_fields()]
+        kwargs = dict((p + '__in', request.GET.getlist(p)) for p in allowed_params if p in request.GET)
+        return self.filter(**kwargs)
 
 
 class RawCatch(DirtyFieldsMixin, models.Model):
@@ -80,17 +95,11 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     last_committed = models.DateTimeField(null=True)
     last_modified = models.DateTimeField(null=True)
 
+    objects = RawCatchQuerySet.as_manager()
+
     class Meta:
         db_table = 'raw_catch'
         managed = False
-
-    @classmethod
-    def autosave(cls, id, column, old_value, new_value):
-        obj = cls.objects.get(id=id)
-        if getattr(obj, column) != new_value:
-            setattr(obj, column, new_value)
-            obj.last_modified = timezone.now()
-            obj.save()
 
     @classmethod
     @atomic
@@ -110,12 +119,40 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     def fields(cls):
         return list(map(lambda x: x.name, cls._meta.fields))[:-4]
 
-    @classmethod
-    def last_page(cls, file_id):
-        return (cls.objects.filter(source_file_id=file_id).count() // ROWS_PER_PAGE) + 1
-
     def to_dict(self):
         return OrderedDict((field, getattr(self, field)) for field in self.fields())
+
+    @staticmethod
+    def allowed_query_fields():
+        return [
+            (
+                'fishing_entity_id',
+                'Fishing entity',
+                catch.models.FishingEntity.objects.order_by('name').values_list('fishing_entity_id', 'name')
+            ),
+            (
+                'eez_id',
+                'EEZ',
+                catch.models.EEZ.objects.order_by('name').values_list('eez_id', 'name')
+            ),
+            (
+                'fao_area_id',
+                'FAO',
+                catch.models.FAO.objects.order_by('name').values_list('fao_area_id', 'name')
+            ),
+            (
+                'layer',
+                'Layer',
+                list((l,) for l in [1, 2, 3])
+            ),
+            (
+                'year',
+                'Year',
+                list((y,) for y in range(1950, 2011))
+            ),
+            # ('taxon_key', 'Taxon key'), # TODO later?
+            # ('reference_id', 'Reference'), # TODO later?
+        ]
 
     @staticmethod
     def required_fields():

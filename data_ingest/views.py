@@ -18,19 +18,17 @@ class ReconResponse(object):
         return HttpResponse(simplejson.dumps(payload, use_decimal=True), content_type='application/json')
 
 
-def get_raw_catch_data(file_id=None, page=None, ids=None):
-    if file_id and page:
-        offset = (int(page) - 1) * ROWS_PER_PAGE
-        query = RawCatch.objects.filter(source_file_id=file_id).order_by('id').all()
-        raw_data = query[offset:ROWS_PER_PAGE + offset]
-        ids = list(map(lambda x: x.id, raw_data))
+def get_raw_catch_data(page=None, ids=None, request=None):
+    if page and request:
+        raw_data = RawCatch.objects.from_request(request).order_by('id').page(page)
+        ids = [x.id for x in raw_data]
     elif ids:
         raw_data = RawCatch.objects.filter(id__in=ids).order_by('id').all()
     else:
-        raise Exception('Expected file_id and page or ids')
+        raise Exception('Expected page or ids')
 
     raw_data_response = {
-        'data': list(map(lambda x: x.to_dict(), raw_data)),
+        'data': [x.to_dict() for x in raw_data],
         'warnings': get_warnings(ids),
         'errors': get_errors(ids),
         'committed': get_committed_ids(ids)
@@ -83,17 +81,19 @@ class DataBrowseView(View):
     template = 'browse_upload.html'
 
     def get(self, request):
-        files = FileUpload.objects.exclude(user_id=None).order_by('create_datetime')
-        return render(request, self.template, {'files': files})
+        params = {'fields': RawCatch.allowed_query_fields()}
+        return render(request, self.template, params)
 
 
 class EditNormalizeView(View):
     template = 'edit_normalize.html'
 
-    def get(self, request, file_id, page):
-        page = int(page)
-        last_page = RawCatch.last_page(file_id)
-        params = {'file_id': file_id, 'page': page, 'pages': list(range(1, last_page + 1))}
+    def get(self, request):
+
+        page = int(request.GET.get('page', 1))
+        last_page = RawCatch.objects.from_request(request).last_page()
+
+        params = {'page': page, 'pages': list(range(1, last_page + 1))}
         if page > 1:
             params['previous_page'] = page - 1
         if page < last_page:
@@ -106,24 +106,12 @@ class CatchFieldsJsonView(View):
         return ReconResponse(RawCatch.fields())
 
 
-class AutoSaveView(View):
-    def post(self, request):
-        try:
-            for change in simplejson.loads(request.body)['data']:
-                RawCatch.autosave(**change)
-            return ReconResponse({'result': 'ok'})
-
-        except Exception as e:
-            logger.exception('Autosave error')
-            return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
-
-
 class UploadDataJsonView(View):
-    def get(self, request, file_id, page):
-        if file_id is None or not RawCatch.objects.filter(source_file_id=file_id).exists():
+    def get(self, request, page):
+        if not RawCatch.objects.from_request(request).exists():
             return HttpResponseNotFound()
         else:
-            return ReconResponse(get_raw_catch_data(file_id=file_id, page=page))
+            return ReconResponse(get_raw_catch_data(page=page, request=request))
 
     def post(self, request):
         try:

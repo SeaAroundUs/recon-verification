@@ -140,3 +140,21 @@ span.warning-reason {
   height: 600px;
   position: relative;
 }
+
+#browse-upload .working-set .form-group {
+  width: 400px;
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: 30px;
+}
+
+#browse-upload .working-set .form-group select#working-query {
+  width: 100%;
+  height: 150px;
+}
+
+#browse-upload .working-set .form-group label,
+#browse-upload .working-set .form-group select#working-query {
+  display: block;
+  margin-bottom: 10px;
+}

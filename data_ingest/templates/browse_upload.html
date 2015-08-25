@@ -7,7 +7,7 @@
             <div class="panel-body">
                 <h3>Browse & Upload</h3>
 
-                <pre id="messageConsole" class="console">Upload a new file or select an existing file for editing</pre>
+                <pre id="messageConsole" class="console">Upload a new file</pre>
 
                 <form role="form" enctype="multipart/form-data">
                     <div class="form-group">
@@ -19,13 +19,41 @@
                     </div>
                 </form>
 
-                <ul class="files">
-                    {% for file in files %}
-                        <li><a href="{% url 'edit-normalize' file.id 1 %}">
-                            {{ file }} ({{ file.create_datetime }})
-                        </a></li>
+                <h3>Generate a working set</h3>
+
+                <div role="form" class="working-set">
+                    {% for field, pretty_field, values in fields %}
+                        <div class="form-group">
+                            <label for="{{ field }}">{{ pretty_field }}</label>
+                            <button id="add_{{ field }}" class="btn btn-default add-button">
+                                <i class="glyphicon glyphicon-plus-sign"></i> Add
+                            </button>
+                            <select id="{{ field }}" name="{{ field }}">
+                                <option>-- SELECT --</option>
+                                <option value="{{ field }}=0">(ERROR)</option>
+                                {% for value in values %}
+                                    <option value="{{ field }}={{ value | first }}">{{ value | last }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     {% endfor %}
-                </ul>
+
+                    <div class="form-group">
+                        <label for="working-query">Working set query</label>
+
+                        <select readonly="readonly" multiple="multiple" id="working-query"></select>
+
+                        <button id="view-data" class="btn btn-primary" disabled="disabled">
+                            <i class="glyphicon glyphicon-eye-open"></i> View data
+                        </button>
+
+                        <button id="clear-query" class="btn btn-default">
+                            <i class="glyphicon glyphicon-remove"></i> Clear query
+                        </button>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>
