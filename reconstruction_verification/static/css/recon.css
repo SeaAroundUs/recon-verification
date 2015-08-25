@@ -121,3 +121,8 @@ span.warning-reason {
 #distribution .glyphicon.run {
   cursor: pointer;
 }
+
+#browse-upload .working-set .form-group {
+  width: 400px;
+  display: inline-block;
+}

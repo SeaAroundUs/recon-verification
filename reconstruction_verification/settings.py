@@ -1,4 +1,5 @@
 import os
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
 SITE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,6 +25,8 @@ SECRET_KEY = 'g&bd3isw+03%r^-f#o+p(%w&&sxzcp%gl9#++)fy0d^y!0n20e'
 DEBUG = True
 
 TEMPLATE_DEBUG = True
+
+TEMPLATE_CONTEXT_PROCESSORS = TEMPLATE_CONTEXT_PROCESSORS + ('django.core.context_processors.request',)
 
 ALLOWED_HOSTS = []
 
