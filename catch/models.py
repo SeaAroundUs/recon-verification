@@ -49,33 +49,18 @@ class FAO(models.Model):
         return u"{0} - {1}".format(self.fao_area_id, self.name)
 
 
-class ICESDivision(models.Model):
-    ices_division_id = models.IntegerField(primary_key=True)
-    ices_division = models.CharField(max_length=200)
+class ICESArea(models.Model):
+    ices_area_id = models.IntegerField(primary_key=True)
+    ices_area = models.CharField(max_length=50)
 
     class Meta:
-        verbose_name = 'ICES Division'
-        verbose_name_plural = 'ICES Division'
-        db_table = 'ices_division'
+        verbose_name = 'ICES Area'
+        verbose_name_plural = 'ICES Areas'
+        db_table = 'ices_area'
         managed = False
 
     def __str__(self):
-        return u"{0} - {1}".format(self.ices_division_id, self.ices_division)
-
-
-class ICESSubDivision(models.Model):
-    ices_subdivision_id = models.IntegerField(primary_key=True)
-    ices_division = models.ForeignKey(to=ICESDivision)
-    ices_subdivision = models.CharField(max_length=200)
-
-    class Meta:
-        verbose_name = 'ICES Subdivision'
-        verbose_name_plural = 'ICES Subdivisions'
-        db_table = 'ices_subdivision'
-        managed = False
-
-    def __str__(self):
-        return u"{0} - {1}".format(self.ices_subdivision_id, self.ices_subdivision)
+        return u"{0} - {1}".format(self.ices_area_id, self.ices_area)
 
 
 class NAFO(models.Model):
@@ -188,8 +173,7 @@ class Catch(models.Model):
     fao_area = models.ForeignKey(to=FAO)
     subregional_area = models.CharField(max_length=200, null=True)
     province_state = models.CharField(max_length=200, null=True)
-    ices_division = models.ForeignKey(to=ICESDivision, related_name='+', null=True)
-    ices_subdivision = models.ForeignKey(to=ICESSubDivision, related_name='+', null=True)
+    ices_area = models.ForeignKey(to=ICESArea, related_name='+', null=True)
     nafo_division = models.ForeignKey(to=NAFO, null=True)
     ccamlr_area = models.CharField(max_length=200, null=True)
     layer = models.IntegerField(default=0)

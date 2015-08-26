@@ -56,10 +56,8 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     fao_area_id = models.IntegerField(default=0)
     subregional_area = models.CharField(max_length=200, null=True)
     province_state = models.CharField(max_length=200, null=True)
-    ices_division = models.CharField(max_length=200, null=True)
-    ices_division_id = models.IntegerField(null=True)
-    ices_subdivision = models.CharField(max_length=200, null=True)
-    ices_subdivision_id = models.IntegerField(null=True)
+    ices_area = models.CharField(max_length=50, null=True)
+    ices_area_id = models.IntegerField(null=True)
     nafo_division = models.CharField(max_length=200, null=True)
     nafo_division_id = models.IntegerField(null=True)
     ccamlr_area = models.CharField(max_length=200, null=True)
@@ -179,8 +177,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'FAO area',
             'subregional area',
             'province state',
-            'ICES division',
-            'ICES subdivision',
+            'ICES area',
             'NAFO division',
             'CCAMLR area',
             'layer',

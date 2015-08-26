@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
-from catch.models import FishingEntity, EEZ, FAO, ICESDivision, ICESSubDivision, NAFO, \
+from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year
 from decimal import Decimal
 from django.forms import ValidationError
@@ -259,14 +259,9 @@ def commit(ids):
             values.update({'original_country_fishing': None})
 
         try:
-            values.update({'ices_division': ICESDivision.objects.get(ices_division_id=row.ices_division_id)})
-        except ICESDivision.DoesNotExist:
-            values.update({'ices_division': None})
-
-        try:
-            values.update({'ices_subdivision': ICESSubDivision.objects.get(ices_subdivision_id=row.ices_subdivision_id)})
-        except ICESSubDivision.DoesNotExist:
-            values.update({'ices_subdivision': None})
+            values.update({'ices_area': ICESArea.objects.get(ices_area_id=row.ices_area_id)})
+        except ICESArea.DoesNotExist:
+            values.update({'ices_area': None})
 
         try:
             values.update({'nafo_division': NAFO.objects.get(nafo_division_id=row.nafo_division_id)})

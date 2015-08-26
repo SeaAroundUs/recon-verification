@@ -1,6 +1,6 @@
 from django.contrib import admin
-from catch.models import FishingEntity, EEZ, FAO, ICESDivision, \
-    ICESSubDivision, NAFO, Sector, CatchType, Taxon
+from catch.models import FishingEntity, EEZ, FAO, ICESArea, \
+    NAFO, Sector, CatchType, Taxon
 
 # admin.site.register(Country)
 # admin.site.register(EEZ)
