@@ -1,12 +1,8 @@
 from django.contrib import admin
-from catch.models import FishingEntity, EEZ, FAO, ICESArea, \
-    NAFO, Sector, CatchType, Taxon
+from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO
 
-# admin.site.register(Country)
-# admin.site.register(EEZ)
-# admin.site.register(FAO)
-# admin.site.register(ICES)
-# admin.site.register(NAFO)
-# admin.site.register(Sector)
-# admin.site.register(CatchType)
-# admin.site.register(Taxon)
+admin.site.register(FishingEntity)
+admin.site.register(EEZ)
+admin.site.register(FAO)
+admin.site.register(ICESArea)
+admin.site.register(NAFO)
