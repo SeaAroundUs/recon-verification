@@ -9,13 +9,23 @@
 
                 <pre id="messageConsole" class="console">Upload a new file</pre>
 
-                <form role="form" enctype="multipart/form-data">
+                <form role="form" enctype="multipart/form-data" class="upload-file">
                     <div class="form-group">
                         <span class="btn btn-success fileinput-button">
                             <i class="glyphicon glyphicon-plus"></i>
                             <span>Select file</span>
                             <input id="fileupload" type="file" name="file">
                         </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reference">Reference:</label>
+                        <select id="reference" name="reference">
+                            <option value="0">-- SELECT --</option>
+                            {% for id, ref in references %}
+                                <option value="{{ id }}">{{ ref }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </form>
 

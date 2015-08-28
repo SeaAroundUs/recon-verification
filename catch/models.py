@@ -139,7 +139,7 @@ class InputType(models.Model):
 
 class Reference(models.Model):
     reference_id = models.IntegerField(primary_key=True)
-    reference = models.CharField(max_length=200)
+    filename = models.CharField(max_length=200)
 
     class Meta:
         db_table = 'reference'

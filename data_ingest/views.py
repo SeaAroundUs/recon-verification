@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
-from reconstruction_verification.settings import ROWS_PER_PAGE
+from catch.models import Reference
 import logging
 import simplejson
 
@@ -81,7 +81,10 @@ class DataBrowseView(View):
     template = 'browse_upload.html'
 
     def get(self, request):
-        params = {'fields': RawCatch.allowed_query_fields()}
+        params = {
+            'fields': RawCatch.allowed_query_fields(),
+            'references': Reference.objects.order_by('filename').values_list('reference_id', 'filename')
+        }
         return render(request, self.template, params)
 
 

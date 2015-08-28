@@ -148,6 +148,11 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 'Year',
                 list((y,) for y in range(1950, 2011))
             ),
+            (
+                'reference_id',
+                'Reference',
+                catch.models.Reference.objects.order_by('filename').values_list('reference_id', 'filename')
+            )
             # ('taxon_key', 'Taxon key'), # TODO later?
             # ('reference_id', 'Reference'), # TODO later?
         ]
@@ -195,6 +200,5 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'forward carry rule',
             'disaggregation rule',
             'layer rule',
-            'reference id',
             'notes'
         ]

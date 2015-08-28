@@ -16,8 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 class ContributedFile:
-    def __init__(self, contributed_file, user):
+    def __init__(self, contributed_file, user, ref_id):
         self.user = user
+        self.ref_id = ref_id
         self.contributed_file = contributed_file
 
         new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
@@ -50,6 +51,7 @@ class ContributedFile:
     def _insert_reconstruction_data(self, source_file):
         raw_catches = []
         user = self.user
+        ref_id = self.ref_id
 
         # iterate over every row in the file
         for recon_datum in self.excel_data:
@@ -59,7 +61,7 @@ class ContributedFile:
             }
 
             # add special fields
-            kwargs.update({'user': user, 'source_file': source_file})
+            kwargs.update({'user': user, 'source_file': source_file, 'reference_id': ref_id})
 
             # ensure decimal fields are properly typed
             for decimal_field in ('amount', 'adjustment_factor'):
@@ -123,6 +125,7 @@ def get_errors(ids):
             'fao_area_id',
             'sector_type_id',
             'input_type_id',
+            'reference_id'
         ]
 
         for field in id_fields:
@@ -162,7 +165,7 @@ def normalize(ids):
             try:
                 original_fao = Taxon.objects.filter(scientific_name__iexact=row.original_fao_name.strip())[0]
                 row.original_fao_name_id = original_fao.taxon_key
-            except IndexError:  # no Taxon found
+            except IndexError:  # no FAO found
                 row.original_fao_name_id = 0
         else:
             row.original_fao_name_id = None
@@ -215,6 +218,11 @@ def normalize(ids):
         if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer == 0:
             eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
             row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
+
+        try:
+            Reference.objects.get(reference_id=row.reference_id)
+        except Reference.DoesNotExist:  # no Reference found
+            row.reference_id = 0
 
         # TODO more normalization
 
