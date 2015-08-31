@@ -6,8 +6,10 @@ from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
 from catch.models import Reference
+from storages.backends.s3boto import S3BotoStorage
 import logging
 import simplejson
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -142,3 +144,17 @@ class CommitView(View):
         except Exception as e:
             logger.exception('Commit error')
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
+
+
+class UploadRefView(View):
+    def post(self, request):
+        file = request.FILES.get('file', None)
+
+        if not file:
+            return ReconResponse({'result': 'not ok', 'exception': 'file not found'})
+
+        S3BotoStorage(bucket='recon-verification').save(name=os.path.join('references', file.name), content=file)
+        Reference(filename=file.name).save()
+
+        logger.info('{} uploaded {}'.format(self.request.user, file.name))
+        return ReconResponse({'result': 'ok'})

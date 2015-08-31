@@ -141,6 +141,10 @@ span.warning-reason {
   position: relative;
 }
 
+#browse-upload .section {
+  margin-bottom: 25px;
+}
+
 #browse-upload .upload-file .form-group {
   display: inline;
   margin-right: 25px;

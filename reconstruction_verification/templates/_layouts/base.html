@@ -12,6 +12,7 @@
     <body role="document">
         <input type="hidden" id="catchFieldsJSON" class="djangoURL" value="{% url 'catch-fields-json' %}" />
         <input type="hidden" id="uploadJSON" class="djangoURL" value="{% url 'upload-json' %}" />
+        <input type="hidden" id="uploadRef" class="djangoURL" value="{% url 'upload-ref' %}" />
         {% block extra_urls %}{% endblock %}
 
         <div id="maindiv">

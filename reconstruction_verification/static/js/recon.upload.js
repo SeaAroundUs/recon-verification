@@ -45,6 +45,13 @@ var Upload = {
                 .prop('disabled', !$.support.fileInput)
                 .parent()
                 .addClass($.support.fileInput ? undefined : 'disabled');
+
+        $('#refupload').fileupload({
+            url: Util.urls.uploadRef,
+            crossDomain: false,
+            beforeSend: Util.addToken,
+            done: function() { window.location.href = window.location.href; }
+        })
     },
 
     updateProgress: function(progress) {

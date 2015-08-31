@@ -138,7 +138,7 @@ class InputType(models.Model):
 
 
 class Reference(models.Model):
-    reference_id = models.IntegerField(primary_key=True)
+    reference_id = models.AutoField(primary_key=True)
     filename = models.CharField(max_length=200)
 
     class Meta:
