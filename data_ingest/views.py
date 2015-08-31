@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.views.generic.edit import CreateView
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
@@ -157,4 +157,19 @@ class UploadRefView(View):
         Reference(filename=file.name).save()
 
         logger.info('{} uploaded {}'.format(self.request.user, file.name))
+        return ReconResponse({'result': 'ok'})
+
+
+class DeleteRowView(View):
+    def get(self, request):
+        row_id = request.GET.get('rowId', None)
+
+        if not row_id:
+            return HttpResponseBadRequest('Missing required parameter: row_id')
+
+        try:
+            RawCatch.objects.get(id=row_id).delete()
+        except RawCatch.DoesNotExist:
+            return HttpResponseNotFound('Row does not exist')
+
         return ReconResponse({'result': 'ok'})

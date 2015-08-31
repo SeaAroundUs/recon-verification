@@ -115,10 +115,12 @@ class RawCatch(DirtyFieldsMixin, models.Model):
 
     @classmethod
     def fields(cls):
-        return list(map(lambda x: x.name, cls._meta.fields))[:-4]
+        fields = list(map(lambda x: x.name, cls._meta.fields))[:-4]
+        fields.append('delete_row')
+        return fields
 
     def to_dict(self):
-        return OrderedDict((field, getattr(self, field)) for field in self.fields())
+        return OrderedDict((field, getattr(self, field, '')) for field in self.fields())
 
     @staticmethod
     def allowed_query_fields():

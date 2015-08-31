@@ -120,12 +120,18 @@ var Table = {
             cellProperties.readOnly = true;
             $td.addClass('readOnly');
         }
+
+        // add delete column
+        if (prop === 'delete_row') {
+            $td.html('<a href="#" class="delete" data-idx="' + row + '" data-id="' + id + '">Delete</a>');
+        }
     },
 
     init: function() {
         if ($('#edit-normalize').length) {
             Table.$table = $('#reconDataTableElement');
             Table.initTable();
+            Table.initDeleteButton();
             Table.loadTableData(function() { Table.events.saveAndNormalize(true); });
         }
     },
@@ -140,6 +146,28 @@ var Table = {
         Handsontable.Dom.addEvent($('#commit')[0], 'click', Table.events.commit);
     },
 
+    initDeleteButton: function() {
+        Table.$table.on('click', 'a.delete', function(e) {
+            var $target = $(e.target);
+            var idx = $target.data('idx');
+            var rowId = $target.data('id');
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (confirm('Really delete row ' + rowId + '?')) {
+                $.get(Util.urls.deleteRow, { rowId: rowId }).done(function() {
+                    var data = Table.dataTable.getData();
+                    data.splice(idx, 1);
+                    Table.dataTable.loadData(data);
+                    Util.setMessage('<span class="glyphicon glyphicon-ok-circle"></span> Row deleted');
+                }).fail(function() {
+                    Util.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> Something went wrong');
+                });
+            }
+        });
+    },
+
     afterChange: function (changes, source) {
         if (source === 'loadData') {
             return null; // don't need to do anything on initial table load
@@ -147,7 +175,7 @@ var Table = {
 
         // mark changed rows as dirty/uncommitted
         changes.forEach(function(change) {
-            if (change[2] === change[3]) { // make sure the value actually changed
+            if (!change || change[2] === change[3]) { // make sure the value actually changed
                 return;
             }
 
@@ -189,7 +217,7 @@ var Table = {
             allowInsertColumn: false,
             allowInsertRow: false,
             allowRemoveColumn: false,
-            allowRemoveRow: false,
+            allowRemoveRow: true,
             colHeaders: headers,
             columnSorting: true,
             startCols: 46,
@@ -215,7 +243,7 @@ var Table = {
         var ro;
         if (!ro) {
             ro = Table.getTableHeaders().map(function(header) {
-                if (header === 'id') {
+                if (header === 'id' || header === 'delete_row') {
                     return true;
                 }
 

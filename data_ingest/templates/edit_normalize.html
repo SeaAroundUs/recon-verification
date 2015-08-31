@@ -6,6 +6,7 @@
 <input type="hidden" id="saveData" class="djangoURL" value="{% url 'save-data' %}?{{ request.GET.urlencode }}" />
 <input type="hidden" id="normalizeData" class="djangoURL" value="{% url 'normalize-data' %}?{{ request.GET.urlencode }}" />
 <input type="hidden" id="commitData" class="djangoURL" value="{% url 'commit-data' %}?{{ request.GET.urlencode }}" />
+<input type="hidden" id="deleteRow" class="djangoURL" value="{% url 'delete-row' %}" />
 {% endblock %}
 {% block content %}
     <div id="edit-normalize" class="panel-group" role="tablist" aria-multiselectable="true">

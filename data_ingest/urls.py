@@ -1,7 +1,8 @@
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from data_ingest.views import EditNormalizeView, DataBrowseView, FileUploadCreateView, \
-    UploadDataJsonView, CatchFieldsJsonView, DataNormalizationView, CommitView, UploadRefView
+    UploadDataJsonView, CatchFieldsJsonView, DataNormalizationView, CommitView, \
+    UploadRefView, DeleteRowView
 
 
 urlpatterns = patterns(
@@ -13,6 +14,7 @@ urlpatterns = patterns(
     url(r'^browse-upload/$', login_required(DataBrowseView.as_view()), name='browse-upload'),
     url(r'^upload/$', login_required(FileUploadCreateView.as_view()), name='upload-json'),
     url(r'^upload-ref/$', login_required(UploadRefView.as_view()), name='upload-ref'),
+    url(r'^delete-row/$', login_required(DeleteRowView.as_view()), name='delete-row'),
     url(r'^data/(?P<page>\d+)$',
         login_required(UploadDataJsonView.as_view()),
         name='uploaded-data-json'),
