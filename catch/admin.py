@@ -1,9 +1,10 @@
 from django.contrib import admin
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
-    AccessAgreement, AccessType
+    AccessAgreement, AccessType, GeoEntity
 
 admin.site.register(FishingEntity, FishingEntity.Admin)
 admin.site.register(EEZ, EEZ.Admin)
+admin.site.register(GeoEntity, GeoEntity.Admin)
 admin.site.register(FAO, FAO.Admin)
 admin.site.register(ICESArea, ICESArea.Admin)
 admin.site.register(NAFO, NAFO.Admin)

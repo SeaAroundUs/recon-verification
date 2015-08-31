@@ -3,19 +3,48 @@ from django.contrib import admin
 from data_ingest.models import RawCatch
 
 
-class FishingEntity(models.Model):
-    fishing_entity_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=200)
-    geo_entity_id = models.IntegerField()  # TODO FK to geo_entity model
-    date_allowed_to_fish_other_eezs = models.IntegerField()
-    date_allowed_to_fish_high_seas = models.IntegerField()
+class GeoEntity(models.Model):
+    geo_entity_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    admin_geo_entity_id = models.IntegerField()
+    jurisdiction_id = models.IntegerField(null=True, blank=True)
+    started_eez_at = models.CharField(max_length=50, null=True, blank=True)
     legacy_c_number = models.IntegerField()
-    is_currently_used_for_web = models.BooleanField()
-    is_currently_used_for_reconstruction = models.BooleanField()
-    remarks = models.CharField(max_length=50, null=True)
+    legacy_admin_c_number = models.IntegerField()
 
     class Meta:
-        verbose_name_plural = 'Fishing Entities'
+        verbose_name = 'Geo entity'
+        verbose_name_plural = 'Geo entities'
+        db_table = 'geo_entity'
+        ordering = ['geo_entity_id']
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'geo_entity_id',
+            'name'
+        )
+        search_fields = ['name']
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name
+
+
+class FishingEntity(models.Model):
+    fishing_entity_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    geo_entity = models.ForeignKey(to=GeoEntity, null=True, blank=True)
+    date_allowed_to_fish_other_eezs = models.IntegerField()
+    date_allowed_to_fish_high_seas = models.IntegerField()
+    legacy_c_number = models.IntegerField(null=True, blank=True)
+    is_currently_used_for_web = models.BooleanField(default=True)
+    is_currently_used_for_reconstruction = models.BooleanField(default=True)
+    remarks = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Fishing entity'
+        verbose_name_plural = 'Fishing entities'
         db_table = 'fishing_entity'
         ordering = ['fishing_entity_id']
         managed = False
@@ -36,21 +65,21 @@ class FishingEntity(models.Model):
 class EEZ(models.Model):
     eez_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
-    alternate_name = models.CharField(max_length=200)
+    alternate_name = models.CharField(max_length=200, null=True, blank=True)
     geo_entity_id = models.IntegerField()
-    area_status_id = models.IntegerField()
+    area_status_id = models.IntegerField(default=2)
     legacy_c_number = models.IntegerField()
     legacy_count_code = models.IntegerField()
     fishbase_id = models.CharField(max_length=4)
-    coords = models.CharField(max_length=400, null=True)
-    can_be_displayed_on_web = models.BooleanField()
-    is_currently_used_for_web = models.BooleanField()
-    is_currently_used_for_reconstruction = models.BooleanField()
-    declaration_year = models.IntegerField()
-    earliest_access_agreement_date = models.IntegerField()
+    coords = models.CharField(max_length=400, null=True, blank=True)
+    can_be_displayed_on_web = models.BooleanField(default=True)
+    is_currently_used_for_web = models.BooleanField(default=False)
+    is_currently_used_for_reconstruction = models.BooleanField(default=False)
+    declaration_year = models.IntegerField(default=1982)
+    earliest_access_agreement_date = models.IntegerField(null=True, blank=True)
     fishing_entity = models.ForeignKey(to=FishingEntity, db_column='is_home_eez_of_fishing_entity_id')
     allows_coastal_fishing_for_layer2_data = models.BooleanField()
-    ohi_link = models.CharField(max_length=400)
+    ohi_link = models.CharField(max_length=400, null=True, blank=True)
 
     class Meta:
         verbose_name = 'EEZ'
