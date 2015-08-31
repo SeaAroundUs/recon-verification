@@ -1,36 +1,76 @@
 from django.db import models
+from django.contrib import admin
 from data_ingest.models import RawCatch
 
 
 class FishingEntity(models.Model):
     fishing_entity_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
+    geo_entity_id = models.IntegerField()  # TODO FK to geo_entity model
+    date_allowed_to_fish_other_eezs = models.IntegerField()
+    date_allowed_to_fish_high_seas = models.IntegerField()
+    legacy_c_number = models.IntegerField()
+    is_currently_used_for_web = models.BooleanField()
+    is_currently_used_for_reconstruction = models.BooleanField()
+    remarks = models.CharField(max_length=50, null=True)
 
     class Meta:
         verbose_name_plural = 'Fishing Entities'
         db_table = 'fishing_entity'
-        ordering = ['name']
+        ordering = ['fishing_entity_id']
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'fishing_entity_id',
+            'name'
+        )
+        list_filter = ('is_currently_used_for_web',)
+        search_fields = ['name']
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0} - {1}".format(self.fishing_entity_id, self.name)
+        return self.name
 
 
 class EEZ(models.Model):
     eez_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
     alternate_name = models.CharField(max_length=200)
+    geo_entity_id = models.IntegerField()
+    area_status_id = models.IntegerField()
+    legacy_c_number = models.IntegerField()
+    legacy_count_code = models.IntegerField()
+    fishbase_id = models.CharField(max_length=4)
+    coords = models.CharField(max_length=400, null=True)
+    can_be_displayed_on_web = models.BooleanField()
+    is_currently_used_for_web = models.BooleanField()
+    is_currently_used_for_reconstruction = models.BooleanField()
+    declaration_year = models.IntegerField()
+    earliest_access_agreement_date = models.IntegerField()
     fishing_entity = models.ForeignKey(to=FishingEntity, db_column='is_home_eez_of_fishing_entity_id')
+    allows_coastal_fishing_for_layer2_data = models.BooleanField()
+    ohi_link = models.CharField(max_length=400)
 
     class Meta:
         verbose_name = 'EEZ'
         verbose_name_plural = 'EEZs'
         db_table = 'eez'
-        ordering = ['name']
+        ordering = ['eez_id']
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'eez_id',
+            'name',
+            'fishing_entity'
+        )
+        list_filter = ('is_currently_used_for_web',)
+        search_fields = ['name', 'fishing_entity__name']
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0} - {1}".format(self.eez_id, self.name)
+        return self.name
 
 
 class FAO(models.Model):
@@ -42,11 +82,19 @@ class FAO(models.Model):
         verbose_name = 'FAO'
         verbose_name_plural = 'FAOs'
         db_table = 'fao_area'
-        ordering = ['name']
+        ordering = ['fao_area_id']
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'fao_area_id',
+            'name'
+        )
+        search_fields = ['name']
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0} - {1}".format(self.fao_area_id, self.name)
+        return self.name
 
 
 class ICESArea(models.Model):
@@ -57,10 +105,19 @@ class ICESArea(models.Model):
         verbose_name = 'ICES Area'
         verbose_name_plural = 'ICES Areas'
         db_table = 'ices_area'
+        ordering = ['ices_area_id']
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'ices_area_id',
+            'ices_area'
+        )
+        search_fields = ['ices_area']
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0} - {1}".format(self.ices_area_id, self.ices_area)
+        return self.ices_area
 
 
 class NAFO(models.Model):
@@ -73,8 +130,16 @@ class NAFO(models.Model):
         db_table = 'nafo'
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'nafo_division_id',
+            'nafo_division'
+        )
+        search_fields = ['nafo_division']
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0} - {1}".format(self.nafo_id, self.nafo_division)
+        return self.nafo_division
 
 
 class Sector(models.Model):
@@ -82,11 +147,20 @@ class Sector(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        verbose_name = 'Sector type'
+        verbose_name_plural = 'Sector types'
         db_table = 'sector_type'
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'sector_type_id',
+            'name'
+        )
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0}".format(self.name)
+        return self.name
 
 
 class CatchType(models.Model):
@@ -94,17 +168,27 @@ class CatchType(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        verbose_name = 'Catch type'
+        verbose_name_plural = 'Catch types'
         db_table = 'catch_type'
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'catch_type_id',
+            'name'
+        )
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0}".format(self.name)
+        return self.name
 
 
 class Taxon(models.Model):
     taxon_key = models.IntegerField(primary_key=True)
     common_name = models.CharField(max_length=255)
     scientific_name = models.CharField(max_length=255)
+    # TODO much more to do here
 
     class Meta:
         verbose_name_plural = 'Taxa'
@@ -112,8 +196,17 @@ class Taxon(models.Model):
         db_table = 'taxon'
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'taxon_key',
+            'common_name',
+            'scientific_name'
+        )
+        search_fields = ['taxon_key', 'common_name', 'scientific_name']
+        show_full_result_count = True
+
     def __str__(self):
-        return u"{0} - {1}  ({2})".format(self.taxon_key, self.scientific_name, self.common_name)
+        return self.common_name
 
 
 class Gear(models.Model):
@@ -121,8 +214,12 @@ class Gear(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        ordering = ['gear_id']
         db_table = 'gear'
         managed = False
+
+    def __str__(self):
+        return self.name
 
 
 class InputType(models.Model):
@@ -130,11 +227,12 @@ class InputType(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        ordering = ['input_type_id']
         db_table = 'input_type'
         managed = False
 
     def __str__(self):
-        return u"{0}".format(self.name)
+        return self.name
 
 
 class Reference(models.Model):
@@ -146,7 +244,7 @@ class Reference(models.Model):
         managed = False
 
     def __str__(self):
-        return u"{0}".format(self.name)
+        return self.name
 
 
 class Year(models.Model):
@@ -154,11 +252,12 @@ class Year(models.Model):
     year = models.IntegerField()
 
     class Meta:
+        ordering = ['id']
         db_table = 'time'
         managed = False
 
     def __str__(self):
-        return u"{0}".format(self.year)
+        return self.name
 
     @classmethod
     def valid_years(cls):
@@ -198,3 +297,87 @@ class Catch(models.Model):
     class Meta:
         db_table = 'catch'
         managed = False
+
+
+class AccessType(models.Model):
+    id = models.AutoField(primary_key=True)
+    description = models.TextField()
+
+    class Meta:
+        verbose_name = 'Access type'
+        verbose_name_plural = 'Access types'
+        ordering = ['id']
+        db_table = 'access_type'
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'id',
+            'description'
+        )
+        search_fields = ['description']
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.description
+
+
+class AccessAgreement(models.Model):
+    id = models.AutoField(primary_key=True)
+    fishing_entity_id = models.IntegerField()
+    fishing_entity = models.CharField(max_length=255)
+    eez_id = models.IntegerField()
+    eez_name = models.CharField(max_length=255)
+    title_of_agreement = models.CharField(max_length=255)
+    access_category = models.CharField(max_length=255)
+    access_type = models.ForeignKey(to=AccessType)
+    agreement_type_id = models.IntegerField()
+    start_year = models.IntegerField()
+    end_year = models.IntegerField()
+    duration_type = models.CharField(max_length=255, null=True)
+    duration_details = models.CharField(max_length=255, null=True)
+    functional_group_id = models.CharField(max_length=255, null=True)
+    functional_group_details = models.CharField(max_length=255, null=True)
+    fees = models.CharField(max_length=255, null=True)
+    quotas = models.CharField(max_length=255, null=True)
+    other_restrictions = models.CharField(max_length=255, null=True)
+    notes_on_agreement = models.CharField(max_length=255, null=True)
+    ref_id = models.IntegerField()
+    source_link = models.CharField(max_length=255, null=True)
+    pdf = models.CharField(max_length=255, null=True)
+    verified = models.CharField(max_length=255, null=True)
+    reference_original = models.CharField(max_length=255, null=True)
+    location_reference_original = models.CharField(max_length=255, null=True)
+    reference = models.CharField(max_length=255, null=True)
+    title_of_reference = models.CharField(max_length=255, null=True)
+    location_reference = models.CharField(max_length=255, null=True)
+    reference_type = models.CharField(max_length=255, null=True)
+    pages = models.CharField(max_length=255, null=True)
+    number_of_boats = models.CharField(max_length=255, null=True)
+    gear = models.CharField(max_length=255, null=True)
+    notes_on_the_references = models.CharField(max_length=255, null=True)
+    change_log = models.CharField(max_length=255, null=True)
+
+    class Meta:
+        verbose_name = 'Access agreement'
+        verbose_name_plural = 'Access agreements'
+        ordering = ['id']
+        db_table = 'access_agreement'
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'id',
+            'fishing_entity',
+            'eez_name',
+            'title_of_agreement',
+            'access_type',
+            'start_year',
+            'end_year'
+        )
+        list_filter = ('access_type',)
+        search_fields = ['fishing_entity', 'eez_name', 'title_of_agreement']
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.title_of_agreement
