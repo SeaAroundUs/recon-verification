@@ -213,13 +213,126 @@ class CatchType(models.Model):
         return self.name
 
 
-class Taxon(models.Model):
-    taxon_key = models.IntegerField(primary_key=True)
-    common_name = models.CharField(max_length=255)
-    scientific_name = models.CharField(max_length=255)
-    # TODO much more to do here
+class CommercialGroup(models.Model):
+    commercial_group_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
 
     class Meta:
+        verbose_name = 'Commercial group'
+        verbose_name_plural = 'Commercial groups'
+        db_table = 'commercial_groups'
+        ordering = ['commercial_group_id']
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'commercial_group_id',
+            'name'
+        )
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name
+
+
+class FunctionalGroup(models.Model):
+    functional_group_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=20)
+    description = models.CharField(max_length=50, null=True, blank=True)
+    target_grp = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Functional group'
+        verbose_name_plural = 'Functional groups'
+        db_table = 'functional_groups'
+        ordering = ['functional_group_id']
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'functional_group_id',
+            'name'
+        )
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name
+
+
+class TaxonGroup(models.Model):
+    taxon_group_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Taxon group'
+        verbose_name_plural = 'Taxon groups'
+        db_table = 'taxon_group'
+        ordering = ['taxon_group_id']
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'taxon_group_id',
+            'name'
+        )
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name
+
+
+class TaxonLevel(models.Model):
+    taxon_level_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Taxon level'
+        verbose_name_plural = 'Taxon levels'
+        db_table = 'taxon_level'
+        ordering = ['taxon_level_id']
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'taxon_level_id',
+            'name'
+        )
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name
+
+
+class Taxon(models.Model):
+    taxon_key = models.IntegerField(primary_key=True)
+    scientific_name = models.CharField(max_length=255)
+    common_name = models.CharField(max_length=255)
+    commercial_group = models.ForeignKey(to=CommercialGroup)
+    functional_group = models.ForeignKey(to=FunctionalGroup)
+    sl_max = models.IntegerField()
+    tl = models.DecimalField(max_digits=50, decimal_places=20)
+    taxon_level = models.ForeignKey(to=TaxonLevel, null=True, blank=True)
+    taxon_group = models.ForeignKey(to=TaxonGroup, null=True, blank=True)
+    isscaap_id = models.IntegerField(null=True, blank=True)  # TODO FK?
+    lat_north = models.IntegerField(null=True, blank=True)
+    lat_south = models.IntegerField(null=True, blank=True)
+    min_depth = models.IntegerField(null=True, blank=True)
+    max_depth = models.IntegerField(null=True, blank=True)
+    loo = models.DecimalField(max_digits=50, decimal_places=20, null=True, blank=True)
+    woo = models.DecimalField(max_digits=50, decimal_places=20, null=True, blank=True)
+    k = models.DecimalField(max_digits=50, decimal_places=20, null=True, blank=True)
+    x_min = models.IntegerField(null=True, blank=True)
+    x_max = models.IntegerField(null=True, blank=True)
+    y_min = models.IntegerField(null=True, blank=True)
+    y_max = models.IntegerField(null=True, blank=True)
+    has_habitat_index = models.BooleanField()
+    has_map = models.BooleanField()
+    is_baltic_only = models.BooleanField()
+
+    class Meta:
+        verbose_name = 'Taxon'
         verbose_name_plural = 'Taxa'
         ordering = ['common_name', 'scientific_name']
         db_table = 'taxon'
@@ -351,16 +464,37 @@ class AccessType(models.Model):
         return self.description
 
 
+class AgreementType(models.Model):
+    id = models.IntegerField(primary_key=True)
+    description = models.TextField()
+
+    class Meta:
+        verbose_name = 'Agreement type'
+        verbose_name_plural = 'Agreement types'
+        ordering = ['id']
+        db_table = 'agreement_type'
+        managed = False
+
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'id',
+            'description'
+        )
+        search_fields = ['description']
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.description
+
+
 class AccessAgreement(models.Model):
     id = models.AutoField(primary_key=True)
-    fishing_entity_id = models.IntegerField()
-    fishing_entity = models.CharField(max_length=255)
-    eez_id = models.IntegerField()
-    eez_name = models.CharField(max_length=255)
+    fishing_entity = models.ForeignKey(to=FishingEntity)
+    eez = models.ForeignKey(to=EEZ)
     title_of_agreement = models.CharField(max_length=255)
     access_category = models.CharField(max_length=255)
     access_type = models.ForeignKey(to=AccessType)
-    agreement_type_id = models.IntegerField()
+    agreement_type = models.ForeignKey(to=AgreementType)
     start_year = models.IntegerField()
     end_year = models.IntegerField()
     duration_type = models.CharField(max_length=255, null=True, blank=True)
@@ -398,9 +532,10 @@ class AccessAgreement(models.Model):
         list_display = (
             'id',
             'fishing_entity',
-            'eez_name',
+            'eez',
             'title_of_agreement',
             'access_type',
+            'agreement_type',
             'start_year',
             'end_year'
         )
