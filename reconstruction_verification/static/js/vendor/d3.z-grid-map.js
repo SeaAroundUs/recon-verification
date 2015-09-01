@@ -6,7 +6,8 @@
 
   var defaultColorScale = d3.scale.quantize()
     .domain([0,255])
-    .range(['#000', '#111', '#222', '#333', '#444', '#555', '#666', '#777', '#888', '#999', '#aaa', '#bbb', '#ccc', '#ddd', '#eee', '#fff']);
+    .range(["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]);
+    // RdYlGn[10]
 
   var worldGeoJSON = {
     type: 'FeatureCollection',
@@ -29,14 +30,27 @@
     d3.range(-89.9999,89.9999).map(function(x) {return [-179.9999, x];}
   )];
 
-  var GridMap = function(container, gridSize, options) {
+  var Grid = function(data, gridSize, bbox) {
+    // represents a gridded data set.  Unless bbox is supplied,
+    // it's assumed to have global coverage
+    this.data = data;
+    this.rows = gridSize[1];
+    this.cols = gridSize[0];
+    this.bbox = bbox; // optional, currently unused
+  };
+
+  var Layer = function(options) {
+    this.zIndex = options ? options.zIndex : 1;
+    this.options = options || {strokeColor: 'rgba(100,100,100,.8)', fillColor: 'rgba(237,178,48,1)'};
+    this.geojson = null;
+    this.grid = null;
+  };
+
+  var GridMap = function(container, options) {
     var self = this;
 
-    this.rotate_latitude = 0.0;
-    this.rotate_longitude = 0.0;
-
-    this.gridCols = gridSize[0];
-    this.gridRows = gridSize[1];
+    this.rotateLatitude = 0.0;
+    this.rotateLongitude = 0.0;
 
     this.container = d3.select(container);
 
@@ -44,13 +58,13 @@
     this.width = rect.width;
     this.height = rect.height;
 
+    this.grids = [];
+    this.layers = [];
+
     this.options = options;
 
-    this.landColor = options.landColor || 'rgba(237,178,48,1)';
     this.seaColor = options.seaColor || 'rgba(21,98,180,.8)';
-    this.landOutlineColor = options.landOutlineColor || 'rgba(100,100,100,.8)';
     this.graticuleColor = options.graticuleColor || 'rgba(100,100,100,.3)';
-    this.geoJsonColor = options.geoJsonColor || 'rgba(0,0,0,1)';
 
     self.area = 1; // minimum area threshold for simplification
 
@@ -62,20 +76,18 @@
       }
     });
 
-    this.projection = options.projection || d3.geo.mollweide();
+    this.projection = options.projection || d3.geo.aitoff();
     this.projection
       .translate([this.width/2, this.height/2])
       .scale(this.width/6)
       .clipExtent([[0, 0], [self.width, self.height]])
       .precision(0.1);
 
-    topojson.presimplify(options.countries);
     this.canvas = this.container
       .append('canvas')
       .style('position', 'absolute')
       .style('top', '0px')
       .style('left', '0px')
-      .datum(topojson.feature(options.countries, options.countries.objects.countries))
       .attr('width', this.width)
       .attr('height', this.height);
 
@@ -84,11 +96,13 @@
       .style('position', 'absolute')
       .style('top', '0px')
       .style('left', '0px')
+      .style('z-index', '2')
       .attr('width', this.width)
       .attr('height', this.height);
 
     this.context = this.canvas.node().getContext('2d');
-    this.hud_context = this.hud.node().getContext('2d');
+    this.hudContext = this.hud.node().getContext('2d');
+
     this.colorScale = options.colorScale || defaultColorScale;
 
     this.simplifyingPath = d3.geo.path()
@@ -99,9 +113,9 @@
       .projection(this.projection)
       .context(this.context);
 
-    this.hud_path = d3.geo.path()
+    this.hudPath = d3.geo.path()
       .projection(this.projection)
-      .context(this.hud_context);
+      .context(this.hudContext);
 
     this.init = function() {
       this.initEvents();
@@ -111,62 +125,108 @@
 
     this.destroy = function() {
       this.canvas.remove();
+      this.hudCanvas.remove();
+      this.grids = [];
+      this.geojson = null;
     };
 
+    this.getCell = function(cellId) {
+      // return value if we have a grid and the grid contains a nonzero alpha channel from
+      // (RGBA) values
+      var grid = this.getGrid();
 
-    this.cellIdToLonLat = function(cellId) {
+      if (grid && grid.data[cellId*4 + 3]) {
+        return grid.data[cellId*4];
+      }
+    };
+
+    this.cellIdToLonLat = function(cellId, grid) {
       /**
        * given a cellId, returns an array containing the [lon,lat] of the
        * upper left corner  points
        * @param {Number} cellId
        * @return {Array} coordinates
        */
-        var _id = cellId - 1;
-        var lon = -180 + (_id % this.gridCols)/this.gridCols * this.gridRows ;
-        var lat = 90 - (~~(_id / this.gridCols)) * (180 / this.gridRows);
-        return [lon, lat];
+
+      var rows = 360;
+      var cols = 720;
+      if (grid) {
+        rows = grid.rows;
+        cols = grid.cols;
+      }
+      var _id = cellId - 1;
+      var lon = -180 + (_id % cols)/cols * rows;
+      var lat = 90 - (~~(_id / cols)) * (180 / rows);
+      return [lon, lat];
     };
 
     this.cellCache = [];
 
-    this.cellIdToCoordinates = function(cellId) {
+    this.cellIdToCoordinates = function(cellId, grid) {
       /**
        * given a cellId, returns an array of arrays containing the [lon,lat] of the corner
        * points
        * @param {Number} cellId
+       * @param {Grid} grid to query, optional
        * @return {Array} coordinates
        */
 
       if (this.cellCache[cellId]) {
         return this.cellCache[cellId];
       }
-      var x_size = 360 / this.gridCols;
-      var y_size = 180 / this.gridRows;
 
-      var lonLat = this.cellIdToLonLat(cellId);
+      var rows = 360;
+      var cols = 720;
+      if (grid) {
+        rows = grid.rows;
+        cols = grid.cols;
+      }
+      var xSize = 360 / cols;
+      var ySize = 180 / rows;
+
+      var lonLat = this.cellIdToLonLat(cellId, grid);
       var coordinates = [
         lonLat,
-        [lonLat[0] + x_size, lonLat[1]],
-        [lonLat[0] + x_size, lonLat[1]-y_size],
-        [lonLat[0], lonLat[1]-y_size],
+        [lonLat[0] + xSize, lonLat[1]],
+        [lonLat[0] + xSize, lonLat[1] - ySize],
+        [lonLat[0], lonLat[1] - ySize],
         lonLat
       ];
       this.cellCache[cellId] = coordinates;
       return coordinates;
     };
 
+    this.getGrid = function() {
+      /**
+       * returns 'the' grid
+       */
+
+      // FIXME: is picking the first grid good enough?
+      var grid = null;
+      for (var i=0; i < this.layers.length; i++) {
+        if (this.layers[i].grid) {
+          return this.layers[i].grid;
+        }
+      }
+    };
+
     this.coordinatesToCellId = function(coords) {
       var lon = coords[0];
       var lat = coords[1];
 
-      var row = ~~(this.gridRows - (lat + 90) / 180  * this.gridRows);
-      var col = ~~((lon + 180) / 360  * this.gridCols);
+      var grid = this.getGrid();
 
-      var cellId = row * this.gridCols + col + 1;
+      var rows = grid.rows;
+      var cols = grid.cols;
+
+      var row = ~~(rows - (lat + 90) / 180  * rows);
+      var col = ~~((lon + 180) / 360  * cols);
+
+      var cellId = row * cols + col + 1;
       return cellId;
     };
 
-    this.updateHUD = function(cellId, coords, feature) {
+    this.updateHUD = function(cellId, coords, cell) {
       var coordFormat = d3.format(' >+7.3f');
 
       var fontSize = self.options.hud.fontSize || 30;
@@ -176,41 +236,41 @@
 
       var font = fontSize + 'px ' + fontFace;
       var h = fontSize + verticalOffset;
-      var gradient = self.hud_context.createLinearGradient(0,self.height-h,0,self.height);
+      var gradient = self.hudContext.createLinearGradient(0,self.height-h,0,self.height);
       gradient.addColorStop(0, 'rgba(0,0,0,0.0');
       gradient.addColorStop(1, 'rgba(0,0,0,1.0');
 
-      self.hud_context.clearRect(0, 0, self.width, self.height);
-      self.hud_context.fillStyle = gradient;
-      self.hud_context.fillRect(0,self.height-(h), self.width, self.height);
+      self.hudContext.clearRect(0, 0, self.width, self.height);
+      self.hudContext.fillStyle = gradient;
+      self.hudContext.fillRect(0,self.height-(h), self.width, self.height);
 
       var s = '';
 
       s = 'cell: ' + cellId + ' ( ' + coordFormat(coords[0]) + '°,' + coordFormat(coords[1]) + '° )';
 
-      if (feature === null) {
-        var coordinates = self.cellIdToCoordinates(cellId);
+      var coordinates = self.cellIdToCoordinates(cellId, self.grids[0]);
 
-        feature = {
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [coordinates]
-          },
-        };
-      } else {
-          s += ' value: ' + feature.properties.value;
+      var feature = {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coordinates]
+        },
+      };
+
+      if (cell !== undefined) {
+        s += ' value: ' + cell;
       }
 
-      self.hud_context.font = font;
-      self.hud_context.fillStyle = fontColor;
-      self.hud_context.fillText(s, 0, self.height - verticalOffset);
+      self.hudContext.font = font;
+      self.hudContext.fillStyle = fontColor;
+      self.hudContext.fillText(s, 0, self.height - verticalOffset);
 
-      self.hud_context.beginPath();
-      self.hud_context.strokeStyle = 'white';
-      self.hud_context.lineWidth = 2;
-      self.hud_path(feature);
-      self.hud_context.stroke();
+      self.hudContext.beginPath();
+      self.hudContext.strokeStyle = 'white';
+      self.hudContext.lineWidth = 2;
+      self.hudPath(feature);
+      self.hudContext.stroke();
     };
 
     this.initEvents = function() {
@@ -220,10 +280,12 @@
         .on('dragstart', function () {
         })
         .on('drag', function () {
-          self.rotate_longitude += 100 * d3.event.dx / zoom.scale();
-          self.rotate_latitude -= 100 * d3.event.dy / zoom.scale();
-          self.projection.rotate([self.rotate_longitude, self.rotate_latitude]);
+          self.rotateLongitude += 100 * d3.event.dx / zoom.scale();
+          self.rotateLatitude -= 100 * d3.event.dy / zoom.scale();
+          self.projection.rotate([self.rotateLongitude, self.rotateLatitude]);
           self.drawWorld();
+          self.drawGeoJSONLayers();
+          self.drawGraticule()
         })
         .on('dragend', function () {
           self.debouncedDraw();
@@ -243,6 +305,8 @@
           self.area = 20000 / scale / scale;
           self.projection.scale(scale);
           self.drawWorld();
+          self.drawGeoJSONLayers();
+          self.drawGraticule()
         })
         .scale(this.width/6)
         .scaleExtent([this.width/6, 2000]);
@@ -255,24 +319,24 @@
           return;
         }
         var coords = self.projection.invert(d3.mouse(this));
+
+        if (!coords) {
+          return;
+        }
         var cellId = null;
-        var feature = null;
+        var cell = null;
 
-        if (self.geojson && coords[0] && coords[1] && coords[0] > -180 && coords[0] < 180 && coords[1] > -90 && coords[1] < 90) {
+        if (coords[0] && coords[1] && coords[0] > -180 && coords[0] < 180 && coords[1] > -90 && coords[1] < 90) {
           cellId = self.coordinatesToCellId(coords);
-          feature = self.geojson.features.filter(function(f) {return f.properties.cellId === cellId;});
-
-          if (feature.length === 1) {
-            feature = feature[0];
+          cell = self.getCell(cellId);
+          if (cell) {
             if (self.options.onCellHover) {
-              self.options.onCellHover(feature);
+              self.options.onCellHover(cell);
             }
-          } else {
-            feature = null;
           }
         }
         if (self.options.hud && cellId) {
-          self.updateHUD(cellId, coords, feature);
+          self.updateHUD(cellId, coords, cell);
         }
       });
     };
@@ -288,70 +352,122 @@
       this.context.closePath();
       this.context.fillStyle = this.seaColor;
       this.context.fill();
+    };
 
-      // draw countries
-      this.context.beginPath();
-      this.canvas.each(this.simplifyingPath);
-      this.context.closePath();
-      this.context.strokeStyle = this.landOutlineColor;
-      this.context.lineWidth = 1;
-      this.context.stroke();
-      this.context.fillStyle = this.landColor;
-      this.context.fill();
+    this.drawGeoJSONLayer = function(layer) {
 
-      // overlay graticule
+      self.context.beginPath();
+      self.simplifyingPath(layer.geojson);
+      self.context.strokeStyle = layer.options.strokeColor;
+      self.context.lineWidth = 0.5;
+      self.context.stroke();
+
+      self.context.fillStyle = layer.options.fillColor;
+      self.context.fill();
+    };
+
+    this.drawGrid = function(grid) {
+
+      var image = this.context.getImageData(0, 0, this.width, this.height);
+      var imageData = image.data;
+
+      for (var y = 0; y < this.height; y++) {
+        for (var x = 0; x < this.width; x++) {
+          var p = this.projection.invert([x, y]);
+
+          if (!p) {
+            continue;
+          }
+
+          var λ = p[0];
+          var φ = p[1];
+
+          if (λ > 180 || λ < -180 || φ > 90 || φ < -90) {
+            continue;
+          }
+          var i = (x + this.width * y) * 4;
+
+          // 1.5 isn't a magic number like Carmack's 0x5f3759df.
+          // Add 0.5 so that our "~~" floor equivalent becomes
+          // round().  Add 1 because cell IDs are defined to be 1-based instead
+          // of our 0-based arrays.
+          var q = ~~((~~((90 - φ) / 180 * grid.rows) * grid.cols + (180 + λ) / 360 * grid.cols + 1.5));
+
+          if (grid.data[q*4+3] === 0) {
+            // skip where alpha is 0;
+            continue;
+          }
+          imageData[i] = grid.data[q*4];
+          imageData[i+1] = grid.data[q*4+1];
+          imageData[i+2] = grid.data[q*4+2];
+          imageData[i+3] = grid.data[q*4+3];
+        }
+      }
+      this.context.putImageData(image, 0, 0);
+    };
+
+    this.drawGraticule = function() {
       this.context.beginPath();
       this.path(graticule);
       this.context.closePath();
       this.context.lineWidth = 1;
       this.context.strokeStyle = this.graticuleColor;
       this.context.stroke();
-
     };
 
-    this.draw = function(_geojson) {
-      if (_geojson) {
-        self.geojson = _geojson;
+    this.drawGeoJSONLayers = function() {
+      for (var i=0; i<self.layers.length; i++) {
+        var layer = self.layers[i];
+
+        if (layer.geojson) {
+          self.drawGeoJSONLayer(layer);
+        }
       }
+    };
+
+    this.draw = function() {
+
+      /**
+        * clears the canvas,
+        * draws the background
+        * draws data layers
+        * draws graticule
+        */
 
       self.drawWorld();
 
-      self.context.beginPath();
-      self.path(self.geojson);
-      self.context.strokeStyle = self.geoJsonColor;
-      self.context.lineWidth = 0.5;
-      self.context.stroke();
+      for (var i=0; i<self.layers.length; i++) {
+        var layer = self.layers[i];
 
-      if (self.geojson && self.geojson.features) {
-        self.geojson.features.forEach(function(feature){
-          var color = null;
-          if (feature.properties.rgba) {
-            color = 'rgba(' + feature.properties.rgba.join(',') + ')';
-          } else {
-            color = self.colorScale(feature.properties.value);
-          }
-          self.context.beginPath();
-          self.path(feature);
-          self.context.strokeStyle = self.geoJsonColor;
-          self.context.lineWidth = 0.5;
-          self.context.stroke();
-          self.context.fillStyle = color;
-          self.context.fill();
-        });
+        if (layer.geojson) {
+          self.drawGeoJSONLayer(layer);
+        } else if (layer.grid) {
+          self.drawGrid(layer.grid);
+        }
       }
+
+      self.drawGraticule();
     };
+
+    var debounceLock = false;
 
     var debounce = function(fn, timeout) {
       var timeoutID = -1;
       return function() {
+        if (debounceLock) {
+          console.log('debounce contention');
+          return;
+        }
+        debounceLock = true;
         if (timeoutID > -1) {
           window.clearTimeout(timeoutID);
         }
         timeoutID = window.setTimeout(fn, timeout);
+        debounceLock = false;
       };
     };
 
-    self.debouncedDraw = debounce(self.draw, 200);
+    self.debouncedDraw = debounce(self.draw, 100);
 
     this.resize = function() {
       this.width = parseInt(this.container.style('width'), 10);
@@ -371,31 +487,33 @@
       this.draw();
     };
 
-    this.setData = function(data) {
+    this.setData = function(data, options) {
+      var layer = new Layer(options);
+
       if (data.constructor === ArrayBuffer) {
-        this.setDataArrayBuffer(data);
-      } else if (data.constructor === UInt8ClampedArray) {
-        this.setDataUnsparseTypedArray(data);
+        var grid = this.arrayBufferToGrid(data, options.gridSize);
+        layer.grid = grid;
+      } else if (data.constructor === Uint8ClampedArray) {
+        var grid = new Grid(data, options.gridSize);
+        layer.grid = grid;
       } else {
         // assume GeoJSON
-        this.setDataGeoJSON(data);
+        if (data.type === 'Topology') {
+          // it is topojson
+          topojson.presimplify(data);
+          // FIXME: this isn't good.  hardcoded assuming only countries data
+          // and immediately converting topojson to geojson.
+          data = topojson.feature(data, data.objects.countries);
+        }
+        layer.geojson = data;
       }
-    };
-
-    this.setDataUnsparseTypedArray = function (data) {
-      this.geojson = this.uInt8ArrayToGeoJSON(data);
-      this.draw();
-    };
-    this.setDataArrayBuffer = function (data) {
-      this.geojson = this.arrayBufferToGeoJSON(data);
-      this.draw();
-    };
-    this.setDataGeoJSON = function (data) {
-      this.geojson = data;
-      this.draw();
+      self.layers.push(layer);
+      self.draw();
     };
 
     this.uInt8ArrayToGeoJSON = function(array) {
+      console.debug('uInt8ArrayToGeoJSON is deprecated. Use setData');
+
       // given a UInt8ClampedArray containing data in
       // RGBA format, returns GeoJSON
 
@@ -438,6 +556,40 @@
       return geojson;
     };
 
+    this.arrayBufferToGrid = function(buff, gridSize) {
+      // given an ArrayBuffer buff containing data in
+      // packed binary format, returns a Grid
+
+      // The packed binary format is expected to be
+      // a sequence of Uint32 elements in which the most
+      // significant byte is the cell value and the
+      // lowest 3 bytes represent the cell ID.
+
+      var w = gridSize[1];
+      var h = gridSize[0];
+
+      var data = new Uint8ClampedArray(w*h*4);
+
+      var typedArray = new Uint32Array(buff);
+
+      for (var i=0; i<typedArray.length; i++) {
+        var packed = typedArray[i];
+        var cellId = (packed & 0xfffff) << 2;
+        // unpack most significant byte, the data value.
+        // note the triple arrow, which fills in 0s instead of 1s.
+        var value = packed >>> 24;
+
+        var color = d3.rgb(self.colorScale(value));
+        var alpha = 255;
+
+        data[cellId+0] = color.r;
+        data[cellId+1] = color.g;
+        data[cellId+2] = color.b;
+        data[cellId+3] = alpha;
+      }
+      return new Grid(data, gridSize);
+    };
+
     this.arrayBufferToGeoJSON = function(buff) {
       // given an ArrayBuffer buff containing data in
       // packed binary format, returns GeoJSON
@@ -448,11 +600,13 @@
       // lowest 3 bytes represent the cell ID.
 
       var geojson = {
-         type: 'FeatureCollection',
-         features: []
+        type: 'FeatureCollection',
+        features: [],
+        _cache: {} // for quickly locating a feature by id
       };
 
       var typedArray = new Uint32Array(buff);
+
       for (var i=0; i<typedArray.length; i++) {
         var packed = typedArray[i];
         var cellId = packed & 0xfffff;
@@ -473,6 +627,7 @@
           }
         };
         geojson.features.push(feature);
+        geojson._cache[cellId] = feature;
       }
       return geojson;
     };

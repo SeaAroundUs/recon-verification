@@ -33,7 +33,6 @@ var Distribution = {
     var modal_content = $('#modal .modal-content');
 
     modal.on('hide.bs.modal', function() {
-      // map.destroy();
       modal_content.empty();
     });
 
@@ -57,7 +56,6 @@ var Distribution = {
           .domain([0,255])
           .range(colorbrewer.RdYlGn[10]);
         var options = {
-          countries: countries,
           hud: {
             fontSize: 20,
             fontColor: 'white',
@@ -69,13 +67,15 @@ var Distribution = {
         };
         var gridSize = [720, 360];
         $('#gridMap').html('');
-        map = new d3.geo.GridMap('#gridMap', gridSize, options);
+        map = new d3.geo.GridMap('#gridMap', options);
+        map.setData(countries);
 
         d3.xhr('taxon/' + taxon_key)
           .responseType('arraybuffer')
           .get(function(error, xhr) {
             var buff = xhr.response;
-            map.setDataArrayBuffer(buff);
+            var gridOptions = {gridSize: [720,360]};
+            map.setData(buff, gridOptions);
             map.panToCentroid();
           });
       });
