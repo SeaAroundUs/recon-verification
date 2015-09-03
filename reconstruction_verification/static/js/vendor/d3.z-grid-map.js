@@ -4,6 +4,13 @@
 (function(){
   'use strict';
 
+  try {
+    /* fake it for IE10 */
+    new Uint8ClampedArray();
+  } catch (e) {
+    window.Uint8ClampedArray = Uint8Array;
+  }
+
   var defaultColorScale = d3.scale.quantize()
     .domain([0,255])
     .range(["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]);
@@ -55,8 +62,8 @@
     this.container = d3.select(container);
 
     var rect = this.container.node().getBoundingClientRect();
-    this.width = rect.width;
-    this.height = rect.height;
+    this.width = rect.width | 0;
+    this.height = rect.height | 0;
 
     this.grids = [];
     this.layers = [];
@@ -64,7 +71,7 @@
     this.options = options;
 
     this.seaColor = options.seaColor || 'rgba(21,98,180,.8)';
-    this.graticuleColor = options.graticuleColor || 'rgba(100,100,100,.3)';
+    this.graticuleColor = options.graticuleColor || 'rgba(255,255,255,.3)';
 
     self.area = 1; // minimum area threshold for simplification
 
@@ -88,8 +95,8 @@
       .style('position', 'absolute')
       .style('top', '0px')
       .style('left', '0px')
-      .attr('width', this.width)
-      .attr('height', this.height);
+      .attr('width', self.width)
+      .attr('height', self.height);
 
     this.hud = this.container
       .append('canvas')
@@ -97,8 +104,8 @@
       .style('top', '0px')
       .style('left', '0px')
       .style('z-index', '2')
-      .attr('width', this.width)
-      .attr('height', this.height);
+      .attr('width', self.width)
+      .attr('height', self.height);
 
     this.context = this.canvas.node().getContext('2d');
     this.hudContext = this.hud.node().getContext('2d');
@@ -119,8 +126,6 @@
 
     this.init = function() {
       this.initEvents();
-      d3.select(window).on('resize', this.resize.bind(this));
-      this.draw();
     };
 
     this.destroy = function() {
@@ -237,8 +242,8 @@
       var font = fontSize + 'px ' + fontFace;
       var h = fontSize + verticalOffset;
       var gradient = self.hudContext.createLinearGradient(0,self.height-h,0,self.height);
-      gradient.addColorStop(0, 'rgba(0,0,0,0.0');
-      gradient.addColorStop(1, 'rgba(0,0,0,1.0');
+      gradient.addColorStop(0, 'rgba(0,0,0,0.0)');
+      gradient.addColorStop(1, 'rgba(0,0,0,1.0)');
 
       self.hudContext.clearRect(0, 0, self.width, self.height);
       self.hudContext.fillStyle = gradient;
@@ -273,6 +278,31 @@
       self.hudContext.stroke();
     };
 
+    this.onMouseMove = function() {
+      if (!self.options.onCellHover && !self.options.hud) {
+        return;
+      }
+      var coords = self.projection.invert(d3.mouse(this));
+
+      if (!coords) {
+        return;
+      }
+      var cellId = null;
+      var cell = null;
+
+      if (coords[0] && coords[1] && coords[0] > -180 && coords[0] < 180 && coords[1] > -90 && coords[1] < 90) {
+        cellId = self.coordinatesToCellId(coords);
+        cell = self.getCell(cellId);
+        if (cell) {
+          if (self.options.onCellHover) {
+            self.options.onCellHover(cell);
+          }
+        }
+      }
+      if (self.options.hud && cellId) {
+        self.updateHUD(cellId, coords, cell);
+      }
+    }
     this.initEvents = function() {
 
       var scale = 150;
@@ -285,17 +315,18 @@
           self.projection.rotate([self.rotateLongitude, self.rotateLatitude]);
           self.drawWorld();
           self.drawGeoJSONLayers();
-          self.drawGraticule()
+          self.drawGraticule();
+          self.draw();
         })
         .on('dragend', function () {
-          self.debouncedDraw();
+          self.draw();
         });
 
       var zoom = d3.behavior.zoom()
         .on('zoomstart', function() {
         })
         .on('zoomend', function() {
-          self.debouncedDraw();
+          self.draw();
         })
         .on('zoom', function(d) {
           if (zoom.scale() >= 2000 || zoom.scale() <= self.width/6) {
@@ -306,7 +337,8 @@
           self.projection.scale(scale);
           self.drawWorld();
           self.drawGeoJSONLayers();
-          self.drawGraticule()
+          self.drawGraticule();
+          self.draw();
         })
         .scale(this.width/6)
         .scaleExtent([this.width/6, 2000]);
@@ -314,31 +346,8 @@
       this.container.call(drag);
       this.container.call(zoom);
 
-      this.container.on('mousemove', function() {
-        if (!self.options.onCellHover && !self.options.hud) {
-          return;
-        }
-        var coords = self.projection.invert(d3.mouse(this));
-
-        if (!coords) {
-          return;
-        }
-        var cellId = null;
-        var cell = null;
-
-        if (coords[0] && coords[1] && coords[0] > -180 && coords[0] < 180 && coords[1] > -90 && coords[1] < 90) {
-          cellId = self.coordinatesToCellId(coords);
-          cell = self.getCell(cellId);
-          if (cell) {
-            if (self.options.onCellHover) {
-              self.options.onCellHover(cell);
-            }
-          }
-        }
-        if (self.options.hud && cellId) {
-          self.updateHUD(cellId, coords, cell);
-        }
-      });
+      this.container.on('mousemove', self.onMouseMove);
+      d3.select(window).on('resize', self.resize);
     };
 
     var graticule = d3.geo.graticule()();
@@ -387,11 +396,9 @@
           }
           var i = (x + this.width * y) * 4;
 
-          // 1.5 isn't a magic number like Carmack's 0x5f3759df.
-          // Add 0.5 so that our "~~" floor equivalent becomes
-          // round().  Add 1 because cell IDs are defined to be 1-based instead
+          // Add 1 because cell IDs are defined to be 1-based instead
           // of our 0-based arrays.
-          var q = ~~((~~((90 - φ) / 180 * grid.rows) * grid.cols + (180 + λ) / 360 * grid.cols + 1.5));
+          var q = ~~((~~((90 - φ) / 180 * grid.rows) * grid.cols + (180 + λ) / 360 * grid.cols + 1.0));
 
           if (grid.data[q*4+3] === 0) {
             // skip where alpha is 0;
@@ -403,7 +410,7 @@
           imageData[i+3] = grid.data[q*4+3];
         }
       }
-      this.context.putImageData(image, 0, 0);
+      self.context.putImageData(image, 0, 0);
     };
 
     this.drawGraticule = function() {
@@ -418,14 +425,15 @@
     this.drawGeoJSONLayers = function() {
       for (var i=0; i<self.layers.length; i++) {
         var layer = self.layers[i];
-
         if (layer.geojson) {
           self.drawGeoJSONLayer(layer);
         }
       }
     };
 
-    this.draw = function() {
+    this.dispatch = d3.dispatch('drawStart', 'drawEnd');
+
+    this._draw = function() {
 
       /**
         * clears the canvas,
@@ -433,6 +441,8 @@
         * draws data layers
         * draws graticule
         */
+
+      self.dispatch.drawStart();
 
       self.drawWorld();
 
@@ -447,6 +457,8 @@
       }
 
       self.drawGraticule();
+
+      self.dispatch.drawEnd();
     };
 
     var debounceLock = false;
@@ -467,24 +479,27 @@
       };
     };
 
-    self.debouncedDraw = debounce(self.draw, 100);
+    self.draw = debounce(self._draw, 500);
 
-    this.resize = function() {
-      this.width = parseInt(this.container.style('width'), 10);
-      this.canvas.attr('width', this.width);
-      this.hud.attr('width', this.width);
-      this.projection
-        .translate([this.width/2, this.height/2])
-        .clipExtent([[0, 0], [this.width, this.height]]);
-      this.draw();
+    this._resize = function() {
+      self.width = parseInt(self.container.style('width'), 10);
+      self.canvas.attr('width', self.width);
+      self.hud.attr('width', self.width);
+      self.projection
+        .translate([self.width/2, self.height/2])
+        .clipExtent([[0, 0], [self.width, self.height]]);
+      self.draw();
     };
 
+    this.resize = debounce(self._resize, 200);
+
     this.panToCentroid = function() {
+      console.debug('panToCentroid needs updating');
+      return;
       var centroid = d3.geo.centroid(this.geojson);
       var rotation = this.projection.rotate();
       rotation[0] = -centroid[0]; // note the '-'
       this.projection.rotate(rotation);
-      this.draw();
     };
 
     this.setData = function(data, options) {
@@ -493,7 +508,7 @@
       if (data.constructor === ArrayBuffer) {
         var grid = this.arrayBufferToGrid(data, options.gridSize);
         layer.grid = grid;
-      } else if (data.constructor === Uint8ClampedArray) {
+      } else if (data.constructor === Uint8Array || data.constructor === Uint8ClampedArray) {
         var grid = new Grid(data, options.gridSize);
         layer.grid = grid;
       } else {
