@@ -56,11 +56,6 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     fao_area_id = models.IntegerField(default=0)
     subregional_area = models.CharField(max_length=200, null=True)
     province_state = models.CharField(max_length=200, null=True)
-    ices_area = models.CharField(max_length=50, null=True)
-    ices_area_id = models.IntegerField(null=True)
-    nafo_division = models.CharField(max_length=200, null=True)
-    nafo_division_id = models.IntegerField(null=True)
-    ccamlr_area = models.CharField(max_length=200, null=True)
     layer = models.IntegerField(default=0)
     sector = models.CharField(max_length=200, null=True)
     sector_type_id = models.IntegerField(default=0)
@@ -88,6 +83,11 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     layer_rule_id = models.IntegerField(null=True)
     reference_id = models.IntegerField(null=True)
     notes = models.TextField(null=True)
+    ices_area = models.CharField(max_length=50, null=True)
+    ices_area_id = models.IntegerField(null=True)
+    nafo_division = models.CharField(max_length=200, null=True)
+    nafo_division_id = models.IntegerField(null=True)
+    ccamlr_area = models.CharField(max_length=200, null=True)
     user = models.ForeignKey(to=User)
     source_file = models.ForeignKey(to=FileUpload)
     last_committed = models.DateTimeField(null=True)
@@ -184,9 +184,6 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'FAO area',
             'subregional area',
             'province state',
-            'ICES area',
-            'NAFO division',
-            'CCAMLR area',
             'layer',
             'sector',
             'original sector',
@@ -202,5 +199,8 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'forward carry rule',
             'disaggregation rule',
             'layer rule',
-            'notes'
+            'notes',
+            'ICES area',
+            'NAFO division',
+            'CCAMLR area'
         ]
