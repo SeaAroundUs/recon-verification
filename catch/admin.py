@@ -4,7 +4,7 @@ from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     FunctionalGroup, TaxonLevel, TaxonGroup
 
 admin.site.register(FishingEntity, FishingEntity.Admin)
-admin.site.register(EEZ, EEZ.Admin)
+# admin.site.register(EEZ, EEZ.Admin) # LP-25476528
 admin.site.register(GeoEntity, GeoEntity.Admin)
 admin.site.register(FAO, FAO.Admin)
 admin.site.register(ICESArea, ICESArea.Admin)
