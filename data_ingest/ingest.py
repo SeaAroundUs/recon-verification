@@ -98,6 +98,7 @@ def get_warnings(ids):
 
     return warnings
 
+
 def get_errors(ids):
     errors = []
     for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
@@ -138,11 +139,15 @@ def get_errors(ids):
 
     return errors
 
+
 def get_committed_ids(ids):
     return list(RawCatch.objects.filter(
         id__in=ids,
         last_committed__lte=F('last_modified')
+    ).exclude(
+        last_committed__isnull=True
     ).order_by('id').values_list('id', flat=True))
+
 
 def normalize(ids):
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
@@ -230,6 +235,7 @@ def normalize(ids):
         if row.is_dirty():
             row.last_modified = timezone.now()
             row.save()
+
 
 def commit(ids):
     rows = RawCatch.objects.filter(id__in=ids)
