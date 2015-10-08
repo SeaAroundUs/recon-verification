@@ -1,7 +1,7 @@
 from django.contrib import admin
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     AccessAgreement, AccessType, GeoEntity, Taxon, CommercialGroup, \
-    FunctionalGroup, TaxonLevel, TaxonGroup
+    FunctionalGroup, TaxonLevel, TaxonGroup, Reference
 
 admin.site.register(FishingEntity, FishingEntity.Admin)
 # admin.site.register(EEZ, EEZ.Admin) # LP-25476528
@@ -16,3 +16,4 @@ admin.site.register(TaxonLevel, TaxonLevel.Admin)
 admin.site.register(TaxonGroup, TaxonGroup.Admin)
 admin.site.register(CommercialGroup, CommercialGroup.Admin)
 admin.site.register(FunctionalGroup, FunctionalGroup.Admin)
+admin.site.register(Reference, Reference.Admin)
