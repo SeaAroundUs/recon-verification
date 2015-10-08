@@ -137,7 +137,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             ),
             (
                 'fao_area_id',
-                'FAO',
+                'FAO area',
                 catch.models.FAO.objects.order_by('name').values_list('fao_area_id', 'name')
             ),
             (
