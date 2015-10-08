@@ -154,9 +154,13 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 'reference_id',
                 'Reference',
                 catch.models.Reference.objects.order_by('filename').values_list('reference_id', 'filename')
+            ),
+            (
+                'source_file_id',
+                'Source file',
+                FileUpload.objects.exclude(user_id__isnull=True).order_by('create_datetime').values_list('id', 'file')
             )
             # ('taxon_key', 'Taxon key'), # TODO later?
-            # ('reference_id', 'Reference'), # TODO later?
         ]
 
     @staticmethod
