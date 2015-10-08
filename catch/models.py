@@ -385,6 +385,14 @@ class Reference(models.Model):
         db_table = 'reference'
         managed = False
 
+    class Admin(admin.ModelAdmin):
+        list_display = (
+            'reference_id',
+            'filename'
+        )
+        search_fields = ['filename']
+        show_full_result_count = True
+
     def __str__(self):
         return self.name
 
