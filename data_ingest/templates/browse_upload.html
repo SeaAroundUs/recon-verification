@@ -7,6 +7,10 @@
             <div class="panel-body">
                 <div class="section">
                     <h3>Upload new reference</h3>
+                    <p>
+                        Upload a new reference document to S3 to associate catch data sets with. The document
+                        will also be added to the reference table.
+                    </p>
 
                     <form role="form" enctype="multipart/form-data" class="upload-ref">
                         <div class="form-group">
@@ -20,7 +24,12 @@
                 </div>
 
                 <div class="section">
-                    <h3>Upload new catch data (<a href="/static/template.xlsx" target="_blank">template</a>)</h3>
+                    <h3>Upload new catch data (<a href="/static/template.xlsx" target="_blank">current template</a>)</h3>
+                    <p>
+                        Choose a reference to associate the catch date with (optional) then upload the
+                        data into the available data. View, edit, and commit the data by generating a working
+                        set with the controls below.
+                    </p>
 
                     <pre id="messageConsole" class="console">Upload a new file</pre>
 
@@ -47,6 +56,10 @@
 
                 <div class="section">
                     <h3>Generate a working set</h3>
+                    <p>
+                        Select one or more values from one or more groups then press "View Data" to generate
+                        a working set to view, edit, and commit.
+                    </p>
 
                     <div role="form" class="working-set">
                         {% for field, pretty_field, values in fields %}
