@@ -59,7 +59,13 @@
                                     <option>-- SELECT --</option>
                                     <option value="{{ field }}=0">(ERROR)</option>
                                     {% for value in values %}
-                                        <option value="{{ field }}={{ value | first }}">{{ value | last }}</option>
+                                        <option value="{{ field }}={{ value | first }}">
+                                        {% if value|length == 1 %}
+                                            {{ value | last }}
+                                        {% else %}
+                                            {{ value | last }} ({{ value | first }})
+                                        {% endif %}
+                                        </option>
                                     {% endfor %}
                                 </select>
                             </div>
