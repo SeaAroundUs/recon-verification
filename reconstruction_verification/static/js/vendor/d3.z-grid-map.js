@@ -14,28 +14,6 @@
   var defaultColorScale = d3.scale.quantize()
     .domain([0,255])
     .range(["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]);
-    // RdYlGn[10]
-
-  var worldGeoJSON = {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'Polygon',
-          coordinates: null
-        }
-      }
-    ]
-  };
-
-  worldGeoJSON.features[0].geometry.coordinates = [
-    d3.range(-179.9999,179.9999).map(function(x) {return [x, 89.9999];}),
-    d3.range(89.9999,-89.9999,-1).map(function(x) {return [179.9999, x];}),
-    d3.range(179.9999,-179.9999,-1).map(function(x) {return [x, -89.9999];}),
-    d3.range(-89.9999,89.9999).map(function(x) {return [-179.9999, x];}
-  )];
 
   var Grid = function(data, gridSize, bbox) {
     // represents a gridded data set.  Unless bbox is supplied,
@@ -47,10 +25,12 @@
   };
 
   var Layer = function(options) {
-    this.zIndex = options ? options.zIndex : 1;
-    this.options = options || {strokeColor: 'rgba(100,100,100,.8)', fillColor: 'rgba(237,178,48,1)'};
-    this.geojson = null;
-    this.grid = null;
+    this.options = options || {};
+    this.options.strokeColor = this.options.strokeColor || 'rgba(100,100,100,.8)';
+    this.options.fillColor = this.options.fillColor ||  'rgba(237,178,48,1)';
+    if (!this.options.hasOwnProperty('renderOnAnimate')) {
+      this.options.renderOnAnimate = true;
+    }
   };
 
   var GridMap = function(container, options) {
@@ -67,11 +47,10 @@
 
     this.grids = [];
     this.layers = [];
+    this.options = options || {};
 
-    this.options = options;
-
-    this.seaColor = options.seaColor || 'rgba(21,98,180,.8)';
-    this.graticuleColor = options.graticuleColor || 'rgba(255,255,255,.3)';
+    this.seaColor = this.options.seaColor || 'rgba(21,98,180,.8)';
+    this.graticuleColor = this.options.graticuleColor || 'rgba(255,255,255,.3)';
 
     self.area = 1; // minimum area threshold for simplification
 
@@ -83,10 +62,11 @@
       }
     });
 
-    this.projection = options.projection || d3.geo.aitoff();
+    this.dispatch = d3.geo.GridMap.dispatch; //singleton
+
+    this.projection = this.options.projection || d3.geo.aitoff();
     this.projection
       .translate([this.width/2, this.height/2])
-      .scale(this.width/6)
       .clipExtent([[0, 0], [self.width, self.height]])
       .precision(0.1);
 
@@ -94,23 +74,23 @@
       .append('canvas')
       .style('position', 'absolute')
       .style('top', '0px')
-      .style('left', '0px')
-      .attr('width', self.width)
-      .attr('height', self.height);
+      .style('left', '0px');
 
     this.hud = this.container
       .append('canvas')
       .style('position', 'absolute')
       .style('top', '0px')
       .style('left', '0px')
-      .style('z-index', '2')
-      .attr('width', self.width)
-      .attr('height', self.height);
+      .style('z-index', '2');
 
     this.context = this.canvas.node().getContext('2d');
     this.hudContext = this.hud.node().getContext('2d');
 
-    this.colorScale = options.colorScale || defaultColorScale;
+    this.colorScale = this.options.colorScale || defaultColorScale;
+
+    if (!this.options.zoomLevels) {
+      this.options.zoomLevels = [1, 2, 4, 8];
+    }
 
     this.simplifyingPath = d3.geo.path()
       .projection({stream: function(s) {return simplify.stream(self.projection.stream(s));}})
@@ -126,13 +106,7 @@
 
     this.init = function() {
       this.initEvents();
-    };
-
-    this.destroy = function() {
-      this.canvas.remove();
-      this.hudCanvas.remove();
-      this.grids = [];
-      this.geojson = null;
+      this.resize();
     };
 
     this.getCell = function(cellId) {
@@ -295,14 +269,15 @@
         cell = self.getCell(cellId);
         if (cell) {
           if (self.options.onCellHover) {
-            self.options.onCellHover(cell);
+            self.options.onCellHover(cell, cellId);
           }
         }
       }
       if (self.options.hud && cellId) {
         self.updateHUD(cellId, coords, cell);
       }
-    }
+    };
+
     this.initEvents = function() {
 
       var scale = 150;
@@ -310,44 +285,40 @@
         .on('dragstart', function () {
         })
         .on('drag', function () {
-          self.rotateLongitude += 100 * d3.event.dx / zoom.scale();
-          self.rotateLatitude -= 100 * d3.event.dy / zoom.scale();
+          self.rotateLongitude += 100 * d3.event.dx / scale;
+          self.rotateLatitude -= 100 * d3.event.dy / scale;
           self.projection.rotate([self.rotateLongitude, self.rotateLatitude]);
-          self.drawWorld();
-          self.drawGeoJSONLayers();
-          self.drawGraticule();
-          self.draw();
+          self.drawAnimation();
         })
         .on('dragend', function () {
           self.draw();
         });
 
-      var zoom = d3.behavior.zoom()
-        .on('zoomstart', function() {
-        })
-        .on('zoomend', function() {
-          self.draw();
-        })
-        .on('zoom', function(d) {
-          if (zoom.scale() >= 2000 || zoom.scale() <= self.width/6) {
-            return;
-          }
-          scale = d3.event.scale;
-          self.area = 20000 / scale / scale;
-          self.projection.scale(scale);
-          self.drawWorld();
-          self.drawGeoJSONLayers();
-          self.drawGraticule();
-          self.draw();
-        })
-        .scale(this.width/6)
-        .scaleExtent([this.width/6, 2000]);
+      if (!self.options.disableMouseZoom) {
+        var zoom = d3.behavior.zoom()
+          .on('zoomstart', function() {
+          })
+          .on('zoomend', function() {
+            self.draw();
+          })
+          .on('zoom', function(d) {
+            scale = d3.event.scale;
+            self.area = 20000 / scale / scale;
+            self.projection.scale(scale);
+            self.drawAnimation();
+          })
+          .scale(scale)
+          .scaleExtent([0, 4000]);
+
+        this.container.call(zoom);
+      }
 
       this.container.call(drag);
-      this.container.call(zoom);
 
       this.container.on('mousemove', self.onMouseMove);
-      d3.select(window).on('resize', self.resize);
+      // set up dispatcher to allow multiple GridMaps to resize
+      d3.select(window).on('resize', d3.geo.GridMap.dispatch.resize);
+      d3.geo.GridMap.dispatch.on('resize.' + self.container.attr('id'), function() {self.resize();});
     };
 
     var graticule = d3.geo.graticule()();
@@ -357,8 +328,7 @@
 
       //draw world background (the sea)
       this.context.beginPath();
-      this.path(worldGeoJSON);
-      this.context.closePath();
+      this.path({type: 'Sphere'});
       this.context.fillStyle = this.seaColor;
       this.context.fill();
     };
@@ -366,7 +336,12 @@
     this.drawGeoJSONLayer = function(layer) {
 
       self.context.beginPath();
-      self.simplifyingPath(layer.geojson);
+
+      if (layer.simplified) {
+        self.simplifyingPath(layer.json);
+      } else {
+        self.path(layer.json);
+      }
       self.context.strokeStyle = layer.options.strokeColor;
       self.context.lineWidth = 0.5;
       self.context.stroke();
@@ -391,7 +366,7 @@
           var λ = p[0];
           var φ = p[1];
 
-          if (λ > 180 || λ < -180 || φ > 90 || φ < -90) {
+          if (!(λ <= 180 && λ >= -180 && φ <= 90 && φ >= -90)) {
             continue;
           }
           var i = (x + this.width * y) * 4;
@@ -422,43 +397,41 @@
       this.context.stroke();
     };
 
-    this.drawGeoJSONLayers = function() {
-      for (var i=0; i<self.layers.length; i++) {
+    this.drawLayers = function (animating) {
+      for (var i = 0; i < self.layers.length; i++) {
         var layer = self.layers[i];
-        if (layer.geojson) {
-          self.drawGeoJSONLayer(layer);
+        var doRender = !animating || layer.options.renderOnAnimate;
+        if (doRender) {
+          if (layer.grid) {
+            self.drawGrid(layer.grid);
+          } else if (layer.json) {
+            if (layer.json.type === 'Topology') {
+              self.drawTopoJSONLayer(layer);
+            } else {
+              self.drawGeoJSONLayer(layer);
+            }
+          }
         }
       }
     };
 
-    this.dispatch = d3.dispatch('drawStart', 'drawEnd');
-
     this._draw = function() {
-
-      /**
-        * clears the canvas,
-        * draws the background
-        * draws data layers
-        * draws graticule
-        */
 
       self.dispatch.drawStart();
 
       self.drawWorld();
-
-      for (var i=0; i<self.layers.length; i++) {
-        var layer = self.layers[i];
-
-        if (layer.geojson) {
-          self.drawGeoJSONLayer(layer);
-        } else if (layer.grid) {
-          self.drawGrid(layer.grid);
-        }
-      }
-
+      self.drawLayers();
       self.drawGraticule();
 
       self.dispatch.drawEnd();
+    };
+
+    this.drawAnimation = function () {
+      var animating = true;
+
+      self.drawWorld();
+      self.drawLayers(animating);
+      self.drawGraticule();
     };
 
     var debounceLock = false;
@@ -482,12 +455,22 @@
     self.draw = debounce(self._draw, 500);
 
     this._resize = function() {
-      self.width = parseInt(self.container.style('width'), 10);
+
+      console.log('resizing ', self);
+      var rect = self.container.node().getBoundingClientRect();
+      self.width = rect.width | 0;
+      self.height = rect.height | 0;
+
       self.canvas.attr('width', self.width);
+      self.canvas.attr('height', self.height);
+
       self.hud.attr('width', self.width);
+      self.hud.attr('height', self.height);
+
       self.projection
         .translate([self.width/2, self.height/2])
         .clipExtent([[0, 0], [self.width, self.height]]);
+
       self.draw();
     };
 
@@ -512,18 +495,27 @@
         var grid = new Grid(data, options.gridSize);
         layer.grid = grid;
       } else {
-        // assume GeoJSON
+        // assume JSON
         if (data.type === 'Topology') {
-          // it is topojson
-          topojson.presimplify(data);
-          // FIXME: this isn't good.  hardcoded assuming only countries data
-          // and immediately converting topojson to geojson.
-          data = topojson.feature(data, data.objects.countries);
+          // it is topojson, convert it
+          var topojsonObject = (options && options.topojsonObject) || data.objects[Object.keys(data.objects)[0]];
+          data = topojson.feature(topojson.presimplify(data), topojsonObject);
+          layer.simplified = true;
         }
-        layer.geojson = data;
+        layer.json = data;
       }
       self.layers.push(layer);
       self.draw();
+
+      return layer;
+    };
+
+    this.removeLayer = function(layer) {
+      for (var i=0; i<self.layers.length; i++) {
+        if (self.layers[i] === layer) {
+          self.layers.splice(i,1);
+        }
+      }
     };
 
     this.uInt8ArrayToGeoJSON = function(array) {
@@ -647,9 +639,44 @@
       return geojson;
     };
 
+    this.zoomTo = function (newScale) {
+      self.area = 20000 / newScale / newScale;
+      self.projection.scale(newScale);
+      self.draw();
+    };
+
+    this.zoomIn = function() {
+      self.options.zoomLevels.sort(function(a, b) {
+        return a-b;
+      });
+
+      var currentZoom = self.projection.scale();
+      for (var i = 0; i < self.options.zoomLevels.length; i++) {
+        if (self.options.zoomLevels[i] * 150 > currentZoom) {
+          self.zoomTo(self.options.zoomLevels[i] * 150);
+          return;
+        }
+      }
+    };
+
+    this.zoomOut = function() {
+      self.options.zoomLevels.sort(function(a, b) {
+        return a-b;
+      });
+
+      var currentZoom = self.projection.scale();
+      for (var i = self.options.zoomLevels.length - 1; i >= 0; i--) {
+        if (self.options.zoomLevels[i] * 150 < currentZoom) {
+          self.zoomTo(self.options.zoomLevels[i] * 150);
+          return;
+        }
+      }
+    };
+
     this.init();
   };
 
   d3.geo.GridMap = GridMap;
+  d3.geo.GridMap.dispatch = d3.geo.GridMap.dispatch || d3.dispatch('drawStart', 'drawEnd', 'resize');
 
 })();
