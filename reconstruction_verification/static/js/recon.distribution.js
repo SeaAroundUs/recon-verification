@@ -30,7 +30,7 @@ var Distribution = {
 
   loadCountries: function() {
     d3.json('../static/geo/countries.topojson', function(error, countries) {
-      map.setData(countries);
+      map.addLayer(countries, {zIndex: 1});
     });
   },
 
@@ -40,14 +40,23 @@ var Distribution = {
       .responseType('arraybuffer')
       .get(function(error, xhr) {
         var buff = xhr.response;
-        var gridOptions = {gridSize: [720,360], renderOnAnimate: false};
-        if (map.dataLayer) {
-          // remove last data
-          map.removeLayer(map.dataLayer);
-        }
+        var layerOptions = {gridSize: [720,360], zIndex: 3, renderOnAnimate: false};
         map.resize();
-        map.dataLayer = map.setData(buff, gridOptions);
+        map.dataLayer = map.addLayer(buff, layerOptions);
       });
+  },
+
+  loadTaxonExtent: function(taxon_key) {
+
+    d3.json('taxon/' + taxon_key + '/extent', function(error, extent) {
+      var layerOptions = {
+        renderOnAnimate: true,
+        fillColor: 'rgba(0,0,0,.3)',
+        strokeColor: 'rgba(0,0,0,1)',
+        zIndex:2
+      };
+      map.extentLayer = map.addLayer(extent, layerOptions);
+    });
   },
 
   init: function() {
@@ -84,6 +93,15 @@ var Distribution = {
       modal.off('shown.bs.modal');
       modal.on('shown.bs.modal', function(event) {
         Distribution.loadTaxonDistribution(taxon_key);
+        Distribution.loadTaxonExtent(taxon_key);
+      });
+      modal.on('hide.bs.modal', function(event) {
+        if (map.extentLayer) {
+          map.removeLayer(map.extentLayer);
+        }
+        if (map.dataLayer) {
+          map.removeLayer(map.dataLayer);
+        }
       });
 
       modal.modal('show');
