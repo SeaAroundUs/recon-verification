@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib import admin
 from data_ingest.models import RawCatch
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
+import re
 
 
 class GeoEntity(models.Model):
@@ -413,6 +416,10 @@ class Year(models.Model):
     def valid_years(cls):
         return cls.objects.values_list('year', flat=True)
 
+    @classmethod
+    def max_year(cls):
+        return cls.objects.aggregate(models.Max('year'))
+
 
 class Catch(models.Model):
     fishing_entity = models.ForeignKey(to=FishingEntity, related_name='+')
@@ -495,6 +502,14 @@ class AgreementType(models.Model):
         return self.description
 
 
+def aa_functional_group_validator(value):
+    if not re.search('^\d+$|^(\d+;)+\d+$', value):
+        raise ValidationError('Expected a semicolon separated list or a single value')
+    fg_ids = FunctionalGroup.objects.values_list('functional_group_id', flat=True)
+    if len(list(fg_id for fg_id in value.split(';') if int(fg_id) not in fg_ids)):
+        raise ValidationError('One or more functional group IDs are not valid')
+
+
 class AccessAgreement(models.Model):
     id = models.AutoField(primary_key=True)
     fishing_entity = models.ForeignKey(to=FishingEntity)
@@ -503,11 +518,23 @@ class AccessAgreement(models.Model):
     access_category = models.CharField(max_length=255)
     access_type = models.ForeignKey(to=AccessType)
     agreement_type = models.ForeignKey(to=AgreementType)
-    start_year = models.IntegerField()
-    end_year = models.IntegerField()
+    start_year = models.IntegerField(
+        validators=[
+            MinValueValidator(1890, message='Min allowable year is 1890'),
+            MaxValueValidator(2013, message='Max allowable year is 2013')
+        ]
+    )
+    end_year = models.IntegerField(
+        validators=[
+            MinValueValidator(1950, message='Min allowable year is 1950'),
+            MaxValueValidator(9999, message='Max allowable year is 9999')
+        ]
+    )
     duration_type = models.CharField(max_length=255, null=True, blank=True)
     duration_details = models.CharField(max_length=255, null=True, blank=True)
-    functional_group_id = models.CharField(max_length=255, null=True, blank=True)
+    functional_group_id = models.CharField(
+        max_length=255, null=True, blank=True, validators=[aa_functional_group_validator]
+    )
     functional_group_details = models.CharField(max_length=255, null=True, blank=True)
     fees = models.CharField(max_length=255, null=True, blank=True)
     quotas = models.CharField(max_length=255, null=True, blank=True)
