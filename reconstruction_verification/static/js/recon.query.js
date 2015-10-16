@@ -4,16 +4,19 @@ var Query = {
     $workingQueryList: null,
     $viewDataButton: null,
     $clearQueryButton: null,
+    $removeSelectedButton: null,
 
     init: function() {
         if ($('.working-set').length) {
             Query.$workingQueryList = $('#working-query');
             Query.$viewDataButton = $('#view-data');
             Query.$clearQueryButton = $('#clear-query');
+            Query.$removeSelectedButton = $('#remove-selected');
 
             Query.initAddButtons();
             Query.initClearQueryButton();
             Query.initViewDataButton();
+            Query.initRemoveSelectedButton();
         }
     },
 
@@ -47,6 +50,17 @@ var Query = {
     initViewDataButton: function() {
         Query.$viewDataButton.click(function() {
             window.location.href = '/data_ingest/edit-normalize/?' + Query.getParams().join('&');
+        });
+    },
+
+    initRemoveSelectedButton: function() {
+        Query.$removeSelectedButton.click(function() {
+            var options = Query.$workingQueryList[0].options;
+            for (var i = 0; i < options.length; i++) {
+                if (options[i].selected) {
+                    Query.$workingQueryList[0].remove(i);
+                }
+            }
         });
     },
 
