@@ -3,7 +3,23 @@ from django.contrib import admin
 from data_ingest.models import RawCatch
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
+from catch.logging import TableEdit
+# TODO log bulk deletes for delete_selected
+from django.contrib.admin.actions import delete_selected
 import re
+
+
+class LoggedAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        if change:
+            TableEdit.log_update(request.user, obj._meta.db_table, 1)
+        else:
+            TableEdit.log_insert(request.user, obj._meta.db_table, 1)
+
+    def delete_model(self, request, obj):
+        obj.delete()
+        TableEdit.log_delete(request.user, obj._meta.db_table, 1)
 
 
 class GeoEntity(models.Model):
@@ -22,7 +38,7 @@ class GeoEntity(models.Model):
         ordering = ['geo_entity_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'geo_entity_id',
             'name'
@@ -52,7 +68,7 @@ class FishingEntity(models.Model):
         ordering = ['fishing_entity_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'fishing_entity_id',
             'name'
@@ -91,7 +107,7 @@ class EEZ(models.Model):
         ordering = ['eez_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'eez_id',
             'name',
@@ -117,7 +133,7 @@ class FAO(models.Model):
         ordering = ['fao_area_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'fao_area_id',
             'name'
@@ -140,7 +156,7 @@ class ICESArea(models.Model):
         ordering = ['ices_area_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'ices_area_id',
             'ices_area'
@@ -162,7 +178,7 @@ class NAFO(models.Model):
         db_table = 'nafo'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'nafo_division_id',
             'nafo_division'
@@ -184,7 +200,7 @@ class Sector(models.Model):
         db_table = 'sector_type'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'sector_type_id',
             'name'
@@ -205,7 +221,7 @@ class CatchType(models.Model):
         db_table = 'catch_type'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'catch_type_id',
             'name'
@@ -227,7 +243,7 @@ class CommercialGroup(models.Model):
         ordering = ['commercial_group_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'commercial_group_id',
             'name'
@@ -251,7 +267,7 @@ class FunctionalGroup(models.Model):
         ordering = ['functional_group_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'functional_group_id',
             'name'
@@ -274,7 +290,7 @@ class TaxonGroup(models.Model):
         ordering = ['taxon_group_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'taxon_group_id',
             'name'
@@ -297,7 +313,7 @@ class TaxonLevel(models.Model):
         ordering = ['taxon_level_id']
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'taxon_level_id',
             'name'
@@ -341,7 +357,7 @@ class Taxon(models.Model):
         db_table = 'taxon'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'taxon_key',
             'common_name',
@@ -388,7 +404,7 @@ class Reference(models.Model):
         db_table = 'reference'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'reference_id',
             'filename'
@@ -467,7 +483,7 @@ class AccessType(models.Model):
         db_table = 'access_type'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'id',
             'description'
@@ -490,7 +506,7 @@ class AgreementType(models.Model):
         db_table = 'agreement_type'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'id',
             'description'
@@ -563,7 +579,7 @@ class AccessAgreement(models.Model):
         db_table = 'access_agreement'
         managed = False
 
-    class Admin(admin.ModelAdmin):
+    class Admin(LoggedAdmin):
         list_display = (
             'id',
             'fishing_entity',
