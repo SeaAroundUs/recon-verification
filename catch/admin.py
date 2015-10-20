@@ -3,6 +3,8 @@ from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     AccessAgreement, AccessType, GeoEntity, Taxon, CommercialGroup, \
     FunctionalGroup, TaxonLevel, TaxonGroup, Reference
 
+admin.site.disable_action('delete_selected')
+
 admin.site.register(FishingEntity, FishingEntity.Admin)
 # admin.site.register(EEZ, EEZ.Admin) # LP-25476528
 admin.site.register(GeoEntity, GeoEntity.Admin)

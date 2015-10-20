@@ -4,8 +4,6 @@ from data_ingest.models import RawCatch
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from catch.logging import TableEdit
-# TODO log bulk deletes for delete_selected
-from django.contrib.admin.actions import delete_selected
 import re
 
 
