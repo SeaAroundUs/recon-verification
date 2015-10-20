@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.forms import ValidationError
 from django.utils import timezone
 from django.db.models import F
+from catch.logging import TableEdit
 import xlrd
 import re
 import time
@@ -75,6 +76,9 @@ class ContributedFile:
 
         # create all the rows
         RawCatch.objects.bulk_create(raw_catches)
+
+        # log the new rows
+        TableEdit.log_insert(user, 'raw_catch', len(raw_catches))
 
 
 def get_warnings(ids):

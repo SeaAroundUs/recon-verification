@@ -7,6 +7,7 @@ from data_ingest.forms import FileUploadForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
 from catch.models import Reference
 from storages.backends.s3boto import S3BotoStorage
+from catch.logging import TableEdit
 import logging
 import simplejson
 import os
@@ -120,7 +121,7 @@ class UploadDataJsonView(View):
 
     def post(self, request):
         try:
-            RawCatch.bulk_save(simplejson.loads(request.body)['data'])
+            RawCatch.bulk_save(simplejson.loads(request.body)['data'], request)
             return ReconResponse({'result': 'ok'})
 
         except Exception as e:
@@ -169,6 +170,7 @@ class DeleteRowView(View):
 
         try:
             RawCatch.objects.get(id=row_id).delete()
+            TableEdit.log_delete(request.user, 'raw_catch', 1)
         except RawCatch.DoesNotExist:
             return HttpResponseNotFound('Row does not exist')
 

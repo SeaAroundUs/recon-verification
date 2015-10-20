@@ -7,11 +7,13 @@ from collections import OrderedDict
 from dirtyfields import DirtyFieldsMixin
 from django.utils import timezone
 from decimal import *
+from catch.logging import TableEdit
 import os
 import logging
 import catch.models
 
 logger = logging.getLogger(__name__)
+
 
 def upload_file_path(instance, filename):
     return os.path.join('recon_files', strftime('%Y%m%d'), filename)
@@ -101,7 +103,8 @@ class RawCatch(DirtyFieldsMixin, models.Model):
 
     @classmethod
     @atomic
-    def bulk_save(cls, changes):
+    def bulk_save(cls, changes, request):
+        changed_rows = 0
         for row in changes:
             obj = cls.objects.get(id=row.pop('id'))
             for field, new_value in row.items():
@@ -112,6 +115,9 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             if obj.is_dirty():
                 obj.last_modified = timezone.now()
                 obj.save()
+                changed_rows += 1
+        if changed_rows > 0:
+            TableEdit.log_update(request.user, 'raw_catch', changed_rows)
 
     @classmethod
     def fields(cls):
