@@ -12,15 +12,16 @@ var modal = null;
 var Distribution = {
 
   initMap: function() {
-    var colorScale = d3.scale.quantize()
-      .domain([0,255])
-      .range(colorbrewer.RdYlGn[10]);
+    var colorScale = d3.scale.linear()
+      .domain([0,127,255])
+      .range(['red', 'yellow', 'green'] );
     var options = {
       hud: {
         fontSize: 20,
         fontColor: 'white',
         verticalOffset: 5
       },
+      legend: true,
       colorScale: colorScale,
       geoJsonColor: 'rgba(255,255,255,0.5)',
       onCellHover: function(feature) { console.debug('hovering over ', feature);}

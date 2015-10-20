@@ -45,6 +45,7 @@ class DistributionView(View):
             kwargs={'force': True}
         )
         thread.start()
+        logger.warn('recalculating distribution for {} (thread id: {})'.format(taxon_key, thread.name))
         return JsonResponse({'thread_id': thread.name})
 
 

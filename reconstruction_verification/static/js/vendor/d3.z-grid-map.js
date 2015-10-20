@@ -15,13 +15,13 @@
     .domain([0,255])
     .range(["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]);
 
-  var Grid = function(data, gridSize, bbox) {
-    // represents a gridded data set.  Unless bbox is supplied,
-    // it's assumed to have global coverage
+  var Grid = function(data, gridSize, rawData) {
+    // represents a gridded data set.  rawData should be an object
+    // mapping cellId to cell value
     this.data = data;
     this.rows = gridSize[1];
     this.cols = gridSize[0];
-    this.bbox = bbox; // optional, currently unused
+    this.rawData = rawData;
   };
 
   var Layer = function(options) {
@@ -35,6 +35,98 @@
     if (!this.options.hasOwnProperty('renderOnAnimate')) {
       this.options.renderOnAnimate = true;
     }
+  };
+
+  var Legend = function(options) {
+    /**
+      * Create a legend which shows the color scale in options.colorScale for
+      * the 6 values [0,0.2,0.4,0.6,0.8,1.0]
+      * Pass in the canvas context on which to draw as
+      * options.context.
+      * var legend = new Legend({context: ctx});
+      * Then draw the legend
+      * legend.draw()
+      */
+    this.options = options;
+    var ctx = options.context;
+    var width = this.options.width || 150;
+    var height = this.options.height || 30;
+    var cornerOffset = this.options.cornerOffset || {x: 5, y: 20};
+    var margin = this.options.margin || 5;
+
+    this.complementaryColor = function(color) {
+      // not really complementary color, just a color which
+      // contrasts with color
+      function rotate(x) {
+        return (x+127)%255;
+      }
+      var complement = d3.rgb(rotate(color.r), rotate(color.g), rotate(color.b));
+      return complement;
+    };
+
+    this.xy = function() {
+      // returns corner point of legend wrt/ canvas
+      return {
+        x: ctx.canvas.clientWidth - width - cornerOffset.x,
+        y: ctx.canvas.clientHeight - height - cornerOffset.y
+      };
+    };
+    this.draw = function(value) {
+      /**
+        * Draws legend on context.
+        */
+      var legendX = ctx.canvas.clientWidth - width - cornerOffset.x;
+      var legendY = ctx.canvas.clientHeight - height - cornerOffset.y;
+      var stops = [
+        {x: 0, label: '0.0'},
+        {x: 51, label: '0.2'},
+        {x: 102, label: '0.4'},
+        {x: 153, label: '0.6'},
+        {x: 204, label: '0.8'},
+        {x: 255, label: '1.0'}
+      ];
+      var stopWidth = (width - 2*margin) / stops.length;
+
+      ctx.save();
+      ctx.translate(legendX, legendY);
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(0,0,0,.5)';
+      ctx.fillRect(0, 0, width, height);
+
+      var font = '8px Helvetica';
+      ctx.font = font;
+
+      for (var i=0; i<stops.length; i++) {
+        var stop = stops[i];
+        var color = d3.rgb(this.options.colorScale(stop.x));
+        ctx.fillStyle = color;
+        ctx.fillRect(i*stopWidth + margin, margin, stopWidth, height - 2*margin);
+
+        ctx.fillStyle = this.complementaryColor(color);
+        ctx.fillText(stop.label, (i+0.5)*stopWidth, height/2 + 2);
+      }
+      ctx.restore();
+    };
+
+    this.highlight = function(value) {
+      /**
+        * highlight value position (0-1) on the legend
+        */
+      var ctx = this.options.context;
+      ctx.save();
+      var xy = this.xy();
+      ctx.translate(xy.x+margin, xy.y+margin);
+      var color = d3.rgb(this.options.colorScale(value*255));
+      ctx.strokeStyle = this.complementaryColor(color);
+      var xPosition = (width - 2*margin) * value;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(xPosition, 0);
+      ctx.lineTo(xPosition, height-2*margin);
+      ctx.stroke();
+      ctx.restore();
+    }
+
   };
 
   var GridMap = function(container, options) {
@@ -96,6 +188,12 @@
       this.options.zoomLevels = [1, 2, 4, 8];
     }
 
+    if (this.options.legend) {
+      this.options.context = this.hudContext;
+      this.options.colorScale = this.colorScale;
+      this.legend = new Legend(this.options);
+    }
+
     this.simplifyingPath = d3.geo.path()
       .projection({stream: function(s) {return simplify.stream(self.projection.stream(s));}})
       .context(this.context);
@@ -118,8 +216,8 @@
       // (RGBA) values
       var grid = this.getGrid();
 
-      if (grid && grid.data[cellId*4 + 3]) {
-        return grid.data[cellId*4];
+      if (grid && grid.rawData) {
+        return grid.rawData[cellId];
       }
     };
 
@@ -199,6 +297,9 @@
 
       var grid = this.getGrid();
 
+      if (! grid) {
+        return;
+      }
       var rows = grid.rows;
       var cols = grid.cols;
 
@@ -219,41 +320,55 @@
 
       var font = fontSize + 'px ' + fontFace;
       var h = fontSize + verticalOffset;
-      var gradient = self.hudContext.createLinearGradient(0,self.height-h,0,self.height);
+      var gradient = self.hudContext.createLinearGradient(0, 0, 0, h);
       gradient.addColorStop(0, 'rgba(0,0,0,0.0)');
       gradient.addColorStop(1, 'rgba(0,0,0,1.0)');
 
-      self.hudContext.clearRect(0, 0, self.width, self.height);
-      self.hudContext.fillStyle = gradient;
-      self.hudContext.fillRect(0,self.height-(h), self.width, self.height);
+      var ctx = self.hudContext;
+      ctx.clearRect(0, 0, self.width, self.height);
+
+      ctx.save();
+      ctx.translate(0, self.height-(h));
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, self.width, h);
 
       var s = '';
 
       s = 'cell: ' + cellId + ' ( ' + coordFormat(coords[0]) + '°,' + coordFormat(coords[1]) + '° )';
 
-      var coordinates = self.cellIdToCoordinates(cellId, self.grids[0]);
+      if (cell !== undefined) {
+        var normalizedValue = cell / 255;
+        s += ' value: ' + d3.format('.4e')(normalizedValue);
+      }
 
+      ctx.font = font;
+      ctx.fillStyle = fontColor;
+      ctx.fillText(s, 0, h - verticalOffset);
+
+      ctx.restore();
+
+      // draw highlight box around hovered cell
       var feature = {
         type: 'Feature',
         geometry: {
           type: 'Polygon',
-          coordinates: [coordinates]
+          coordinates: [self.cellIdToCoordinates(cellId, self.getGrid())]
         },
       };
 
-      if (cell !== undefined) {
-        s += ' value: ' + cell;
-      }
-
-      self.hudContext.font = font;
-      self.hudContext.fillStyle = fontColor;
-      self.hudContext.fillText(s, 0, self.height - verticalOffset);
-
-      self.hudContext.beginPath();
-      self.hudContext.strokeStyle = 'white';
-      self.hudContext.lineWidth = 2;
+      ctx.beginPath();
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
       self.hudPath(feature);
-      self.hudContext.stroke();
+      ctx.stroke();
+
+      if (self.legend) {
+        self.legend.draw();
+        if (cell) {
+          self.legend.highlight(normalizedValue);
+        }
+      }
     };
 
     this.onMouseMove = function() {
@@ -604,9 +719,12 @@
 
       var typedArray = new Uint32Array(buff);
 
+      var rawData = [];
+
       for (var i=0; i<typedArray.length; i++) {
         var packed = typedArray[i];
-        var cellId = (packed & 0xfffff) << 2;
+        var cellId = (packed & 0xfffff);
+        var idx = cellId << 2;
         // unpack most significant byte, the data value.
         // note the triple arrow, which fills in 0s instead of 1s.
         var value = packed >>> 24;
@@ -614,12 +732,14 @@
         var color = d3.rgb(self.colorScale(value));
         var alpha = 255;
 
-        data[cellId+0] = color.r;
-        data[cellId+1] = color.g;
-        data[cellId+2] = color.b;
-        data[cellId+3] = alpha;
+        data[idx+0] = color.r;
+        data[idx+1] = color.g;
+        data[idx+2] = color.b;
+        data[idx+3] = alpha;
+
+        rawData[cellId] = value;
       }
-      return new Grid(data, gridSize);
+      return new Grid(data, gridSize, rawData);
     };
 
     this.arrayBufferToGeoJSON = function(buff) {
