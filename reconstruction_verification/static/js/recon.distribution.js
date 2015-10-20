@@ -14,7 +14,7 @@ var Distribution = {
   initMap: function() {
     var colorScale = d3.scale.linear()
       .domain([0,127,255])
-      .range(['red', 'yellow', 'green'] );
+      .range(['green', 'yellow', 'red'] );
     var options = {
       hud: {
         fontSize: 20,
