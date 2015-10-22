@@ -75,7 +75,7 @@ class ContributedFile:
             raw_catches.append(RawCatch(**kwargs))
 
         # create all the rows
-        RawCatch.objects.bulk_create(raw_catches)
+        RawCatch.objects.bulk_create(raw_catches, batch_size=1000)
 
         # log the new rows
         TableEdit.log_insert(user, 'raw_catch', len(raw_catches))

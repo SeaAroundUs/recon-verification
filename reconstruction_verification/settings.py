@@ -181,4 +181,4 @@ PIPELINE_JS = {
     }
 }
 
-ROWS_PER_PAGE = 20
+ROWS_PER_PAGE = 50
