@@ -33,6 +33,7 @@ class DistributionView(View):
             with db.Session() as session:
                 taxa = session.query(Taxon) \
                     .options(joinedload(Taxon.distribution_log)) \
+                    .join(TaxonExtent, Taxon.taxon_key == TaxonExtent.taxon_key)  \
                     .order_by(Taxon.taxon_key)
                 return render(request, self.template, {'taxa': taxa})
         except:
