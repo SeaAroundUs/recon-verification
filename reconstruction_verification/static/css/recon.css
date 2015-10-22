@@ -149,6 +149,10 @@ span.warning-reason {
   top: -75px;
   visibility: hidden;
 }
+#distribution [name=search] {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 
 #browse-upload .section {
   margin-bottom: 25px;

@@ -88,6 +88,26 @@ var Distribution = {
     Distribution.loadCountries();
     Distribution.initDistribution();
     $('.modal .x').click(function() {modal.modal('hide'); });
+    $('[name="search"]').keyup(function() {
+      var query = $(this).val();
+      var regex = new RegExp(query, 'gi');
+      $('tr.data').each(function(index) {
+        var tr = $(this);
+        var common_name = tr.find('.common_name').html();
+        var scientific_name = tr.find('.scientific_name').html();
+        var taxon_key = tr.find('.taxon_key').html();
+
+        if (
+          regex.test(common_name) ||
+          regex.test(scientific_name) ||
+          regex.test(taxon_key)
+          ) {
+          tr.show();
+        } else {
+          tr.hide();
+        }
+      });
+    });
     var taxon_key = location.hash.slice(1)|0;
     if (taxon_key) {
       var taxon_name = $('button.view-taxon-link[data-taxon_key="' + taxon_key + '"]').data().taxon_name;

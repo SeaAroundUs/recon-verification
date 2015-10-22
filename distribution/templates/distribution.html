@@ -6,9 +6,7 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <h3>Distribution</h3>
-
-                <pre id="messageConsole" class="console">Run distribution on selected taxa</pre>
-
+                <input class="form-control search-query" name="search" type="text" placeholder="Search">
                 <div id="modal" class="modal">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
@@ -22,7 +20,7 @@
                     </div>
                 </div>
                 <table class="table table-striped table-bordered">
-                    <tr>
+                    <tr class="header">
                         <th>Taxon key</th>
                         <th>Common name</th>
                         <th>Scientific name</th>
@@ -31,15 +29,15 @@
                         <th></th>
                     </tr>
                     {% for taxon in taxa %}
-                        <tr class="">
-                            <td>
+                        <tr class="data">
+                            <td class="taxon_key">
                                 <a href="/admin/catch/taxon/{{taxon.taxon_key}}">
                                     {{ taxon.taxon_key }}
                                 </a>
                                 <a class="anchor" name="{{ taxon.taxon_key }}"></a>
                             </td>
-                            <td>{{ taxon.common_name }}</td>
-                            <td>{{ taxon.scientific_name }}</td>
+                            <td class="common_name">{{ taxon.common_name }}</td>
+                            <td class="scientific_name">{{ taxon.scientific_name }}</td>
                             <td>{{ taxon.distribution_log.modified_timestamp }}</td>
                             <td>
                                 <button
