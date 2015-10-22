@@ -13,10 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    from species_distribution.models.db import engine, Session
+    from species_distribution.models import db
     from species_distribution.models.taxa import Taxon
+    from species_distribution.models.taxa import TaxonDistributionLog
     from species_distribution.models.taxa import TaxonExtent
     from species_distribution.distribution import create_and_save_taxon
+
+    from sqlalchemy.orm import joinedload
 
 except Exception as e:
     logger.exception('unable to import species_distribution, check your credentials in ~/.species_distribution/settings.json.')
@@ -27,9 +30,9 @@ class DistributionView(View):
 
     def get(self, request):
         try:
-            with Session() as session:
+            with db.Session() as session:
                 taxa = session.query(Taxon) \
-                    .join(TaxonExtent, Taxon.taxon_key == TaxonExtent.taxon_key) \
+                    .options(joinedload(Taxon.distribution_log)) \
                     .order_by(Taxon.taxon_key)
                 return render(request, self.template, {'taxa': taxa})
         except:
@@ -53,8 +56,8 @@ class TaxonExtentView(View):
 
     def get(self, request, taxon_id=None):
 
-        with engine.connect() as connection:
-            raw_conn = connection.connection.connection
+        with db.Session() as session:
+            raw_conn = session.connection().connection
             cursor = raw_conn.cursor()
 
             query = """SELECT ST_AsGeoJSON(ST_Simplify(geom, .04), 6)::json as geojson
@@ -83,10 +86,9 @@ class TaxonDistributionView(View):
 
     def get(self, request, taxon_id=None):
 
-        with engine.connect() as connection:
 
-            # love this
-            raw_conn = connection.connection.connection
+        with db.Session() as session:
+            raw_conn = session.connection().connection
             cursor = raw_conn.cursor()
 
             if request.GET.get('format','').lower() == 'csv':

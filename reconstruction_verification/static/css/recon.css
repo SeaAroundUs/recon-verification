@@ -139,6 +139,16 @@ span.warning-reason {
   height: 600px;
   position: relative;
 }
+#distribution table tr:hover {
+  background-color: rgb(230,230,230);
+}
+#distribution table .anchor {
+  /* anchors scroll past fixed header */
+  display: block;
+  position: relative;
+  top: -75px;
+  visibility: hidden;
+}
 
 #browse-upload .section {
   margin-bottom: 25px;

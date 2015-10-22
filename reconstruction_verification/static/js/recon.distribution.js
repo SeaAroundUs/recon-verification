@@ -36,7 +36,6 @@ var Distribution = {
   },
 
   loadTaxonDistribution: function(taxon_key) {
-
     d3.xhr('taxon/' + taxon_key)
       .responseType('arraybuffer')
       .get(function(error, xhr) {
@@ -60,12 +59,40 @@ var Distribution = {
     });
   },
 
+  showTaxon: function(taxon_key, taxon_name) {
+
+    $('#taxon_name').html(taxon_name);
+    $('#taxon_key').html(taxon_key);
+
+    modal.off('shown.bs.modal');
+    modal.on('shown.bs.modal', function(event) {
+      Distribution.loadTaxonDistribution(taxon_key);
+      Distribution.loadTaxonExtent(taxon_key);
+    });
+    modal.on('hide.bs.modal', function(event) {
+      if (map.extentLayer) {
+        map.removeLayer(map.extentLayer);
+      }
+      if (map.dataLayer) {
+        map.removeLayer(map.dataLayer);
+      }
+    });
+
+    modal.modal('show');
+
+  },
+
   init: function() {
     modal = $('#modal');
     Distribution.initMap();
     Distribution.loadCountries();
     Distribution.initDistribution();
     $('.modal .x').click(function() {modal.modal('hide'); });
+    var taxon_key = location.hash.slice(1)|0;
+    if (taxon_key) {
+      var taxon_name = $('button.view-taxon-link[data-taxon_key="' + taxon_key + '"]').data().taxon_name;
+      Distribution.showTaxon(taxon_key, taxon_name);
+    }
   },
 
   initDistribution: function() {
@@ -77,9 +104,8 @@ var Distribution = {
           .done(function(data) {
             console.log('response: ', data);
           });
-          $(this).addClass('spin');
           // only allow this to be clicked once
-          $(this).data('taxon_key', '');
+          $(this).remove();
         }
       });
 
@@ -87,26 +113,8 @@ var Distribution = {
       event.stopPropagation();
       var taxon_key = $(event.target).data().taxon_key;
       var taxon_name = $(event.target).data().taxon_name;
-
-      $('#taxon_name').html(taxon_name);
-      $('#taxon_key').html(taxon_key);
-
-      modal.off('shown.bs.modal');
-      modal.on('shown.bs.modal', function(event) {
-        Distribution.loadTaxonDistribution(taxon_key);
-        Distribution.loadTaxonExtent(taxon_key);
-      });
-      modal.on('hide.bs.modal', function(event) {
-        if (map.extentLayer) {
-          map.removeLayer(map.extentLayer);
-        }
-        if (map.dataLayer) {
-          map.removeLayer(map.dataLayer);
-        }
-      });
-
-      modal.modal('show');
-
+      window.location.hash = taxon_key;
+      Distribution.showTaxon(taxon_key, taxon_name);
     });
   }
 };

@@ -21,24 +21,42 @@
                         </div>
                     </div>
                 </div>
-
-                <ul class="">
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <th>Taxon key</th>
+                        <th>Common name</th>
+                        <th>Scientific name</th>
+                        <th>Distribution Timestamp</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
                     {% for taxon in taxa %}
-                        <li>
-                            {{ taxon.taxon_key}} - {{ taxon.common_name }} ({{ taxon.scientific_name }})
-                            <span
-                                data-taxon_key="{{taxon.taxon_key}}"
-                                data-csrfmiddlewaretoken="{{csrf_token}}"
-                                class="glyphicon glyphicon-refresh run">
-                            </span>
-
-                            <a
-                                data-taxon_key="{{taxon.taxon_key}}"
-                                data-taxon_name="{{taxon.common_name}}"
-                                href="#" class="view-taxon-link">
-                                (view)
-                            </a>
-
+                        <tr class="">
+                            <td>
+                                <a href="/admin/catch/taxon/{{taxon.taxon_key}}">
+                                    {{ taxon.taxon_key }}
+                                </a>
+                                <a class="anchor" name="{{ taxon.taxon_key }}"></a>
+                            </td>
+                            <td>{{ taxon.common_name }}</td>
+                            <td>{{ taxon.scientific_name }}</td>
+                            <td>{{ taxon.distribution_log.modified_timestamp }}</td>
+                            <td>
+                                <button
+                                    data-taxon_key="{{taxon.taxon_key}}"
+                                    data-csrfmiddlewaretoken="{{csrf_token}}"
+                                    class="run">
+                                    Regenerate distribution
+                                </button>
+                            </td>
+                            <td>
+                                <button
+                                    data-taxon_key="{{taxon.taxon_key}}"
+                                    data-taxon_name="{{taxon.common_name}}"
+                                    class="view-taxon-link">
+                                    View distribution
+                                </button>
+                            </td>
                         </li>
                     {% endfor %}
                 </ul>
