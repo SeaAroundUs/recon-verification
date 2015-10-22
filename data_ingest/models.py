@@ -152,6 +152,21 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 list((l,) for l in [1, 2, 3])
             ),
             (
+                'sector_type_id',
+                'Sector',
+                catch.models.Sector.objects.order_by('sector_type_id').values_list('sector_type_id', 'name')
+            ),
+            (
+                'catch_type_id',
+                'Catch type',
+                catch.models.CatchType.objects.order_by('catch_type_id').values_list('catch_type_id', 'name')
+            ),
+            (
+                'input_type_id',
+                'Input type',
+                catch.models.InputType.objects.order_by('input_type_id').values_list('input_type_id', 'name')
+            ),
+            (
                 'year',
                 'Year',
                 list((y,) for y in range(1950, 2011))
