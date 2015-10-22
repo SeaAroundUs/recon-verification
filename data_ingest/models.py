@@ -162,14 +162,19 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 catch.models.CatchType.objects.order_by('catch_type_id').values_list('catch_type_id', 'name')
             ),
             (
-                'input_type_id',
-                'Input type',
-                catch.models.InputType.objects.order_by('input_type_id').values_list('input_type_id', 'name')
-            ),
-            (
                 'year',
                 'Year',
                 list((y,) for y in range(1950, 2011))
+            ),
+            (
+                'taxon_key',
+                'Taxon',
+                catch.models.Taxon.objects.order_by('scientific_name').values_list('taxon_key', 'scientific_name', 'common_name')
+            ),
+            (
+                'input_type_id',
+                'Input type',
+                catch.models.InputType.objects.order_by('input_type_id').values_list('input_type_id', 'name')
             ),
             (
                 'reference_id',
@@ -181,7 +186,6 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 'Source file',
                 FileUpload.objects.exclude(user_id__isnull=True).order_by('create_datetime').values_list('id', 'file')
             )
-            # ('taxon_key', 'Taxon key'), # TODO later?
         ]
 
     @staticmethod

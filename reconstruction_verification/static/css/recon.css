@@ -170,8 +170,13 @@ span.warning-reason {
   margin-bottom: 30px;
 }
 
+#browse-upload .working-set .form-group select {
+  max-width: 300px;
+}
+
 #browse-upload .working-set .form-group select#working-query {
   width: 100%;
+  max-width: 100%;
   height: 150px;
 }
 

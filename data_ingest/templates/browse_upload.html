@@ -75,6 +75,8 @@
                                         <option value="{{ field }}={{ value | first }}">
                                         {% if value|length == 1 %}
                                             {{ value | last }}
+                                        {%  elif field == 'taxon_key' %}
+                                            {{ value.1 }} ({{ value | last }})
                                         {% else %}
                                             {{ value | last }} ({{ value | first }})
                                         {% endif %}
