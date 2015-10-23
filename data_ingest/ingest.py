@@ -83,29 +83,97 @@ class ContributedFile:
 
 def get_warnings(ids):
     warnings = []
+
+    peru_eez_id = EEZ.objects.get(name='Peru').eez_id
+    subsistence_sector_id = Sector.objects.get(name='Subsistence').sector_type_id
+    industrial_sector_id = Sector.objects.get(name='Industrial').sector_type_id
+
     for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
 
-        if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer != 0:
-            eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
-            expected_layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
-            # TODO layer 3 logic based on taxon
-            if row.layer != expected_layer:
-                warnings.append({'row': idx, 'col': 'layer', 'reason': 'Unexpected layer per rule'})
-
-        if row.input_type_id == 2 and row.catch_type_id == 3:
-            warnings.append({'row': idx, 'col': 'input_type_id', 'reason': 'Input type/catch type mismatch'})
-
+        # Year greater than 2010
         if row.year > 2010:
             warnings.append({'row': idx, 'col': 'year', 'reason': 'Year after 2010'})
 
-    # TODO more warnings
+        # Original taxon name is not null
+        if row.original_taxon_name is not None:
+            warnings.append({'row': idx, 'col': 'original_taxon_name', 'reason': 'Original taxon name is not null'})
+
+        # Original country fishing is not null
+        if row.original_country_fishing is not None:
+            warnings.append(
+                {'row': idx, 'col': 'original_country_fishing', 'reason': 'Original country fishing is not null'}
+            )
+
+        # Original sector is not null
+        if row.original_sector is not None:
+            warnings.append({'row': idx, 'col': 'original_sector', 'reason': 'Original sector is not null'})
+
+        # Catch amount greater than 15e6 for Peru
+        if row.eez_id == peru_eez_id and row.amount > 15e6:
+            warnings.append({'row': idx, 'col': 'amount', 'reason': 'Amount > 15e6 (Peru)'})
+
+        # Catch amount greater than 5e6 for others
+        elif row.amount > 5e6:
+            warnings.append({'row': idx, 'col': 'amount', 'reason': 'Amount > 5e6'})
+
+        # FAO is 27 and ICES is null
+        if row.fao_area_id == 27 and row.ices_area_id is None:
+            warnings.append({'row': idx, 'col': 'ices_area_id', 'reason': 'Null ICES for FAO 27'})
+
+        # FAO is 21 and NAFO is null
+        if row.fao_area_id == 21 and row.nafo_division_id is None:
+            warnings.append({'row': idx, 'col': 'nafo_division_id', 'reason': 'Null NAFO for FAO 21'})
+
+        # Sector is subsistence and Layer is not 1
+        if row.sector_type_id == subsistence_sector_id and row.layer != 1:
+            warnings.append({'row': idx, 'col': 'layer', 'reason': 'Sector is subsistence and Layer is not 1'})
+
+        # Layer is 2 or 3 and sector is not industrial
+        if row.layer in (2, 3) and row.sector_type_id != industrial_sector_id:
+            warnings.append({'row': idx, 'col': 'layer', 'reason': 'Layer is 2 or 3 and sector is not industrial'})
 
     return warnings
 
 
 def get_errors(ids):
     errors = []
+
+    reconstructed_input_type_id = InputType.objects.get(name='Reconstructed').input_type_id
+    reported_landings_catch_type_id = CatchType.objects.get(name='reported landings').catch_type_id
+
     for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
+
+        # Fishing entity and EEZ rule for Layer
+        if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer != 0:
+            eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
+            expected_layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
+            # TODO layer 3 logic based on taxon
+            if row.layer != expected_layer:
+                errors.append({'row': idx, 'col': 'layer', 'reason': 'Fishing entity and EEZ rule for Layer'})
+
+        # Input type is reconstructed and Catch type is reported landings
+        if row.input_type_id == reconstructed_input_type_id and row.catch_type_id == reported_landings_catch_type_id:
+            errors.append({
+                'row': idx,
+                'col': 'input_type_id',
+                'reason': 'Input type is reconstructed and Catch type is reported landings'
+            })
+
+        # Input type is not reconstructed and Catch type not reported landings
+        if row.input_type_id != reconstructed_input_type_id and row.catch_type_id != reported_landings_catch_type_id:
+            errors.append({
+                'row': idx,
+                'col': 'input_type_id',
+                'reason': 'Input type is not reconstructed and Catch type not reported landings'
+            })
+
+        # Layer is not 1, 2, or 3
+        if row.layer not in [1, 2, 3]:
+            errors.append({'row': idx, 'col': 'layer', 'reason': 'Unknown layer'})
+
+        # Catch amount is zero or negative
+        if row.amount <= 0:
+            errors.append({'row': idx, 'col': 'amount',  'reason': 'Catch amount is zero or negative'})
 
         if row.input_type_id == 1 and row.catch_type_id == 1:
             errors.append({'row': idx, 'col': 'input_type',  'reason': 'Input type/catch type mismatch'})
@@ -113,12 +181,7 @@ def get_errors(ids):
         if row.input_type_id in [2, 4, 5, 6] and row.catch_type_id in [2, 3]:
             errors.append({'row': idx, 'col': 'input_type',  'reason': 'Input type/catch type mismatch'})
 
-        if row.layer not in [1, 2, 3]:
-            errors.append({'row': idx, 'col': 'layer', 'reason': 'Unknown layer'})
-
-        if row.year not in Year.valid_years():
-            errors.append({'row': idx, 'col': 'year', 'reason': 'Invalid year'})
-
+        # Lookup table mismatch
         id_fields = [
             'taxon_key',
             'original_taxon_name_id',
@@ -126,20 +189,29 @@ def get_errors(ids):
             'catch_type_id',
             'fishing_entity_id',
             'original_country_fishing_id',
-            'eez_id',
             'fao_area_id',
             'sector_type_id',
             'input_type_id',
             'reference_id'
         ]
-
         for field in id_fields:
             if getattr(row, field) == 0:
-                errors.append({'row': idx, 'col': field,  'reason': 'Unknown value'})
+                errors.append({'row': idx, 'col': field,  'reason': 'Lookup table mismatch'})
 
+        # Lookup table mismatch (EEZ)
+        try:
+            EEZ.objects.get(eez_id=row.eez_id)
+        except EEZ.DoesNotExist:
+            errors.append({'row': idx, 'col': 'year', 'reason': 'Lookup table mismatch'})
+
+        # Lookup table mismatch (year)
+        if row.year not in Year.valid_years():
+            errors.append({'row': idx, 'col': 'year', 'reason': 'Lookup table mismatch'})
+
+        # Missing required field
         for field in RawCatch.required_fields():
             if not str(getattr(row, field)).strip():
-                errors.append({'row': idx, 'col': field,  'reason': 'Required field is empty'})
+                errors.append({'row': idx, 'col': field,  'reason': 'Missing required field'})
 
     return errors
 
@@ -204,7 +276,7 @@ def normalize(ids):
             eez = EEZ.objects.get(name__iexact=row.eez.strip())
             row.eez_id = eez.eez_id
         except EEZ.DoesNotExist:  # no EEZ found
-            row.eez_id = 0
+            row.eez_id = None
 
         try:
             fao_area = FAO.objects.get(name__iexact=row.fao_area.strip())

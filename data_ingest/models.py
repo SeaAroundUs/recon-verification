@@ -52,7 +52,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     original_country_fishing = models.CharField(max_length=200, null=True)
     original_country_fishing_id = models.IntegerField(null=True)
     eez = models.CharField(max_length=200, null=True)
-    eez_id = models.IntegerField(default=0)
+    eez_id = models.IntegerField(default=0, null=True)
     eez_sub_area = models.CharField(max_length=200, null=True)
     fao_area = models.CharField(max_length=200)
     fao_area_id = models.IntegerField(default=0)
