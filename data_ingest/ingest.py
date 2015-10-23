@@ -175,12 +175,6 @@ def get_errors(ids):
         if row.amount <= 0:
             errors.append({'row': idx, 'col': 'amount',  'reason': 'Catch amount is zero or negative'})
 
-        if row.input_type_id == 1 and row.catch_type_id == 1:
-            errors.append({'row': idx, 'col': 'input_type',  'reason': 'Input type/catch type mismatch'})
-
-        if row.input_type_id in [2, 4, 5, 6] and row.catch_type_id in [2, 3]:
-            errors.append({'row': idx, 'col': 'input_type',  'reason': 'Input type/catch type mismatch'})
-
         # Lookup table mismatch
         id_fields = [
             'taxon_key',
