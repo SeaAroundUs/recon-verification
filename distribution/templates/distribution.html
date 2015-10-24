@@ -16,6 +16,7 @@
                                 (<span id="taxon_key"></span>)
                             </h1>
                             <div id="gridMap"></div>
+                            <div id="aquamaps"></div>
                         </div>
                     </div>
                 </div>
@@ -25,6 +26,7 @@
                         <th>Common name</th>
                         <th>Scientific name</th>
                         <th>Distribution Timestamp</th>
+                        <th></th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -52,7 +54,15 @@
                                     data-taxon_key="{{taxon.taxon_key}}"
                                     data-taxon_name="{{taxon.common_name}}"
                                     class="view-taxon-link">
-                                    View distribution
+                                    View SAU distribution
+                                </button>
+                            </td>
+                            <td>
+                                <button
+                                    data-taxon_key="{{taxon.taxon_key}}"
+                                    data-taxon_name="{{taxon.common_name}}"
+                                    class="view-aquamaps-link">
+                                    View Aquamaps distribution
                                 </button>
                             </td>
                         </li>

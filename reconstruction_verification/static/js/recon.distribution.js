@@ -76,10 +76,29 @@ var Distribution = {
       if (map.dataLayer) {
         map.removeLayer(map.dataLayer);
       }
+      $('#aquamaps').html('');
     });
 
     modal.modal('show');
 
+  },
+
+  showAquamaps: function(taxon_key, taxon_name) {
+
+    $('#taxon_name').html(taxon_name);
+    $('#taxon_key').html(taxon_key);
+
+    modal.off('shown.bs.modal');
+    modal.on('shown.bs.modal', function(event) {
+      d3.html('taxon/' + taxon_key + '/aquamaps', function(error, html_fragment) {
+        $('#aquamaps').html(html_fragment);
+      });
+    });
+    modal.on('hide.bs.modal', function(event) {
+      $('#aquamaps').html('');
+    });
+
+    modal.modal('show');
   },
 
   init: function() {
@@ -135,6 +154,13 @@ var Distribution = {
       var taxon_name = $(event.target).data().taxon_name;
       window.location.hash = taxon_key;
       Distribution.showTaxon(taxon_key, taxon_name);
+    });
+
+    $(".view-aquamaps-link").click(function(event) {
+      event.stopPropagation();
+      var taxon_key = $(event.target).data().taxon_key;
+      var taxon_name = $(event.target).data().taxon_name;
+      Distribution.showAquamaps(taxon_key, taxon_name);
     });
   }
 };

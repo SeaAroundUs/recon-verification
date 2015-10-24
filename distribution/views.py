@@ -4,10 +4,12 @@ import logging
 import struct
 import threading
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render
 from django.views.generic.base import View
 import topojson
+
+from .aquamaps import get_map
 
 logger = logging.getLogger(__name__)
 
@@ -52,10 +54,23 @@ class DistributionView(View):
         logger.warn('recalculating distribution for {} (thread id: {})'.format(taxon_key, thread.name))
         return JsonResponse({'thread_id': thread.name})
 
+class AquamapsView(View):
+
+    def get(self, request, taxon_key):
+        with db.Session() as session:
+            taxa = session.query(Taxon) \
+                .filter(Taxon.taxon_key == taxon_key) \
+                .first()
+            if not taxa:
+                raise Http404
+
+            genus, species = taxa.scientific_name.split()
+            body = get_map(genus, species)
+            return HttpResponse(body)
 
 class TaxonExtentView(View):
 
-    def get(self, request, taxon_id=None):
+    def get(self, request, taxon_key=None):
 
         with db.Session() as session:
             raw_conn = session.connection().connection
@@ -66,7 +81,7 @@ class TaxonExtentView(View):
                 WHERE taxon_key=%(taxon_key)s
             """
 
-            cursor.execute(query, {'taxon_key': taxon_id})
+            cursor.execute(query, {'taxon_key': taxon_key})
             # topojson.py doesn't currently support a raw MultiPolygon, so wrap it in
             # a FeatureCollection
             features = []
@@ -74,7 +89,7 @@ class TaxonExtentView(View):
                 features.append(
                     {
                     'type': 'Feature',
-                    'properties': {'taxon_key': taxon_id},
+                    'properties': {'taxon_key': taxon_key},
                     'geometry': geom[0]
                 })
             geojson = {'type':'FeatureCollection', 'features': features}
@@ -85,7 +100,7 @@ class TaxonExtentView(View):
 
 class TaxonDistributionView(View):
 
-    def get(self, request, taxon_id=None):
+    def get(self, request, taxon_key=None):
 
 
         with db.Session() as session:
@@ -96,7 +111,7 @@ class TaxonDistributionView(View):
                 query = """select cell_id, relative_abundance as relative_abundance
                     from distribution.taxon_distribution d
                     where taxon_key=%(id)s order by cell_id"""
-                cursor.execute(query, {'id': taxon_id})
+                cursor.execute(query, {'id': taxon_key})
                 rows = ((x[0], '{:.15f}'.format(x[1])) for x in cursor)
                 f = io.StringIO()
                 writer = csv.writer(f)
@@ -109,7 +124,7 @@ class TaxonDistributionView(View):
                     from distribution.taxon_distribution d,
                     (SELECT max(relative_abundance) as max, min(relative_abundance) as min from distribution.taxon_distribution where taxon_key=%(id)s) s
                     where taxon_key=%(id)s order by cell_id"""
-                cursor.execute(query, {'id': taxon_id})
+                cursor.execute(query, {'id': taxon_key})
                 # return packed binary
                 data = ((cell_id | (x << 24)) for cell_id, x in cursor)
                 packed = struct.pack('I' * cursor.rowcount, *data)
