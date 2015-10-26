@@ -185,3 +185,12 @@ span.warning-reason {
   display: block;
   margin-bottom: 10px;
 }
+
+#browse-upload .working-set .form-group div.range {
+  float: right;
+  margin-right: 80px;
+}
+
+#browse-upload .working-set .form-group div.range label {
+  display: inline;
+}

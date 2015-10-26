@@ -65,7 +65,7 @@
                         {% for field, pretty_field, values in fields %}
                             <div class="form-group">
                                 <label for="{{ field }}">{{ pretty_field }}</label>
-                                <button id="add_{{ field }}" class="btn btn-default add-button">
+                                <button id="add-{{ field }}" class="btn btn-default add-button">
                                     <i class="glyphicon glyphicon-plus-sign"></i> Add
                                 </button>
                                 <select id="{{ field }}" name="{{ field }}">
@@ -85,6 +85,36 @@
                                 </select>
                             </div>
                         {% endfor %}
+
+                        <div class="form-group">
+                            <label for="yearRange">Year (range)</label>
+                            <button id="add-year-range" class="btn btn-default add-range-button">
+                                <i class="glyphicon glyphicon-plus-sign"></i> Add
+                            </button>
+                            <div class="range">
+                                <label>Min year:</label>
+                                <input type="text" id="yearRangeMin" name="yearRangeMin" class="rangeMin" />
+                            </div>
+                            <div class="range">
+                                <label>Max year:</label>
+                                <input type="text" id="yearRangeMax" name="yearRangeMax" class="rangeMax" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amountRange">Catch amount (range)</label>
+                            <button id="add-amount-range" class="btn btn-default add-range-button">
+                                <i class="glyphicon glyphicon-plus-sign"></i> Add
+                            </button>
+                            <div class="range">
+                                <label>Min amount:</label>
+                                <input type="text" id="amountRangeMin" name="amountRangeMin" class="rangeMin" />
+                            </div>
+                            <div class="range">
+                                <label>Max amount:</label>
+                                <input type="text" id="amountRangeMax" name="amountRangeMax" class="rangeMax" />
+                            </div>
+                        </div>
 
                         <div class="form-group">
                             <label for="working-query">Working set query</label>

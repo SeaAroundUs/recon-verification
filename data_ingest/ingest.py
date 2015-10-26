@@ -196,7 +196,7 @@ def get_errors(ids):
         try:
             EEZ.objects.get(eez_id=row.eez_id)
         except EEZ.DoesNotExist:
-            errors.append({'row': idx, 'col': 'year', 'reason': 'Lookup table mismatch'})
+            errors.append({'row': idx, 'col': 'eez', 'reason': 'Lookup table mismatch'})
 
         # Lookup table mismatch (year)
         if row.year not in Year.valid_years():

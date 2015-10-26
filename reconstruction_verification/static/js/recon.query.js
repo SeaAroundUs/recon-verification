@@ -14,6 +14,7 @@ var Query = {
             Query.$removeSelectedButton = $('#remove-selected');
 
             Query.initAddButtons();
+            Query.initAddRangeButtons();
             Query.initClearQueryButton();
             Query.initViewDataButton();
             Query.initRemoveSelectedButton();
@@ -34,6 +35,31 @@ var Query = {
 
             newOption = '<option value="' + $selected.val() + '">' +
                     $label.text() + ': ' + $selected.text() + '</option>';
+
+            Query.$workingQueryList.append(newOption);
+            Query.$viewDataButton.prop('disabled', false);
+        });
+    },
+
+    initAddRangeButtons: function() {
+        $('button.add-range-button').click(function() {
+            var newOption;
+            var $parent = $(this).parent();
+            var $label = $parent.find('label').first();
+            var field = $label.attr('for');
+            var min = $parent.find('.rangeMin').val();
+            var max = $parent.find('.rangeMax').val();
+
+            // handle NaN
+            min = isNaN(min) ? null : min;
+            max = isNaN(max) ? null : max;
+
+            if (min === null && max === null) {
+                return false;
+            }
+
+            newOption = '<option value="' + field + '=' + min + '-' +  max +'">' +
+                $label.text() + ': ' + min + ' - ' + max + '</option>';
 
             Query.$workingQueryList.append(newOption);
             Query.$viewDataButton.prop('disabled', false);

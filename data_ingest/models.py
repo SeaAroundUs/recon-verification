@@ -43,6 +43,29 @@ class RawCatchQuerySet(models.QuerySet):
     def from_request(self, request):
         allowed_params = [f[0] for f in self.model.allowed_query_fields()]
         kwargs = dict((p + '__in', request.GET.getlist(p)) for p in allowed_params if p in request.GET)
+
+        if 'yearRange' in request.GET:
+            year_min, year_max = request.GET.get('yearRange').split('-')
+            try:
+                kwargs['year__gte'] = int(year_min)
+            except ValueError:
+                pass
+            try:
+                kwargs['year__lte'] = int(year_max)
+            except ValueError:
+                pass
+
+        if 'amountRange' in request.GET:
+            amount_min, amount_max = request.GET.get('amountRange').split('-')
+            try:
+                kwargs['amount__gte'] = float(amount_min)
+            except ValueError:
+                pass
+            try:
+                kwargs['amount__lte'] = float(amount_max)
+            except ValueError:
+                pass
+
         return self.filter(**kwargs)
 
 
@@ -164,7 +187,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             (
                 'year',
                 'Year',
-                list((y,) for y in range(1950, 2011))
+                list((y,) for y in catch.models.Year.valid_years())
             ),
             (
                 'taxon_key',
