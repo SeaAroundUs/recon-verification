@@ -1,6 +1,11 @@
 import html
+import re
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_map(genus, species):
@@ -9,6 +14,7 @@ def get_map(genus, species):
     url = "http://www.aquamaps.org/webservice/getAMap.php?genus={}&species={}"\
         .format(genus, species)
     response = urlopen(url).read()
+    logger.warn('retrieved {}'.format(url))
     xml_lines = response.decode('utf-8').split('\r\n')
     # fragile way of giving this a root element in order to be well formed
     # enough to be parsable
@@ -16,4 +22,10 @@ def get_map(genus, species):
     xml_lines.append('</fakeroot>')
     root = ET.fromstring(''.join(xml_lines))
     body = root.find('section').find('section_body')
-    return body.text
+
+    # extract the image and link and return an html fragment
+    match = re.search("http://www.aquamaps.org/preMap.php.*?'", body.text)
+    link = match.group(0)[:-1]
+    match = re.search('http://www.aquamaps.org/imagethumb/file_destination/.*?\.jpg', body.text)
+    img = match.group(0)
+    return '<a target="_blank" href="{}">{}</a><br /><img src="{}" />'.format(link,link,img)
