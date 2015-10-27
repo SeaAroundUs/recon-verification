@@ -96,6 +96,10 @@ class EditNormalizeView(View):
 
     def get(self, request):
 
+        if 'get_count' in request.GET:
+            count = RawCatch.objects.from_request(request).count()
+            return ReconResponse({'count': count})
+
         page = int(request.GET.get('page', 1))
         last_page = RawCatch.objects.from_request(request).last_page()
 

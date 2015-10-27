@@ -75,7 +75,15 @@ var Query = {
 
     initViewDataButton: function() {
         Query.$viewDataButton.click(function() {
-            window.location.href = '/data_ingest/edit-normalize/?' + Query.getParams().join('&');
+            var url = '/data_ingest/edit-normalize/?' + Query.getParams().join('&');
+            $.get(url + '&get_count=true', function(res) {
+                if (res.count > 100) {
+                    alert('The query returned greater than 100 rows (' + res.count +' rows returned); please add ' +
+                      'additional query terms to refine your result further or query the database directly');
+                } else {
+                    window.location.href = url;
+                }
+            });
         });
     },
 
