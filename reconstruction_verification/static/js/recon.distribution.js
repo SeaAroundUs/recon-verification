@@ -65,7 +65,15 @@ var Distribution = {
     });
   },
 
-  showTaxon: function(taxon_key, taxon_name) {
+  showTaxon: function(taxon_key, taxon_name, taxon_level) {
+
+    $('#aquamaps-link').data('taxon_key', taxon_key);
+    if (taxon_level == 6) {
+      $('#aquamaps-link').show();
+    } else {
+      $('#aquamaps-link').hide();
+    }
+    $('.spin').hide();
 
     $('#taxon_name').html(taxon_name);
     $('#taxon_key').html(taxon_key);
@@ -78,22 +86,16 @@ var Distribution = {
     modal.modal('show');
   },
 
-  showAquamaps: function(taxon_key, taxon_name) {
+  showAquamaps: function(taxon_key) {
 
-    $('#taxon_name').html(taxon_name);
-    $('#taxon_key').html(taxon_key);
-
-    modal.off('shown.bs.modal');
-    modal.on('shown.bs.modal', function(event) {
-      d3.html('taxon/' + taxon_key + '/aquamaps', function(error, html_fragment) {
-        $('#aquamaps').html(html_fragment);
-      });
+    d3.html('taxon/' + taxon_key + '/aquamaps', function(error, html_fragment) {
+      $('.spin').hide();
+      $('#aquamaps').html(html_fragment);
     });
+
     modal.on('hide.bs.modal', function(event) {
       $('#aquamaps').html('');
     });
-
-    modal.modal('show');
   },
 
   init: function() {
@@ -102,6 +104,7 @@ var Distribution = {
     Distribution.loadCountries();
     Distribution.initDistribution();
     $('.modal .x').click(function() {modal.modal('hide'); });
+
     $('[name="search"]').keyup(function() {
       var query = $(this).val();
       var regex = new RegExp(query, 'gi');
@@ -125,7 +128,8 @@ var Distribution = {
     var taxon_key = location.hash.slice(1)|0;
     if (taxon_key) {
       var taxon_name = $('button.view-taxon-link[data-taxon_key="' + taxon_key + '"]').data().taxon_name;
-      Distribution.showTaxon(taxon_key, taxon_name);
+      var taxon_level = $('button.view-taxon-link[data-taxon_key="' + taxon_key + '"]').data().taxon_level;
+      Distribution.showTaxon(taxon_key, taxon_name, taxon_level);
     }
   },
 
@@ -147,15 +151,18 @@ var Distribution = {
       event.stopPropagation();
       var taxon_key = $(event.target).data().taxon_key;
       var taxon_name = $(event.target).data().taxon_name;
+      var taxon_level = $(event.target).data().taxon_level;
+
       window.location.hash = taxon_key;
-      Distribution.showTaxon(taxon_key, taxon_name);
+
+      Distribution.showTaxon(taxon_key, taxon_name, taxon_level);
     });
 
-    $(".view-aquamaps-link").click(function(event) {
-      event.stopPropagation();
-      var taxon_key = $(event.target).data().taxon_key;
-      var taxon_name = $(event.target).data().taxon_name;
-      Distribution.showAquamaps(taxon_key, taxon_name);
+    $('#aquamaps-link').click(function() {
+      $(event.target).hide();
+      $('.spin').show();
+      var taxon_key = $(event.target).data('taxon_key')
+      Distribution.showAquamaps(taxon_key);
     });
   }
 };

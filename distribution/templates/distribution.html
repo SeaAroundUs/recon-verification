@@ -11,11 +11,13 @@
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <span class="x glyphicon glyphicon-remove"></span>
-                            <h1>
+                            <h2>
                                 Distribution for <span id="taxon_name"></span>
                                 (<span id="taxon_key"></span>)
-                            </h1>
+                            </h2>
                             <div id="gridMap"></div>
+                            <a style="cursor: pointer" data-taxon_key="" data-taxon_name="" id="aquamaps-link">Compare with Aquamaps</a>
+                            <span class="glyphicon glyphicon-refresh spin"></span>
                             <div id="aquamaps"></div>
                         </div>
                     </div>
@@ -26,7 +28,6 @@
                         <th>Common name</th>
                         <th>Scientific name</th>
                         <th>Distribution Timestamp</th>
-                        <th></th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -53,16 +54,9 @@
                                 <button
                                     data-taxon_key="{{taxon.taxon_key}}"
                                     data-taxon_name="{{taxon.common_name}}"
+                                    data-taxon_level="{{taxon.taxon_level_id}}"
                                     class="view-taxon-link">
-                                    View SAU distribution
-                                </button>
-                            </td>
-                            <td>
-                                <button
-                                    data-taxon_key="{{taxon.taxon_key}}"
-                                    data-taxon_name="{{taxon.common_name}}"
-                                    class="view-aquamaps-link">
-                                    View Aquamaps distribution
+                                    View distribution
                                 </button>
                             </td>
                         </li>

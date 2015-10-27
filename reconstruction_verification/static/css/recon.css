@@ -117,43 +117,6 @@ span.warning-reason {
   background-color: #eaeaea;
 }
 
-#distribution .modal .x {
-  float:left;
-  z-index: 2;
-  font-size: 2em;
-  top: 10px;
-  left: 10px;
-}
-.x:hover {
-  cursor: pointer;
-}
-#distribution .glyphicon.run {
-  cursor: pointer;
-}
-#distribution .modal-content {
-  text-align: center;
-  padding-bottom: 10px;
-}
-#distribution #gridMap {
-  width: 100%;
-  height: 600px;
-  position: relative;
-}
-#distribution table tr:hover {
-  background-color: rgb(230,230,230);
-}
-#distribution table .anchor {
-  /* anchors scroll past fixed header */
-  display: block;
-  position: relative;
-  top: -75px;
-  visibility: hidden;
-}
-#distribution [name=search] {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
 #browse-upload .section {
   margin-bottom: 25px;
 }
