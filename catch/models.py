@@ -411,7 +411,7 @@ class Reference(models.Model):
         show_full_result_count = True
 
     def __str__(self):
-        return self.name
+        return self.filename
 
 
 class Year(models.Model):
