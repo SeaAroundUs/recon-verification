@@ -9,5 +9,5 @@ django-pipeline==1.5.0
 boto==2.34.0
 django-storages-redux==1.2
 django-dirtyfields==0.7
-https://github.com/SeaAroundUs/species-distribution/tarball/b78a4a96a447e1a17ed1e09224ff3c052352e2a0#egg=species_distribution
+https://github.com/SeaAroundUs/species-distribution/tarball/396ecff10d7e6bcaea0bd239fa3956b6e45884c4#egg=species_distribution-2.0.1
 https://github.com/SeaAroundUs/topojson.py/tarball/111bfd80fd338ac5d951d8d5ada8ee1471e00a31#egg=topojson.py
