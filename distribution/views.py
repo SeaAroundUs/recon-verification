@@ -76,7 +76,7 @@ class TaxonExtentView(View):
             raw_conn = session.connection().connection
             cursor = raw_conn.cursor()
 
-            query = """SELECT ST_AsGeoJSON(ST_ForceRHR(ST_Simplify(geom, .025)), 6)::json as geojson
+            query = """SELECT ST_AsGeoJSON(ST_Simplify(geom, .025), 6)::json as geojson
                 FROM distribution.taxon_extent
                 WHERE taxon_key=%(taxon_key)s
             """
