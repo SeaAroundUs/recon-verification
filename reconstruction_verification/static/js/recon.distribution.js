@@ -62,6 +62,7 @@ var Distribution = {
         zIndex:2
       };
       map.extentLayer = map.addLayer(extent, layerOptions);
+      map.panToCentroid(extent);
     });
   },
 
