@@ -99,6 +99,7 @@ var Distribution = {
   },
 
   init: function() {
+    $('table').tablesorter();
     modal = $('#modal');
     Distribution.initMap();
     Distribution.loadCountries();
