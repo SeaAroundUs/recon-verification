@@ -160,7 +160,7 @@ var Distribution = {
       Distribution.showTaxon(taxon_key, taxon_name, taxon_level);
     });
 
-    $('#aquamaps-link').click(function() {
+    $('#aquamaps-link').click(function(event) {
       $(event.target).hide();
       $('.spin').show();
       var taxon_key = $(event.target).data('taxon_key')

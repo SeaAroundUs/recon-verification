@@ -9,6 +9,9 @@
 .x:hover {
   cursor: pointer;
 }
+#distribution #aquamaps img {
+  width: 100%;
+}
 #distribution .glyphicon.run {
   cursor: pointer;
 }
