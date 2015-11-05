@@ -37,9 +37,6 @@ var Distribution = {
   },
 
   loadTaxonDistribution: function(taxon_key) {
-    if (map.dataLayer) {
-      map.removeLayer(map.dataLayer);
-    }
     d3.xhr('taxon/' + taxon_key)
       .responseType('arraybuffer')
       .get(function(error, xhr) {
@@ -51,9 +48,7 @@ var Distribution = {
   },
 
   loadTaxonExtent: function(taxon_key) {
-    if (map.extentLayer) {
-      map.removeLayer(map.extentLayer);
-    }
+
     d3.json('taxon/' + taxon_key + '/extent', function(error, extent) {
       var layerOptions = {
         renderOnAnimate: true,
@@ -84,6 +79,17 @@ var Distribution = {
       Distribution.loadTaxonDistribution(taxon_key);
       Distribution.loadTaxonExtent(taxon_key);
     });
+
+    modal.on('hide.bs.modal', function(event) {
+      $('#aquamaps').html('');
+      if (map.extentLayer) {
+        map.removeLayer(map.extentLayer);
+      }
+      if (map.dataLayer) {
+        map.removeLayer(map.dataLayer);
+      }
+    });
+
     modal.modal('show');
   },
 
@@ -94,9 +100,6 @@ var Distribution = {
       $('#aquamaps').html(html_fragment);
     });
 
-    modal.on('hide.bs.modal', function(event) {
-      $('#aquamaps').html('');
-    });
   },
 
   init: function() {
