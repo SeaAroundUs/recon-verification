@@ -348,6 +348,14 @@ class Taxon(models.Model):
     has_map = models.BooleanField()
     is_baltic_only = models.BooleanField()
 
+    @property
+    def is_rare(self):
+        try:
+            RareTaxon.objects.get(taxon_key=self.taxon_key)
+            return True
+        except RareTaxon.DoesNotExist:
+            return False
+
     class Meta:
         verbose_name = 'Taxon'
         verbose_name_plural = 'Taxa'
@@ -594,3 +602,21 @@ class AccessAgreement(models.Model):
 
     def __str__(self):
         return self.title_of_agreement
+
+
+class RareTaxon(models.Model):
+    taxon_key = models.IntegerField(primary_key=True)
+    scientific_name = models.CharField(max_length=255)
+    common_name = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name = 'Rare taxon'
+        verbose_name_plural = 'Rare taxa'
+        ordering = ['common_name']
+        db_table = 'rare_taxon'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('taxon_key', 'scientific_name', 'common_name')
+        search_fields = ('scientific_name', 'common_name')
+        show_full_result_count = True

@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
-    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year
+    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year, RareTaxon
 from decimal import Decimal
 from django.forms import ValidationError
 from django.utils import timezone
@@ -206,6 +206,10 @@ def get_errors(ids):
         for field in RawCatch.required_fields():
             if not str(getattr(row, field)).strip():
                 errors.append({'row': idx, 'col': field,  'reason': 'Missing required field'})
+
+        # Rare taxa should be excluded
+        if row.taxon_key in RareTaxon.objects.all().values_list('taxon_key', flat=True):
+            errors.append({'row': idx, 'col': 'taxon_key',  'reason': 'Rare taxa should be excluded'})
 
     return errors
 
