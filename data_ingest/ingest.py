@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
-    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year, RareTaxon
+    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year, RareTaxon, Layer3Taxon
 from decimal import Decimal
 from django.forms import ValidationError
 from django.utils import timezone
@@ -143,8 +143,13 @@ def get_errors(ids):
 
     for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
 
+        # Layer 3 taxa list rule
+        if row.taxon_key and row.taxon_key in Layer3Taxon.objects.all().values_list('taxon_key', flat=True):
+            if row.layer != 3:
+                errors.append({'row': idx, 'col': 'layer', 'reason': 'Layer 3 taxa should be Layer 3'})
+
         # Fishing entity and EEZ rule for Layer
-        if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer != 0:
+        elif row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer != 0:
             eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
             expected_layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
             # TODO layer 3 logic based on taxon
