@@ -146,14 +146,16 @@ def get_errors(ids):
         # Layer 3 taxa list rule
         if row.taxon_key and row.taxon_key in Layer3Taxon.objects.all().values_list('taxon_key', flat=True):
             if row.layer != 3:
-                errors.append({'row': idx, 'col': 'layer', 'reason': 'Layer 3 taxa should be Layer 3'})
+                errors.append({'row': idx, 'col': 'layer',
+                               'reason': 'Layer is incorrect (determined by EEZ, Fishing Entity, and Taxon)'})
 
         # Fishing entity and EEZ rule for Layer
         elif row.eez_id is not None and row.fishing_entity_id != 0 and row.layer != 0:
             eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
             expected_layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
             if row.layer != expected_layer:
-                errors.append({'row': idx, 'col': 'layer', 'reason': 'Fishing entity and EEZ rule for Layer'})
+                errors.append({'row': idx, 'col': 'layer',
+                               'reason': 'Layer is incorrect (determined by EEZ, Fishing Entity, and Taxon)'})
 
         # Input type is reconstructed and Catch type is reported landings
         if row.input_type_id == reconstructed_input_type_id and row.catch_type_id == reported_landings_catch_type_id:
