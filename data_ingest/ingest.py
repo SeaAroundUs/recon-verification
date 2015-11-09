@@ -149,10 +149,9 @@ def get_errors(ids):
                 errors.append({'row': idx, 'col': 'layer', 'reason': 'Layer 3 taxa should be Layer 3'})
 
         # Fishing entity and EEZ rule for Layer
-        elif row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer != 0:
+        elif row.eez_id is not None and row.fishing_entity_id != 0 and row.layer != 0:
             eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
             expected_layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
-            # TODO layer 3 logic based on taxon
             if row.layer != expected_layer:
                 errors.append({'row': idx, 'col': 'layer', 'reason': 'Fishing entity and EEZ rule for Layer'})
 
@@ -299,16 +298,17 @@ def normalize(ids):
         except InputType.DoesNotExist:  # no Input Type found
             row.input_type_id = 0
 
-        if row.eez_id != 0 and row.fishing_entity_id != 0 and row.layer == 0:
-            eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
-            row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
+        try:
+            if row.eez_id is not None and row.fishing_entity_id != 0 and row.layer == 0:
+                eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
+                row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
+        except EEZ.DoesNotExist:
+            row.layer = 0
 
         try:
             Reference.objects.get(reference_id=row.reference_id)
         except Reference.DoesNotExist:  # no Reference found
             row.reference_id = 0
-
-        # TODO more normalization
 
         # only save rows that change
         if row.is_dirty():
