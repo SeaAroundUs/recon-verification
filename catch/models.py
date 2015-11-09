@@ -620,3 +620,21 @@ class RareTaxon(models.Model):
         list_display = ('taxon_key', 'scientific_name', 'common_name')
         search_fields = ('scientific_name', 'common_name')
         show_full_result_count = True
+
+
+class Layer3Taxon(models.Model):
+    taxon_key = models.IntegerField(primary_key=True)
+    scientific_name = models.CharField(max_length=255)
+    common_name = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name = 'Layer 3 taxon'
+        verbose_name_plural = 'Layer 3 taxa'
+        ordering = ['common_name']
+        db_table = 'layer3_taxon'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('taxon_key', 'scientific_name', 'common_name')
+        search_fields = ('scientific_name', 'common_name')
+        show_full_result_count = True
