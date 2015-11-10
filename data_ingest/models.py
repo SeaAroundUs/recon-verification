@@ -295,7 +295,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     @staticmethod
     def error_views():
         return [
-            ('TODO', 'Layer is incorrect (determined by EEZ, Fishing Entity, and Taxon)'),
+            ('fishing_entity_and_eez_not_aligned', 'Layer is incorrect (determined by EEZ, Fishing Entity, and Taxon)'),
             ('input_reconstructed_catch_type_reported',
              'Input type is reconstructed and Catch type is reported landings'),
             ('input_not_reconstructed_catch_type_not_reported',
