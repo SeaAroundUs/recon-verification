@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.contrib import admin
 from data_ingest.models import RawCatch
 from django.core.exceptions import ValidationError
@@ -637,4 +638,47 @@ class Layer3Taxon(models.Model):
     class Admin(LoggedAdmin):
         list_display = ('taxon_key', 'scientific_name', 'common_name')
         search_fields = ('scientific_name', 'common_name')
+        show_full_result_count = True
+
+
+class HabitatIndex(models.Model):
+    taxon_key = models.IntegerField(primary_key=True)
+    taxon_name = models.CharField(max_length=255, null=True, blank=True)
+    common_name = models.CharField(max_length=255, null=True, blank=True)
+    cla_code = models.IntegerField(null=True, blank=True)
+    ord_code = models.IntegerField(null=True, blank=True)
+    fam_code = models.IntegerField(null=True, blank=True)
+    gen_code = models.IntegerField(null=True, blank=True)
+    spe_code = models.IntegerField(null=True, blank=True)
+    habitat_diversity_index = models.FloatField(null=True, blank=True)
+    effective_distance = models.FloatField(null=True, blank=True)
+    estuaries = models.FloatField(null=True, blank=True)
+    coral = models.FloatField(null=True, blank=True)
+    sea_grass = models.FloatField(null=True, blank=True)
+    others = models.FloatField(null=True, blank=True)
+    shelf = models.FloatField(null=True, blank=True)
+    slope = models.FloatField(null=True, blank=True)
+    abyssal = models.FloatField(null=True, blank=True)
+    inshore = models.FloatField(null=True, blank=True)
+    offshore = models.FloatField(null=True, blank=True)
+    offshore_back = models.FloatField(null=True, blank=True)
+    max_depth = models.IntegerField(null=True, blank=True)
+    min_depth = models.IntegerField(null=True, blank=True)
+    lat_north = models.IntegerField(null=True, blank=True)
+    lat_south = models.IntegerField(null=True, blank=True)
+    found_in_fao_area_id = ArrayField(models.IntegerField(null=True, blank=True))
+    fao_limits = models.IntegerField(null=True, blank=True)
+    sl_max = models.IntegerField(null=True, blank=True)
+    intertidal = models.NullBooleanField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Habitat index'
+        verbose_name_plural = 'Habitat indices'
+        ordering = ['common_name']
+        db_table = 'taxon_habitat'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('taxon_key', 'taxon_name', 'common_name')
+        search_fields = ('taxon_name', 'common_name')
         show_full_result_count = True
