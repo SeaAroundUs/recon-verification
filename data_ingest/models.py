@@ -1,5 +1,5 @@
 from time import strftime
-from django.db import models
+from django.db import models, connection
 from django.db.transaction import atomic
 from django.contrib.auth.models import User
 from reconstruction_verification.settings import ROWS_PER_PAGE
@@ -41,7 +41,7 @@ class RawCatchQuerySet(models.QuerySet):
         return self.all()[offset:ROWS_PER_PAGE + offset]
 
     def from_request(self, request):
-        allowed_params = [f[0] for f in self.model.allowed_query_fields()]
+        allowed_params = [f[0] for f in self.model.allowed_query_fields() if f[0] not in ('warning_view', 'error_view')]
         kwargs = dict((p + '__in', request.GET.getlist(p)) for p in allowed_params if p in request.GET)
 
         if 'yearRange' in request.GET:
@@ -65,6 +65,16 @@ class RawCatchQuerySet(models.QuerySet):
                 kwargs['amount__lte'] = float(amount_max)
             except ValueError:
                 pass
+
+        if 'warning_view' in request.GET or 'error_view' in request.GET:
+            views = request.GET.getlist('warning_view') + request.GET.getlist('error_view')
+            allowed_views = RawCatch.warning_views() + RawCatch.error_views()
+            id_sql = ' UNION '.join('SELECT id FROM %s' % ('v_raw_catch_' + view)
+                                    for view in views
+                                    if view in [_[0] for _ in allowed_views])
+            with connection.cursor() as cursor:
+                cursor.execute(id_sql)
+                kwargs['id__in'] = [_[0] for _ in cursor.fetchall()]
 
         return self.filter(**kwargs)
 
@@ -208,6 +218,16 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 'source_file_id',
                 'Source file',
                 FileUpload.objects.exclude(user_id__isnull=True).order_by('create_datetime').values_list('id', 'file')
+            ),
+            (
+                'warning_view',
+                'Warning',
+                RawCatch.warning_views()
+            ),
+            (
+                'error_view',
+                'Error',
+                RawCatch.error_views()
             )
         ]
 
@@ -255,4 +275,34 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'ICES area',
             'NAFO division',
             'CCAMLR area'
+        ]
+
+    @staticmethod
+    def warning_views():
+        return [
+            ('year_greater_2010', 'Year greater than 2010'),
+            ('original_taxon_not_null', 'Original taxon name is not null'),
+            ('original_country_fishing_not_null', 'Original country fishing is not null'),
+            ('original_sector_not_null', 'Original sector is not null'),
+            ('peru_catch_amount_greater_than_threshold', 'Catch amount greater than 15e6 for Peru'),
+            ('amount_greater_than_threshold', 'Catch amount greater than 5e6 (excluding Peru)'),
+            ('fao_27_ices_null', 'FAO is 27 and ICES is null'),
+            ('fao_21_nafo_null', 'FAO is 21 and NAFO is null'),
+            ('subsistence_and_layer_not_1', 'Sector is subsistence and Layer is not 1'),
+            ('layer_2_or_3_and_sector_not_industrial', 'Layer is 2 or 3 and sector is not industrial'),
+        ]
+
+    @staticmethod
+    def error_views():
+        return [
+            ('TODO', 'Layer is incorrect (determined by EEZ, Fishing Entity, and Taxon)'),
+            ('input_reconstructed_catch_type_reported',
+             'Input type is reconstructed and Catch type is reported landings'),
+            ('input_not_reconstructed_catch_type_not_reported',
+             'Input type is not reconstructed and Catch type not reported landings'),
+            ('layer_not_in_range', 'Layer is not 1, 2, or 3'),
+            ('amount_zero_or_negative', 'Catch amount is zero or negative'),
+            ('lookup_mismatch', 'Lookup table mismatch'),
+            ('missing_required_field', 'Missing required field'),
+            ('taxa_is_rare', 'Rare taxa should be excluded'),
         ]
