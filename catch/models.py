@@ -666,7 +666,7 @@ class HabitatIndex(models.Model):
     min_depth = models.IntegerField(null=True, blank=True)
     lat_north = models.IntegerField(null=True, blank=True)
     lat_south = models.IntegerField(null=True, blank=True)
-    found_in_fao_area_id = ArrayField(models.IntegerField(null=True, blank=True))
+    found_in_fao_area_id = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
     fao_limits = models.IntegerField(null=True, blank=True)
     sl_max = models.IntegerField(null=True, blank=True)
     intertidal = models.NullBooleanField(null=True, blank=True)
