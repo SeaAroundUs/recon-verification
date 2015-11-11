@@ -157,3 +157,19 @@ span.warning-reason {
 #browse-upload .working-set .form-group div.range label {
   display: inline;
 }
+
+#health span.error {
+  color: red;
+}
+
+#health span.clear {
+  color: green;
+}
+
+#health span.warning {
+  color: yellow;
+}
+
+#health span.warning, span.error {
+  font-weight: bold;
+}

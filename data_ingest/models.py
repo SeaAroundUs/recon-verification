@@ -306,3 +306,9 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             ('missing_required_field', 'Missing required field'),
             ('taxa_is_rare', 'Rare taxa should be excluded'),
         ]
+
+    @classmethod
+    def get_view_count(cls, view):
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT count(1) FROM %s' % ('v_raw_catch_' + view))
+            return cursor.fetchone()[0]

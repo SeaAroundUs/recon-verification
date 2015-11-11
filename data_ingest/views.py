@@ -179,3 +179,13 @@ class DeleteRowView(View):
             return HttpResponseNotFound('Row does not exist')
 
         return ReconResponse({'result': 'ok'})
+
+
+class HealthView(View):
+    template = 'health.html'
+
+    def get(self, request):
+        warnings = [(view[0], view[1], RawCatch.get_view_count(view[0])) for view in RawCatch.warning_views()]
+        errors = [(view[0], view[1], RawCatch.get_view_count(view[0])) for view in RawCatch.error_views()]
+        params = {'warning_queries': warnings, 'error_queries': errors}
+        return render(request, self.template, params)

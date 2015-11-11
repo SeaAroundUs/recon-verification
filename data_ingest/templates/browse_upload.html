@@ -70,7 +70,9 @@
                                 </button>
                                 <select id="{{ field }}" name="{{ field }}">
                                     <option>-- SELECT --</option>
-                                    <option value="{{ field }}=0">(ERROR)</option>
+                                    {% if field != 'warning_view' and field != 'error_view' %}
+                                      <option value="{{ field }}=0">(ERROR)</option>
+                                    {% endif %}
                                     {% for value in values %}
                                         <option value="{{ field }}={{ value | first }}">
                                         {% if value|length == 1 %}
