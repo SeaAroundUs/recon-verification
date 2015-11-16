@@ -164,6 +164,7 @@ PIPELINE_JS = {
             'js/recon.table.js',
             'js/recon.query.js',
             'js/recon.upload.js',
+            'js/recon.health.js',
         ),
         'output_filename': 'js/scripts.js'
     },

@@ -5,40 +5,66 @@
   <div id="health" class="panel-group" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
       <div class="panel-body">
-        <div class="section">
-          <h3>Raw Catch Health Report</h3>
-          <h4>Warnings:</h4>
-          {% for query, label, count in raw_catch_warnings %}
-            <p>
-              <a href="{% url 'edit-normalize' %}?warning_view={{ query }}">{{ label }}</a> ::
-              <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
-            </p>
-          {% endfor %}
-          <h4>Errors:</h4>
-          {% for query, label, count in raw_catch_errors %}
-            <p>
-              <a href="{% url 'edit-normalize' %}?error_view={{ query }}">{{ label }}</a> ::
-              <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
-            </p>
-          {% endfor %}
-        </div>
+        <h3>Data Health</h3>
 
-        <div class="section">
-          <h3>Catch Health Report</h3>
-          <h4>Warnings:</h4>
-          {% for query, label, count in catch_warnings %}
-            <p>
-              <span>{{ label }}</span> ::
-              <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
-            </p>
-          {% endfor %}
-          <h4>Errors:</h4>
-          {% for query, label, count in catch_errors %}
-            <p>
-              <span>{{ label }}</span> ::
-              <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
-            </p>
-          {% endfor %}
+        <ul class="nav nav-tabs">
+          <li role="presentation" class="active"><a href="#raw-catch" data-toggle="tab">Raw Catch</a></li>
+          <li role="presentation"><a href="#catch" data-toggle="tab">Catch</a></li>
+        </ul>
+
+        <div class="tab-content">
+          <div role="tab-panel" class="tab-pane active" id="raw-catch">
+            <h3>Raw Catch Health Report</h3>
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Warnings:</h4>
+                {% for query, label, count in raw_catch_warnings %}
+                  <p>
+                    <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
+                      {{ label }}
+                    </a> ::
+                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                  </p>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <h4>Errors:</h4>
+                {% for query, label, count in raw_catch_errors %}
+                  <p>
+                    <a class="view-link" href="{% url 'edit-normalize' %}?error_view={{ query }}" data-count="{{ count }}">
+                      {{ label }}
+                    </a> ::
+                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                  </p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div role="tab-panel" class="tab-pane" id="catch">
+            <h3>Catch Health Report</h3>
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Warnings:</h4>
+                {% for query, label, count in catch_warnings %}
+                  <p>
+                    <span>{{ label }}</span> ::
+                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                  </p>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <h4>Errors:</h4>
+                {% for query, label, count in catch_errors %}
+                  <p>
+                    <span>{{ label }}</span> ::
+                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                  </p>
+                {% endfor %}
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
