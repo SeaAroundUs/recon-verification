@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadReque
 from data_ingest.models import FileUpload, RawCatch
 from data_ingest.forms import FileUploadForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
-from catch.models import Reference
+from catch.models import Reference, Catch
 from storages.backends.s3boto import S3BotoStorage
 from catch.logging import TableEdit
 import logging
@@ -185,7 +185,16 @@ class HealthView(View):
     template = 'health.html'
 
     def get(self, request):
-        warnings = [(view[0], view[1], RawCatch.get_view_count(view[0])) for view in RawCatch.warning_views()]
-        errors = [(view[0], view[1], RawCatch.get_view_count(view[0])) for view in RawCatch.error_views()]
-        params = {'warning_queries': warnings, 'error_queries': errors}
+        raw_catch_warnings = [(view[0], view[1], RawCatch.get_view_count(view[0]))
+                              for view in RawCatch.warning_views()]
+        raw_catch_errors = [(view[0], view[1], RawCatch.get_view_count(view[0]))
+                            for view in RawCatch.error_views()]
+        catch_warnings = [(view[0], view[1], Catch.get_view_count(view[0]))
+                          for view in Catch.warning_views()]
+        catch_errors = [(view[0], view[1], Catch.get_view_count(view[0]))
+                        for view in Catch.error_views()]
+        params = {'raw_catch_warnings': raw_catch_warnings,
+                  'raw_catch_errors': raw_catch_errors,
+                  'catch_warnings': catch_warnings,
+                  'catch_errors': catch_errors}
         return render(request, self.template, params)

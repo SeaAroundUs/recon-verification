@@ -8,16 +8,34 @@
         <div class="section">
           <h3>Raw Catch Health Report</h3>
           <h4>Warnings:</h4>
-            {% for query, label, count in warning_queries %}
-              <p>
-                <a href="{% url 'edit-normalize' %}?warning_view={{ query }}">{{ label }}</a> ::
-                <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
-              </p>
-            {% endfor %}
+          {% for query, label, count in raw_catch_warnings %}
+            <p>
+              <a href="{% url 'edit-normalize' %}?warning_view={{ query }}">{{ label }}</a> ::
+              <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+            </p>
+          {% endfor %}
           <h4>Errors:</h4>
-          {% for query, label, count in error_queries %}
+          {% for query, label, count in raw_catch_errors %}
             <p>
               <a href="{% url 'edit-normalize' %}?error_view={{ query }}">{{ label }}</a> ::
+              <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+            </p>
+          {% endfor %}
+        </div>
+
+        <div class="section">
+          <h3>Catch Health Report</h3>
+          <h4>Warnings:</h4>
+          {% for query, label, count in catch_warnings %}
+            <p>
+              <span>{{ label }}</span> ::
+              <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+            </p>
+          {% endfor %}
+          <h4>Errors:</h4>
+          {% for query, label, count in catch_errors %}
+            <p>
+              <span>{{ label }}</span> ::
               <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
             </p>
           {% endfor %}
