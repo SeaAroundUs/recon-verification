@@ -151,8 +151,11 @@ def get_errors(ids):
 
         # Fishing entity and EEZ rule for Layer
         elif row.eez_id is not None and row.fishing_entity_id != 0 and row.layer != 0:
-            eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
-            expected_layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
+            try:
+                eez_owner_id = EEZ.objects.get(eez_id=row.eez_id).fishing_entity.fishing_entity_id
+            except FishingEntity.DoesNotExist:
+                eez_owner_id = -1
+            expected_layer = 1 if eez_owner_id == row.fishing_entity_id else 2
             if row.layer != expected_layer:
                 errors.append({'row': idx, 'col': 'layer',
                                'reason': 'Layer is incorrect (determined by EEZ, Fishing Entity, and Taxon)'})
