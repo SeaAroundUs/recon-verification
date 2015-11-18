@@ -280,7 +280,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     @staticmethod
     def warning_views():
         return [
-            ('year_greater_2010', 'Year greater than 2010'),
+            ('year_max', 'Year greater than the max year'),
             ('original_taxon_not_null', 'Original taxon name is not null'),
             ('original_country_fishing_not_null', 'Original country fishing is not null'),
             ('original_sector_not_null', 'Original sector is not null'),

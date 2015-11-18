@@ -90,8 +90,8 @@ def get_warnings(ids):
 
     for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
 
-        # Year greater than 2010
-        if row.year > 2010:
+        # Year greater than the max year
+        if row.year > Year.max_year():
             warnings.append({'row': idx, 'col': 'year', 'reason': 'Year after 2010'})
 
         # Original taxon name is not null

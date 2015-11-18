@@ -441,7 +441,7 @@ class Year(models.Model):
 
     @classmethod
     def max_year(cls):
-        return cls.objects.aggregate(models.Max('year'))
+        return cls.objects.aggregate(models.Max('year'))['year__max']
 
 
 class Catch(models.Model):
@@ -481,7 +481,7 @@ class Catch(models.Model):
     @staticmethod
     def warning_views():
         return [
-            ('year_greater_2010', 'Year greater than 2010'),
+            ('year_max', 'Year greater than the max year'),
             ('original_taxon_not_null', 'Original taxon name is not null'),
             ('original_country_fishing_not_null', 'Original country fishing is not null'),
             ('original_sector_not_null', 'Original sector is not null'),
