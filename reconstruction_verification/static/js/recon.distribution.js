@@ -12,9 +12,21 @@ var modal = null;
 var Distribution = {
 
   initMap: function() {
-    var colorScale = d3.scale.linear()
+
+    var greenToRedColorScale = d3.scale.linear()
       .domain([0,127,255])
       .range(['green', 'yellow', 'red'] );
+
+    var aquamapsColorScale = d3.scale.linear()
+      .domain([0.0, 63.75, 127.5, 191.25, 255.0])
+      .range([
+        d3.rgb(255, 255, 105),
+        d3.rgb(255, 218, 79),
+        d3.rgb(255, 157, 82),
+        d3.rgb(255, 81, 85),
+        d3.rgb(214, 41, 47)
+      ]);
+
     var options = {
       hud: {
         fontSize: 20,
@@ -23,7 +35,7 @@ var Distribution = {
       },
       projection: d3.geo.equirectangular(),
       legend: true,
-      colorScale: colorScale,
+      colorScale: aquamapsColorScale,
       geoJsonColor: 'rgba(255,255,255,0.5)',
       onCellHover: function(feature) { console.debug('hovering over ', feature);}
     };
@@ -32,7 +44,7 @@ var Distribution = {
 
   loadCountries: function() {
     d3.json('../static/geo/countries.topojson', function(error, countries) {
-      map.addLayer(countries, {zIndex: 1});
+      map.addLayer(countries, {fillColor: 'rgb(151,161,97)', zIndex: 1});
     });
   },
 
