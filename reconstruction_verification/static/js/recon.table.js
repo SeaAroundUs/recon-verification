@@ -279,9 +279,14 @@ var Table = {
             if ($.isFunction(callback)) {
                 callback();
             }
-        }).fail(function() {
-            Util.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> No data found');
-            $('#reconDataTableElement').html('<h3>No data found for this working set</h3>')
+        }).fail(function(xhr) {
+            if (xhr.status === 404) {
+                Util.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> No data found');
+                $('#reconDataTableElement').html('<h3>No data found for this working set</h3>');
+            } else {
+                Util.setMessage('<span class="glyphicon glyphicon-remove-circle"></span> Unknown error occured');
+                $('#reconDataTableElement').html('<h3>Unknown error occured</h3>');
+            }
         });
     },
 
