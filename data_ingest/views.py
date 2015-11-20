@@ -108,6 +108,11 @@ class EditNormalizeView(View):
             params['previous_page'] = page - 1
         if page < last_page:
             params['next_page'] = page + 1
+
+        get = request.GET.copy()
+        del get['page']
+        params['querystring'] = get.urlencode()
+
         return render(request, self.template, params)
 
 

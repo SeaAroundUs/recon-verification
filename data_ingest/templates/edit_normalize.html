@@ -39,19 +39,19 @@
                     <ul class="pagination">
                         {% if previous_page %}
                         <li>
-                            <a href="{% url 'edit-normalize' %}?{{ request.GET.urlencode }}&page={{ previous_page }}" aria-label="Previous">
+                            <a href="{% url 'edit-normalize' %}?{{ querystring }}&page={{ previous_page }}" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
                         {% endif %}
                         {% for linked_page in pages %}
                             <li{% if linked_page == page %} class="active"{% endif %}>
-                                <a href="{% url 'edit-normalize' %}?{{ request.GET.urlencode }}&page={{ linked_page }}">{{ linked_page }}</a>
+                                <a href="{% url 'edit-normalize' %}?{{ querystring }}&page={{ linked_page }}">{{ linked_page }}</a>
                             </li>
                         {% endfor %}
                         {% if next_page %}
                             <li>
-                                <a href="{% url 'edit-normalize' %}?{{ request.GET.urlencode }}&page={{ next_page }}" aria-label="Next">
+                                <a href="{% url 'edit-normalize' %}?{{ querystring }}&page={{ next_page }}" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
