@@ -83,41 +83,41 @@ class RawCatchQuerySet(models.QuerySet):
 class RawCatch(DirtyFieldsMixin, models.Model):
     fishing_entity = models.CharField(max_length=200, null=True)
     fishing_entity_id = models.IntegerField(default=0)
-    original_country_fishing = models.CharField(max_length=200, null=True)
-    original_country_fishing_id = models.IntegerField(null=True)
     eez = NullableCharField(max_length=200, null=True)
     eez_id = models.IntegerField(default=0, null=True)
-    eez_sub_area = NullableCharField(max_length=200, null=True)
     fao_area = models.CharField(max_length=200)
     fao_area_id = models.IntegerField(default=0)
-    subregional_area = NullableCharField(max_length=200, null=True)
-    province_state = NullableCharField(max_length=200, null=True)
     layer = models.IntegerField(default=0)
     sector = NullableCharField(max_length=200, null=True)
     sector_type_id = models.IntegerField(default=0)
-    original_sector = NullableCharField(max_length=200, null=True)
     catch_type = NullableCharField(max_length=200, null=True)
     catch_type_id = models.IntegerField(default=0)
     year = models.IntegerField(default=0)
     taxon_name = NullableCharField(max_length=200, null=True)
     taxon_key = models.IntegerField(default=0)
+    amount = models.DecimalField(max_digits=20, decimal_places=12)
+    input_type = NullableCharField(max_length=200, null=True)
+    input_type_id = models.IntegerField(null=True)
+    reference_id = models.IntegerField(null=True)
+    original_country_fishing = models.CharField(max_length=200, null=True)
+    original_country_fishing_id = models.IntegerField(null=True)
+    eez_sub_area = NullableCharField(max_length=200, null=True)
+    subregional_area = NullableCharField(max_length=200, null=True)
+    province_state = NullableCharField(max_length=200, null=True)
+    original_sector = NullableCharField(max_length=200, null=True)
     original_taxon_name = NullableCharField(max_length=200, null=True)
     original_taxon_name_id = models.IntegerField(null=True)
     original_fao_name = NullableCharField(max_length=200, null=True)
     original_fao_name_id = models.IntegerField(null=True)
-    amount = models.DecimalField(max_digits=20, decimal_places=12)
     adjustment_factor = models.DecimalField(max_digits=20, decimal_places=12, null=True)
     gear_type = NullableCharField(max_length=200, null=True)
     gear_type_id = models.IntegerField(null=True)
-    input_type = NullableCharField(max_length=200, null=True)
-    input_type_id = models.IntegerField(null=True)
     forward_carry_rule = NullableCharField(max_length=200, null=True)
     forward_carry_rule_id = models.IntegerField(null=True)
     disaggregation_rule = NullableCharField(max_length=200, null=True)
     disaggregation_rule_id = models.IntegerField(null=True)
     layer_rule = NullableCharField(max_length=200, null=True)
     layer_rule_id = models.IntegerField(null=True)
-    reference_id = models.IntegerField(null=True)
     notes = NullableTextField(null=True)
     ices_area = NullableCharField(max_length=50, null=True)
     ices_area_id = models.IntegerField(null=True)
@@ -251,24 +251,24 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     def template_fields():
         return [
             'fishing entity',
-            'original country fishing',
             'EEZ',
-            'EEZ sub area',
             'FAO area',
-            'subregional area',
-            'province state',
             'layer',
             'sector',
-            'original sector',
             'catch type',
             'year',
             'taxon name',
+            'amount',
+            'input type',
+            'original country fishing',
+            'EEZ sub area',
+            'subregional area',
+            'province state',
+            'original sector',
             'original taxon name',
             'original FAO name',
-            'amount',
             'adjustment factor',
             'gear type',
-            'input type',
             'forward carry rule',
             'disaggregation rule',
             'layer rule',
