@@ -109,9 +109,12 @@ class EditNormalizeView(View):
         if page < last_page:
             params['next_page'] = page + 1
 
-        get = request.GET.copy()
-        del get['page']
-        params['querystring'] = get.urlencode()
+        if 'page' in request.GET:
+            get = request.GET.copy()
+            del get['page']
+            params['querystring'] = get.urlencode()
+        else:
+            params['querystring'] = request.GET.urlencode()
 
         return render(request, self.template, params)
 
