@@ -5,6 +5,7 @@ from data_ingest.models import RawCatch
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from catch.logging import TableEdit
+from data_ingest.util import NullableCharField, NullableTextField
 import re
 
 
@@ -448,16 +449,16 @@ class Catch(models.Model):
     fishing_entity = models.ForeignKey(to=FishingEntity, related_name='+')
     original_country_fishing = models.ForeignKey(to=FishingEntity, related_name='+', null=True)
     eez = models.ForeignKey(to=EEZ)
-    eez_sub_area = models.CharField(max_length=200, null=True)
+    eez_sub_area = NullableCharField(max_length=200, null=True)
     fao_area = models.ForeignKey(to=FAO)
-    subregional_area = models.CharField(max_length=200, null=True)
-    province_state = models.CharField(max_length=200, null=True)
+    subregional_area = NullableCharField(max_length=200, null=True)
+    province_state = NullableCharField(max_length=200, null=True)
     ices_area = models.ForeignKey(to=ICESArea, related_name='+', null=True)
     nafo_division = models.ForeignKey(to=NAFO, null=True)
-    ccamlr_area = models.CharField(max_length=200, null=True)
+    ccamlr_area = NullableCharField(max_length=200, null=True)
     layer = models.IntegerField(default=0)
     sector = models.ForeignKey(to=Sector, db_column='sector_type_id')
-    original_sector = models.CharField(max_length=200, null=True)
+    original_sector = NullableCharField(max_length=200, null=True)
     catch_type = models.ForeignKey(to=CatchType)
     year = models.IntegerField(default=0)
     taxon = models.ForeignKey(to=Taxon, db_column='taxon_key', related_name='+')
@@ -471,7 +472,7 @@ class Catch(models.Model):
     disaggregation_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to disaggregation_rule table
     layer_rule_id = models.IntegerField(default=0, null=True)  # TODO relate to layer_rule table
     reference = models.ForeignKey(to=Reference, null=True)
-    notes = models.TextField(null=True)
+    notes = NullableTextField(null=True)
     raw_catch = models.ForeignKey(to=RawCatch)
 
     class Meta:
