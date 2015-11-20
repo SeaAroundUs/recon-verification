@@ -228,6 +228,7 @@ var Table = {
             contextMenu: false,
             search: true,
             afterChange: Table.afterChange,
+            fixedColumnsLeft: 1,
             cells: function () {
                 return { renderer: 'reconRenderer' };
             }
