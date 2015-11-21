@@ -1,12 +1,13 @@
-from collections import OrderedDict
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year, RareTaxon, Layer3Taxon
 from decimal import Decimal
 from django.forms import ValidationError
 from django.utils import timezone
+from django.db import connection
 from django.db.models import F
-from catch.logging import TableEdit
+from .util import IteratorFile
+from itertools import repeat
 import xlrd
 import re
 import time
@@ -24,61 +25,46 @@ class ContributedFile:
 
         new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
         contributed_file.name = new_name
-        source_file = FileUpload(file=self.contributed_file.name, user=self.user)
+        self.source_file = FileUpload(file=self.contributed_file.name, user=self.user)
 
-        self._process_excel_file()
-        if self._is_valid():
-            source_file.save()
-            self._insert_reconstruction_data(source_file)
-        else:
-            source_file.delete()
-            raise ValidationError('uploaded file does not match template')
-
-    def _is_valid(self):
-        return list(self.excel_data[0].keys()) == RawCatch.template_fields()
-
-    def _convert_to_dict(self, sheet):
-        fields = list(map(str.strip, sheet.row_values(0)))
-        return list(OrderedDict(zip(fields, sheet.row_values(rx))) for rx in range(1, sheet.nrows))
-
-    def _process_excel_file(self):
         book = xlrd.open_workbook(
             file_contents=self.contributed_file.read(),
             encoding_override='utf-8'
         )
         sheet = book.sheet_by_index(0)
-        self.excel_data = self._convert_to_dict(sheet)
 
-    def _insert_reconstruction_data(self, source_file):
-        raw_catches = []
-        user = self.user
-        ref_id = self.ref_id
+        if sheet.row_values(0) == RawCatch.template_fields():
+            self.source_file.save()
+            self._insert_recon_data(sheet)
+        else:
+            raise ValidationError('uploaded file does not match template')
 
-        # iterate over every row in the file
-        for recon_datum in self.excel_data:
-            kwargs = {
-                key.lower().strip().replace(' ', '_'): val if val != '' else None
-                for (key, val) in recon_datum.items()
-            }
+    def _get_data_iterator(self, sheet):
+        for rx in range(1, sheet.nrows):
+            row_values = sheet.row_values(rx)
+            args = row_values[:10] + [self.ref_id] + row_values[10:] + [self.user.id, self.source_file.id]
 
-            # add special fields
-            kwargs.update({'user': user, 'source_file': source_file, 'reference_id': ref_id})
+            # cast decimal columns
+            for f in ['amount', 'adjustment_factor']:
+                i = RawCatch.inserted_fields().index(f)
+                val = args[i]
+                args[i] = Decimal(val.strip() if isinstance(val, str) else val) if val else None
 
-            # ensure decimal fields are properly typed
-            for decimal_field in ('amount', 'adjustment_factor'):
-                val = kwargs[decimal_field]
-                if isinstance(val, str):
-                    val = val.strip()
-                kwargs[decimal_field] = Decimal(val) if val else None
+            # cast integer columns
+            for f in ['layer', 'year']:
+                i = RawCatch.inserted_fields().index(f)
+                val = args[i]
+                args[i] = int(val.strip() if isinstance(val, str) else val) if val else None
 
-            # throw the row in the pile
-            raw_catches.append(RawCatch(**kwargs))
+            yield ('\t'.join(repeat('{}', len(args))) + '\n').format(*args)
 
-        # create all the rows
-        RawCatch.objects.bulk_create(raw_catches, batch_size=1000)
-
-        # log the new rows
-        TableEdit.log_insert(user, 'raw_catch', len(raw_catches))
+    def _insert_recon_data(self, sheet):
+        with connection.cursor() as cursor:
+            cursor.copy_from(IteratorFile(self._get_data_iterator(sheet)),
+                             'raw_catch',
+                             sep='\t',
+                             null='None',
+                             columns=RawCatch.inserted_fields())
 
 
 def get_warnings(ids):

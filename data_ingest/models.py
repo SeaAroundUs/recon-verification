@@ -99,7 +99,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     input_type = NullableCharField(max_length=200, null=True)
     input_type_id = models.IntegerField(null=True)
     reference_id = models.IntegerField(null=True)
-    original_country_fishing = models.CharField(max_length=200, null=True)
+    original_country_fishing = NullableCharField(max_length=200, null=True)
     original_country_fishing_id = models.IntegerField(null=True)
     eez_sub_area = NullableCharField(max_length=200, null=True)
     subregional_area = NullableCharField(max_length=200, null=True)
@@ -313,3 +313,8 @@ class RawCatch(DirtyFieldsMixin, models.Model):
         with connection.cursor() as cursor:
             cursor.execute('SELECT count(1) FROM %s' % ('v_raw_catch_' + view))
             return cursor.fetchone()[0]
+
+    @classmethod
+    def inserted_fields(cls):
+        fields = list(field.lower().replace(' ', '_') for field in cls.template_fields())
+        return fields[:10] + ['reference_id'] + fields[10:] + ['user_id', 'source_file_id']
