@@ -140,16 +140,19 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     def bulk_save(cls, changes, request):
         changed_rows = 0
         for row in changes:
-            obj = cls.objects.get(id=row.pop('id'))
-            for field, new_value in row.items():
-                if field == 'amount' and Decimal.from_float(new_value) == getattr(obj, field):
-                    setattr(obj, field, new_value)
-                elif field != 'amount':
-                    setattr(obj, field, new_value)
-            if obj.is_dirty():
-                obj.last_modified = timezone.now()
-                obj.save()
-                changed_rows += 1
+            try:
+                obj = cls.objects.get(id=row.pop('id'))
+                for field, new_value in row.items():
+                    if field == 'amount' and Decimal.from_float(new_value) == getattr(obj, field):
+                        setattr(obj, field, new_value)
+                    elif field != 'amount':
+                        setattr(obj, field, new_value)
+                if obj.is_dirty():
+                    obj.last_modified = timezone.now()
+                    obj.save()
+                    changed_rows += 1
+            except cls.DoesNotExist:
+                pass  # ignore rows that don't exist
         if changed_rows > 0:
             TableEdit.log_update(request.user, 'raw_catch', changed_rows)
 
