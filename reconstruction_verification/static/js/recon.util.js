@@ -32,6 +32,30 @@ var Util = {
         return null;
     },
 
+    prettyList: function(list) {
+        return list
+            .sort(function(a, b) { return a - b; })
+            .reduce(function(pl, item) {
+            var lastNum, lastSymbol;
+            if (pl === '') {
+                pl = '' + item;
+            } else {
+                lastNum = parseInt(pl.match(/(\d+)$/)[1]);
+                lastSymbol = pl.match(/(^|-|,)\d+$/)[1];
+                if (parseInt(item) === lastNum + 1) {
+                    if (lastSymbol === '-') {
+                        pl = pl.replace(/\d+$/, item);
+                    } else {
+                        pl += '-' + item;
+                    }
+                } else {
+                    pl += ',' + item;
+                }
+            }
+            return pl;
+        }, '');
+    },
+
     setMessage: function(text) {
         $('#messageConsole').html(text);
     },

@@ -25,8 +25,8 @@
 
                 <div class="form-group table-controls">
                     <button name="normalize" id="normalize" class="btn btn-info" disabled>Save &amp; Normalize Page</button>
-                    <span id="error-count">0</span>
-                    <span id="warning-count">0</span>
+                    <a id="error-count" data-toggle="modal" data-target="#error-modal">0</a>
+                    <a id="warning-count" data-toggle="modal" data-target="#warning-modal">0</a>
                     <button name="commit" id="commit" class="btn btn-success" disabled>Commit Page</button>
 
                     <input id="search_field" type="search" class="form-control" placeholder="Search" disabled />
@@ -62,5 +62,36 @@
 
             </div>
         </div>
+
+    <!-- Error modal -->
+    <div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Warnings <span class="glyphicon glyphicon-remove-sign red" aria-hidden="true"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">No errors!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning modal -->
+    <div class="modal fade" id="warning-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Warnings <span class="glyphicon glyphicon-info-sign yellow" aria-hidden="true"></span>
+                    </h4>
+                </div>
+                <div class="modal-body">No warnings!</div>
+            </div>
+        </div>
+    </div>
+
     </div>
 {% endblock %}

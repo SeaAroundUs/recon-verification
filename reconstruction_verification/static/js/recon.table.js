@@ -83,7 +83,6 @@ var Table = {
     },
 
     renderer: function(instance, td, row, col, prop, value, cellProperties) {
-        var errorReason, warningReason;
         var $td = $(td);
         var id = Table.dataTable ? Table.dataTable.getDataAtRowProp(row, 'id') : 0;
 
@@ -94,20 +93,12 @@ var Table = {
         $td.removeClass(['warning', 'error', 'committed']);
 
         // red for zeros
-        if (errorReason = Table.errors[row + ',' + prop]) {
+        if (Table.errors[row + ',' + prop]) {
             $td.addClass('error');
 
-            // yellow for warnings
-        } else if (warningReason = Table.warnings[row + ',' + prop]) {
+        // yellow for warnings
+        } else if (Table.warnings[row + ',' + prop]) {
             $td.addClass('warning');
-
-            /* // disable this for now
-             $td.hover(function() {
-                $(this).append('<span class="warning-reason">' + warningReason + '</span>');
-             }, function() {
-                $(this).children('span.warning-reason').remove();
-             });
-             */
         }
 
         // green for committed
@@ -292,37 +283,57 @@ var Table = {
     },
 
     updateWarnings: function(warnings) {
-        var key;
+        var warningModalContent = '';
 
-        Table.warnings = warnings.reduce(function(warnings, warning) {
-            key = warning.row + ',' + warning.col;
-            if (warnings[key]) {
-                warnings[key] += "<br />" + warning.reason;
-            } else {
-                warnings[key] = warning.reason;
-            }
+        var warningDetails = warnings.reduce(function(warnings, warning) {
+            var key = warning.reason + ' (' + warning.col + ')';
+            warnings[key] = (warnings[key] || []).concat(Table.dataTable.getDataAtRowProp(warning.row, 'id'));
             return warnings;
         }, {});
 
-        $('#warning-count').html(warnings.length);
+        var warning;
+        for (warning in warningDetails) {
+            if (warningDetails.hasOwnProperty(warning)) {
+                warningModalContent += '<b>' + warning + '</b>: ' +
+                    Util.prettyList(warningDetails[warning]) + '<br />';
+            }
+        }
+
+        Table.warnings = warnings.reduce(function(warnings, warning) {
+            warnings[warning.row + ',' + warning.col] = true;
+            return warnings;
+        }, {});
+
+        $('#warning-count').text(warnings.length);
+
+        $('#warning-modal div.modal-body').html(warningModalContent);
     },
 
     updateErrors: function(errors) {
-        var key;
+        var errorModalContent = '';
 
-        Table.errors = errors.reduce(function(errors, error) {
-            key = error.row + ',' + error.col;
-            if (errors[key]) {
-                errors[key] += "<br />" + error.reason;
-            } else {
-                errors[key] = error.reason;
-            }
+        var errorDetails = errors.reduce(function(errors, error) {
+            var key = error.reason + ' (' + error.col + ')';
+            errors[key] = (errors[key] || []).concat(Table.dataTable.getDataAtRowProp(error.row, 'id'));
             return errors;
         }, {});
 
-        $('#error-count')
-                .text(errors.length)
-                .toggleClass('errors', errors.length > 0);
+        var error;
+        for (error in errorDetails) {
+            if (errorDetails.hasOwnProperty(error)) {
+                errorModalContent += '<b>' + error + '</b>: ' +
+                    Util.prettyList(errorDetails[error]) + '<br />';
+            }
+        }
+
+        Table.errors = errors.reduce(function(errors, error) {
+            errors[error.row + ',' + error.col] = true;
+            return errors;
+        }, {});
+
+        $('#error-count').text(errors.length).toggleClass('errors', errors.length > 0);
+
+        $('#error-modal div.modal-body').html(errorModalContent);
 
         $('#commit').prop('disabled', function() { return errors.length > 0; });
     },

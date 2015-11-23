@@ -17,6 +17,10 @@ button:focus {
   font-weight: normal;
 }
 
+.table-controls #error-count, .table-controls #warning-count {
+  cursor: pointer;
+}
+
 .table-controls #error-count:before {
   content: 'Errors: ';
   color: #333;
@@ -26,12 +30,20 @@ button:focus {
   color: green;
 }
 
-.table-controls #error-count.errors {
+.table-controls #error-count.errors, .glyphicon.red {
   color: red;
+}
+
+.glyphicon.yellow {
+  color: gold;
 }
 
 .table-controls #warning-count:before {
   content: 'Warnings: ';
+  color: #333;
+}
+
+.table-controls #warning-count {
   color: #333;
 }
 
