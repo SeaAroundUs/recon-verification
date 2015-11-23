@@ -318,11 +318,44 @@ var Table = {
             return errors;
         }, {});
 
-        var error;
+        var error, url;
         for (error in errorDetails) {
             if (errorDetails.hasOwnProperty(error)) {
-                errorModalContent += '<b>' + error + '</b>: ' +
-                    Util.prettyList(errorDetails[error]) + '<br />';
+                if (error.match(/Lookup table mismatch/)) {
+                    url = '/admin/catch/';
+                    switch (error.match(/\((\w+)\)/)[1]) {
+                        case 'original_taxon_name_id':
+                        case 'taxon_key':
+                            url += 'taxon/';
+                            break;
+                        case 'fishing_entity_id':
+                        case 'original_country_fishing_id':
+                            url += 'fishingentity/';
+                            break;
+                        case 'original_fao_name_id':
+                        case 'fao_area_id':
+                            url += 'fao/';
+                            break;
+                        case 'reference_id':
+                            url += 'reference/';
+                            break;
+                        case 'eez_id':
+                        case 'sector_type_id':
+                        case 'input_type_id':
+                        case 'catch_type_id':
+                        default:
+                            url = '';
+                            break;
+                    }
+                    errorModalContent += url === '' ?
+                        '<b>' + error + '</b>: ' :
+                        '<a href="' + url + '" target="_blank">' + error + '</a>: ';
+                } else if (error === 'Rare taxa should be excluded (taxon_key)') {
+                    errorModalContent += '<a href="/admin/catch/raretaxon/" target="_blank">' + error + '</a>: ';
+                } else {
+                    errorModalContent += '<b>' + error + '</b>: ';
+                }
+                errorModalContent += Util.prettyList(errorDetails[error]) + '<br />';
             }
         }
 

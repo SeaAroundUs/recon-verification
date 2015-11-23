@@ -185,3 +185,7 @@ span.warning-reason {
 #health span.warning, span.error {
   font-weight: bold;
 }
+
+#warning-modal .modal-body a, #error-modal .modal-body a {
+  font-weight: bold;
+}
