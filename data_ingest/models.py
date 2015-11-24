@@ -143,7 +143,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             try:
                 obj = cls.objects.get(id=row.pop('id'))
                 for field, new_value in row.items():
-                    if field == 'amount' and Decimal.from_float(new_value) == getattr(obj, field):
+                    if field == 'amount' and Decimal.from_float(float(new_value)) == getattr(obj, field):
                         setattr(obj, field, new_value)
                     elif field != 'amount':
                         setattr(obj, field, new_value)
