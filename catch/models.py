@@ -633,7 +633,7 @@ class AccessAgreement(models.Model):
             'end_year'
         )
         list_filter = ('access_type',)
-        search_fields = ['fishing_entity', 'eez_name', 'title_of_agreement']
+        search_fields = ['fishing_entity__name', 'eez__name', 'title_of_agreement']
         show_full_result_count = True
 
     def __str__(self):
