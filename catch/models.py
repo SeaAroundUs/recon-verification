@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from catch.logging import TableEdit
 from data_ingest.util import NullableCharField, NullableTextField
+from data_ingest.warning_error import *
 import re
 
 
@@ -481,31 +482,11 @@ class Catch(models.Model):
 
     @staticmethod
     def warning_views():
-        return [
-            ('year_max', 'Year greater than the max year'),
-            ('original_taxon_not_null', 'Original taxon name is not null'),
-            ('original_country_fishing_not_null', 'Original country fishing is not null'),
-            ('original_sector_not_null', 'Original sector is not null'),
-            ('peru_catch_amount_greater_than_threshold', 'Catch amount greater than 15e6 for Peru'),
-            ('amount_greater_than_threshold', 'Catch amount greater than 5e6 (excluding Peru)'),
-            ('fao_27_ices_null', 'FAO is 27 and ICES is null'),
-            ('fao_21_nafo_null', 'FAO is 21 and NAFO is null'),
-            ('subsistence_and_layer_not_1', 'Sector is subsistence and Layer is not 1'),
-            ('layer_2_or_3_and_sector_not_industrial', 'Layer is 2 or 3 and sector is not industrial'),
-        ]
+        return [(cls.view, cls.message) for cls in CatchMixin.__subclasses__() if cls.type == "warning"]
 
     @staticmethod
     def error_views():
-        return [
-            ('fishing_entity_and_eez_not_aligned', 'Layer is incorrect (determined by EEZ, Fishing Entity, and Taxon)'),
-            ('input_reconstructed_catch_type_reported',
-             'Input type is reconstructed and Catch type is reported landings'),
-            ('input_not_reconstructed_catch_type_not_reported',
-             'Input type is not reconstructed and Catch type not reported landings'),
-            ('layer_not_in_range', 'Layer is not 1, 2, or 3'),
-            ('amount_zero_or_negative', 'Catch amount is zero or negative'),
-            ('taxa_is_rare', 'Rare taxa should be excluded'),
-        ]
+        return [(cls.view, cls.message) for cls in CatchMixin.__subclasses__() if cls.type == "error"]
 
     @classmethod
     def get_view_count(cls, view):
