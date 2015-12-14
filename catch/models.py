@@ -637,7 +637,7 @@ class AccessAgreement(models.Model):
         show_full_result_count = True
 
     def __str__(self):
-        return self.title_of_agreement
+        return self.title_of_agreement or "(None)"
 
 
 class RareTaxon(models.Model):
