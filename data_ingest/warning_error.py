@@ -1,29 +1,6 @@
-from django.db.models import Model, IntegerField
-
-
-class RawCatchMixin:
-    def db_view(self, view):
-        return 'v_raw_catch_%s' % view
-
-
-class CatchMixin:
-    def db_view(self, view):
-        return 'v_catch_%s' % view
-
-
-class ReconView(Model):
-    view_id = IntegerField()
-
-    def db_view(self, view):
-        raise Exception('Warning and Error models require inheriting RawCatchMixin or CatchMixin')
-
-    class Meta:
-        managed = False
-
-        @property
-        def db_table(self):
-            return self.db_view(self.view)
-
+class RawCatchMixin: pass
+class CatchMixin: pass
+class ReconView: pass
 
 class WarningView(ReconView):
     type = "warning"
@@ -149,7 +126,7 @@ class RawCatchFishingEntityAndEEZNotAligned(FishingEntityAndEEZNotAligned, RawCa
 class RawCatchInputNotReconstructedCatchTypeNotReported(InputNotReconstructedCatchTypeNotReported, RawCatchMixin): pass
 class RawCatchInputReconstructedCatchTypeReported(InputReconstructedCatchTypeReported, RawCatchMixin): pass
 class RawCatchLayer2Or3AndSectorNotIndustrial(Layer2Or3AndSectorNotIndustrial, RawCatchMixin): pass
-class RawCatchLayerNotInRange(LayerNotInRange): pass
+class RawCatchLayerNotInRange(LayerNotInRange, RawCatchMixin): pass
 class RawCatchLookupMismatch(LookupMismatch, RawCatchMixin): pass
 class RawCatchMissingRequiredField(MissingRequiredField, RawCatchMixin): pass
 class RawCatchOriginalCountryFishingNotNull(OriginalCountryFishingNotNull, RawCatchMixin): pass
@@ -169,7 +146,7 @@ class CatchFishingEntityAndEEZNotAligned(FishingEntityAndEEZNotAligned, CatchMix
 class CatchInputNotReconstructedCatchTypeNotReported(InputNotReconstructedCatchTypeNotReported, CatchMixin): pass
 class CatchInputReconstructedCatchTypeReported(InputReconstructedCatchTypeReported, CatchMixin): pass
 class CatchLayer2Or3AndSectorNotIndustrial(Layer2Or3AndSectorNotIndustrial, CatchMixin): pass
-class CatchLayerNotInRange(LayerNotInRange): pass
+class CatchLayerNotInRange(LayerNotInRange, CatchMixin): pass
 class CatchOriginalCountryFishingNotNull(OriginalCountryFishingNotNull, CatchMixin): pass
 class CatchOriginalSectorNotNull(OriginalSectorNotNull, CatchMixin): pass
 class CatchOriginalTaxonNotNull(OriginalTaxonNotNull, CatchMixin): pass
