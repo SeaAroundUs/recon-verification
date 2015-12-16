@@ -1,0 +1,48 @@
+{% extends '_layouts/base.html' %}
+{% load staticfiles %}
+{% block title %}Custom views{% endblock %}
+{% block content %}
+<div id="custom" class="panel-group" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            {% if not results %}
+                <h3>Custom views</h3>
+
+                {% if views %}
+                    <ul>
+                        {% for view in views %}
+                            <li><a href="{{ view.url }}">{{ view }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <i>No custom views found; add views to the DB starting with "v_custom_"</i>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'custom' %}">Back to list</a><br />
+
+                <h3>{{ view_name }}</h3>
+
+                <table class="table table-striped">
+                <thead>
+                <tr>
+                    {% for head in headers %}
+                        <th>{{ head }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            {% for field in result %}
+                                <td>{{ field }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

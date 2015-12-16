@@ -8,6 +8,7 @@ from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_
 from catch.models import Reference, Catch
 from storages.backends.s3boto import S3BotoStorage
 from catch.logging import TableEdit
+from data_ingest.custom import Custom
 import logging
 import simplejson
 import os
@@ -205,4 +206,23 @@ class HealthView(View):
                   'raw_catch_errors': raw_catch_errors,
                   'catch_warnings': catch_warnings,
                   'catch_errors': catch_errors}
+        return render(request, self.template, params)
+
+
+class CustomView(View):
+    template = 'custom.html'
+
+    def get(self, request):
+        if 'view' in request.GET:
+            view = Custom(request.GET.get('view', None))
+            results = view.results()
+            params = {
+                'view_name': str(view),
+                'headers': results[0],
+                'results': results[1:]
+            }
+        else:
+            params = {
+                'views': Custom.view_list()
+            }
         return render(request, self.template, params)
