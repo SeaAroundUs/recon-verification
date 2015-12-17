@@ -113,7 +113,7 @@ class TaxaIsRare(ErrorView):
 
 
 class YearMax(WarningView):
-    message = "Year after 2010"
+    message = "Year greater than the max year"
     view = "year_max"
     col = "year"
 

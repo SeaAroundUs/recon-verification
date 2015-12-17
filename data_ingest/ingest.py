@@ -78,7 +78,7 @@ def get_warnings(ids):
 
         # Year greater than the max year
         if row.year > Year.max_year():
-            warnings.append({'row': idx, 'col': 'year', 'reason': 'Year after 2010'})
+            warnings.append({'row': idx, 'col': 'year', 'reason': 'Year greater than the max year'})
 
         # Original taxon name is not null
         if row.original_taxon_name is not None:
