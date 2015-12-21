@@ -698,3 +698,21 @@ class HabitatIndex(models.Model):
         list_display = ('taxon_key', 'taxon_name', 'common_name')
         search_fields = ('taxon_name', 'common_name')
         show_full_result_count = True
+
+
+class LME(models.Model):
+    lme_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=50)
+    profile_url = models.CharField(max_length=255, default='http://www.lme.noaa.gov/')
+
+    class Meta:
+        verbose_name = 'LME'
+        verbose_name_plural = 'LMEs'
+        ordering = ['name']
+        db_table = 'lme'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('lme_id', 'name', 'profile_url')
+        search_fields = ('name',)
+        show_full_result_count = True
