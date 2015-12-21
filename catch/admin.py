@@ -1,5 +1,5 @@
 from django.contrib import admin
-from catch.models import FishingEntity, FAO, ICESArea, NAFO, \
+from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     AccessAgreement, AccessType, GeoEntity, Taxon, CommercialGroup, \
     FunctionalGroup, TaxonLevel, TaxonGroup, Reference, RareTaxon, \
     Layer3Taxon, HabitatIndex, LME, RFMO
@@ -7,7 +7,7 @@ from catch.models import FishingEntity, FAO, ICESArea, NAFO, \
 admin.site.disable_action('delete_selected')
 
 admin.site.register(FishingEntity, FishingEntity.Admin)
-# admin.site.register(EEZ, EEZ.Admin) # LP-25476528
+admin.site.register(EEZ, EEZ.Admin)
 admin.site.register(GeoEntity, GeoEntity.Admin)
 admin.site.register(FAO, FAO.Admin)
 admin.site.register(ICESArea, ICESArea.Admin)
