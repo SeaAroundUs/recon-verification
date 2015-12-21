@@ -716,3 +716,22 @@ class LME(models.Model):
         list_display = ('lme_id', 'name', 'profile_url')
         search_fields = ('name',)
         show_full_result_count = True
+
+
+class RFMO(models.Model):
+    rfmo_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=50)
+    long_name = models.CharField(max_length=255)
+    profile_url = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'RFMO'
+        verbose_name_plural = 'RFMOs'
+        ordering = ['name']
+        db_table = 'rfmo'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('rfmo_id', 'name', 'long_name', 'profile_url')
+        search_fields = ('name', 'long_name')
+        show_full_result_count = True
