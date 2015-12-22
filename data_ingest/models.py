@@ -73,7 +73,7 @@ class RawCatchQuerySet(models.QuerySet):
             allowed_views = RawCatch.warning_views() + RawCatch.error_views()
             id_sql = ' UNION '.join('SELECT id FROM %s' % ('v_raw_catch_' + view)
                                     for view in views
-                                    if view in [_[0] for _ in allowed_views])
+                                    if view in [cls.view for cls in allowed_views])
             with connection.cursor() as cursor:
                 cursor.execute(id_sql)
                 kwargs['id__in'] = [_[0] for _ in cursor.fetchall()]
