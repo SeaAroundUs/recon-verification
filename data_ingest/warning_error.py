@@ -1,6 +1,37 @@
-class RawCatchMixin: pass
-class CatchMixin: pass
-class ReconView: pass
+from django.db import connection
+
+
+class ReconView:
+    @classmethod
+    def view_name(cls):
+        return cls.prefix + cls.view
+
+    @classmethod
+    def all(cls):
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM %s;' % cls.view_name())
+            return cursor.fetchall()
+
+    @classmethod
+    def any(cls, ids):
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM %s WHERE id IN (%s);' % (cls.view_name(), ','.join(map(str, ids))))
+            return cursor.fetchall()
+
+    @classmethod
+    def count(cls):
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT count(1) FROM %s;' % cls.view_name())
+            return cursor.fetchone()[0]
+
+
+class RawCatchMixin:
+    prefix = 'v_raw_catch_'
+
+
+class CatchMixin:
+    prefix = 'v_catch_'
+
 
 class WarningView(ReconView):
     type = "warning"

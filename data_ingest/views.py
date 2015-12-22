@@ -194,13 +194,13 @@ class HealthView(View):
     template = 'health.html'
 
     def get(self, request):
-        raw_catch_warnings = [(view[0], view[1], RawCatch.get_view_count(view[0]))
+        raw_catch_warnings = [(view.view, view.message, view.count())
                               for view in RawCatch.warning_views()]
-        raw_catch_errors = [(view[0], view[1], RawCatch.get_view_count(view[0]))
+        raw_catch_errors = [(view.view, view.message, view.count())
                             for view in RawCatch.error_views()]
-        catch_warnings = [(view[0], view[1], Catch.get_view_count(view[0]))
+        catch_warnings = [(view.view, view.message, view.count())
                           for view in Catch.warning_views()]
-        catch_errors = [(view[0], view[1], Catch.get_view_count(view[0]))
+        catch_errors = [(view.view, view.message, view.count())
                         for view in Catch.error_views()]
         params = {'raw_catch_warnings': raw_catch_warnings,
                   'raw_catch_errors': raw_catch_errors,

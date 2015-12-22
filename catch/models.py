@@ -1,4 +1,4 @@
-from django.db import models, connection
+from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.contrib import admin
 from data_ingest.models import RawCatch
@@ -482,17 +482,11 @@ class Catch(models.Model):
 
     @staticmethod
     def warning_views():
-        return [(cls.view, cls.message) for cls in CatchMixin.__subclasses__() if cls.type == "warning"]
+        return [cls for cls in CatchMixin.__subclasses__() if cls.type == "warning"]
 
     @staticmethod
     def error_views():
-        return [(cls.view, cls.message) for cls in CatchMixin.__subclasses__() if cls.type == "error"]
-
-    @classmethod
-    def get_view_count(cls, view):
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT count(1) FROM %s' % ('v_catch_' + view))
-            return cursor.fetchone()[0]
+        return [cls for cls in CatchMixin.__subclasses__() if cls.type == "error"]
 
 
 class AccessType(models.Model):

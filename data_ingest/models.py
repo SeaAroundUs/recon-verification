@@ -1,5 +1,5 @@
 from time import strftime
-from django.db import models, connection
+from django.db import models
 from django.db.transaction import atomic
 from django.contrib.auth.models import User
 from reconstruction_verification.settings import ROWS_PER_PAGE
@@ -227,12 +227,12 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             (
                 'warning_view',
                 'Warning',
-                RawCatch.warning_views()
+                [(cls.view, cls.message) for cls in RawCatch.warning_views()]
             ),
             (
                 'error_view',
                 'Error',
-                RawCatch.error_views()
+                [(cls.view, cls.message) for cls in RawCatch.error_views()]
             )
         ]
 
@@ -284,17 +284,11 @@ class RawCatch(DirtyFieldsMixin, models.Model):
 
     @staticmethod
     def warning_views():
-        return [(cls.view, cls.message) for cls in RawCatchMixin.__subclasses__() if cls.type == "warning"]
+        return [cls for cls in RawCatchMixin.__subclasses__() if cls.type == "warning"]
 
     @staticmethod
     def error_views():
-        return [(cls.view, cls.message) for cls in RawCatchMixin.__subclasses__() if cls.type == "error"]
-
-    @classmethod
-    def get_view_count(cls, view):
-        with connection.cursor() as cursor:
-            cursor.execute('SELECT count(1) FROM %s' % ('v_raw_catch_' + view))
-            return cursor.fetchone()[0]
+        return [cls for cls in RawCatchMixin.__subclasses__() if cls.type == "error"]
 
     @classmethod
     def inserted_fields(cls):
