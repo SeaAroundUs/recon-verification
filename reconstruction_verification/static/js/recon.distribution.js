@@ -78,8 +78,10 @@ var Distribution = {
     $('#aquamaps-link').data('taxon_key', taxon_key);
     if (taxon_level == 6) {
       $('#aquamaps-link').show();
+      $('#aquamaps-missing').hide();
     } else {
       $('#aquamaps-link').hide();
+      $('#aquamaps-missing').show();
     }
     $('.spin').hide();
 
@@ -110,6 +112,7 @@ var Distribution = {
     d3.html('taxon/' + taxon_key + '/aquamaps', function(error, html_fragment) {
       $('.spin').hide();
       $('#aquamaps').html(html_fragment);
+      setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 500);  // allows d3-grid-map to resize
     });
 
   },

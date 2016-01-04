@@ -6,6 +6,21 @@
   top: 10px;
   left: 10px;
 }
+#distribution .modal .modal-dialog {
+  width: 100%;
+}
+#distribution .modal .modal-dialog #aquamaps-missing {
+  font-size: 0.5em;
+}
+#distribution .modal .modal-content #maps {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+#distribution .modal .modal-content #maps #aquamaps {
+  margin-top: 60px;
+}
 .x:hover {
   cursor: pointer;
 }

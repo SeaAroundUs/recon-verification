@@ -7,17 +7,23 @@
             <input class="form-control search-query" name="search" type="text" placeholder="Search">
             <div class="panel-body">
                 <div id="modal" class="modal">
-                    <div class="modal-dialog modal-lg">
+                    <div class="modal-dialog">
                         <div class="modal-content">
                             <span class="x glyphicon glyphicon-remove"></span>
                             <h2>
                                 Distribution for <span id="taxon_name"></span>
                                 (<span id="taxon_key"></span>)
+
+                                <span id="aquamaps-missing">No Aquamaps available</span>
+                                <a style="cursor: pointer" data-taxon_key="" data-taxon_name="" id="aquamaps-link">Compare with Aquamaps</a>
+                                <span class="glyphicon glyphicon-refresh spin"></span>
+
                             </h2>
-                            <div id="gridMap"></div>
-                            <a style="cursor: pointer" data-taxon_key="" data-taxon_name="" id="aquamaps-link">Compare with Aquamaps</a>
-                            <span class="glyphicon glyphicon-refresh spin"></span>
-                            <div id="aquamaps"></div>
+                            <div id="maps">
+                                <div id="gridMap"></div>
+                                <div id="aquamaps"></div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
