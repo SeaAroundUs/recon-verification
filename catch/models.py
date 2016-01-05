@@ -747,3 +747,20 @@ class RFMOManagedTaxon(models.Model):
     class Admin(LoggedAdmin):
         list_display = ('rfmo_id',)
         show_full_result_count = True
+
+
+class HighSeas(models.Model):
+    fao_area_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=50)
+    alternate_name = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'High sea'
+        verbose_name_plural = 'High seas'
+        ordering = ['fao_area_id']
+        db_table = 'high_seas'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('fao_area_id', 'name', 'alternate_name')
+        show_full_result_count = True
