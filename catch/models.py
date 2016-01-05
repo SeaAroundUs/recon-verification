@@ -729,3 +729,21 @@ class RFMO(models.Model):
         list_display = ('rfmo_id', 'name', 'long_name', 'profile_url')
         search_fields = ('name', 'long_name')
         show_full_result_count = True
+
+
+class RFMOManagedTaxon(models.Model):
+    rfmo_id = models.IntegerField(primary_key=True)
+    primary_taxon_keys = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
+    secondary_taxon_keys = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
+    taxon_check_required = models.BooleanField()
+
+    class Meta:
+        verbose_name = 'RFMO managed taxon'
+        verbose_name_plural = 'RFMO managed taxa'
+        ordering = ['rfmo_id']
+        db_table = 'rfmo_managed_taxon'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('rfmo_id',)
+        show_full_result_count = True

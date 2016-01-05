@@ -2,7 +2,7 @@ from django.contrib import admin
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     AccessAgreement, AccessType, GeoEntity, Taxon, CommercialGroup, \
     FunctionalGroup, TaxonLevel, TaxonGroup, Reference, RareTaxon, \
-    Layer3Taxon, HabitatIndex, LME, RFMO
+    Layer3Taxon, HabitatIndex, LME, RFMO, RFMOManagedTaxon
 
 admin.site.disable_action('delete_selected')
 
@@ -25,3 +25,4 @@ admin.site.register(Reference, Reference.Admin)
 admin.site.register(HabitatIndex, HabitatIndex.Admin)
 admin.site.register(LME, LME.Admin)
 admin.site.register(RFMO, RFMO.Admin)
+admin.site.register(RFMOManagedTaxon, RFMOManagedTaxon.Admin)
