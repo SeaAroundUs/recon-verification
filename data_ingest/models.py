@@ -24,6 +24,7 @@ def upload_file_path(instance, filename):
 class FileUpload(models.Model):
     file = models.FileField(upload_to=upload_file_path)
     user = models.ForeignKey(to=User, null=True)
+    comment = models.CharField(max_length=200)
     create_datetime = models.DateTimeField(auto_now_add=True)
 
     class Meta:

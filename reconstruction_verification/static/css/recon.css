@@ -138,6 +138,10 @@ span.warning-reason {
   margin-right: 25px;
 }
 
+#browse-upload .upload-file .form-group input#comment {
+  width: 300px;
+}
+
 #browse-upload .working-set .form-group {
   width: 400px;
   display: inline-block;

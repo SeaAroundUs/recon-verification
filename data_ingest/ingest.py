@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 
 
 class ContributedFile:
-    def __init__(self, contributed_file, user, ref_id):
+    def __init__(self, contributed_file, user, ref_id, comment=None):
         self.user = user
         self.ref_id = ref_id
         self.contributed_file = contributed_file
 
         new_name = re.sub(r'(\.[^\.]+)$', r'%s\1' % str(time.time()).split('.')[0], contributed_file.name)
         contributed_file.name = new_name
-        self.source_file = FileUpload(file=self.contributed_file.name, user=self.user)
+        self.source_file = FileUpload(file=self.contributed_file.name, user=self.user, comment=comment)
 
         book = xlrd.open_workbook(
             file_contents=self.contributed_file.read(),

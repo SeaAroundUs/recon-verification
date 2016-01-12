@@ -51,27 +51,12 @@ class FileUploadCreateView(CreateView):
         return kwargs
 
     def form_valid(self, form):
-        # todo:  limit file types and *sizes*?
-
-        data = {'files': []}
-        file_attributes = getattr(form.save(), 'file')
-
-        # todo:  fragile.  sanity check file_attributes.
-        if file_attributes:
-            data['files'].append({
-                'name': file_attributes.name,
-                'url': file_attributes.url,
-                'size': file_attributes.size,
-            })
-            if len(data['files']) > 0:
-                logger.info(u'{0} uploaded {1}.'.format(self.request.user, data['files'][0]['url']))
-
-        response = HttpResponse(
-            content=simplejson.dumps(data),
-            content_type='application/json',
+        # don't save the form here since it gets saved during validation
+        return HttpResponse(
+                content=simplejson.dumps('upload success'),
+                content_type='application/json',
+                status=200,
         )
-        response['Content-Disposition'] = 'inline; filename=files.json'
-        return response
 
     def form_invalid(self, form):
         return HttpResponse(

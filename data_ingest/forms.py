@@ -18,7 +18,8 @@ class FileUploadForm(ModelForm):
         ContributedFile(
             file,
             self.request.user,
-            int(self.request.POST.get('reference', 0))
+            int(self.request.POST.get('reference', 0)),
+            self.request.POST.get('comment', None)
         )
 
     class Meta:
