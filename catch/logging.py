@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+# this is used by the LoggedAdmin class to record admin actions in the table_edits table
 class TableEdit(models.Model):
     id = models.AutoField(primary_key=True)
     auth_user = models.ForeignKey(to=User)

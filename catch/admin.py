@@ -4,8 +4,11 @@ from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     FunctionalGroup, TaxonLevel, TaxonGroup, Reference, RareTaxon, \
     Layer3Taxon, HabitatIndex, LME, RFMO, RFMOManagedTaxon, HighSeas
 
+# this line is disables bulk deletion on the admin list pages
 admin.site.disable_action('delete_selected')
 
+# to add a model to the admin editing section add it to the import statement
+# above, then add a line to the block below
 admin.site.register(FishingEntity, FishingEntity.Admin)
 admin.site.register(EEZ, EEZ.Admin)
 admin.site.register(GeoEntity, GeoEntity.Admin)

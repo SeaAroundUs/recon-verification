@@ -10,6 +10,7 @@ from data_ingest.warning_error import *
 import re
 
 
+# subclass this inside a model to enable admin editing
 class LoggedAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.save()
@@ -23,7 +24,9 @@ class LoggedAdmin(admin.ModelAdmin):
         TableEdit.log_delete(request.user, obj._meta.db_table, 1)
 
 
+# models represent tables in the db
 class GeoEntity(models.Model):
+    # the following assignments are informing the model to the table columns
     geo_entity_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     admin_geo_entity_id = models.IntegerField()
@@ -32,6 +35,7 @@ class GeoEntity(models.Model):
     legacy_c_number = models.IntegerField()
     legacy_admin_c_number = models.IntegerField()
 
+    # this meta section gives additional context to django about the table
     class Meta:
         verbose_name = 'Geo entity'
         verbose_name_plural = 'Geo entities'
@@ -39,6 +43,7 @@ class GeoEntity(models.Model):
         ordering = ['geo_entity_id']
         managed = False
 
+    # this admin subclass is used by the admin editing section
     class Admin(LoggedAdmin):
         list_display = (
             'geo_entity_id',
@@ -47,6 +52,7 @@ class GeoEntity(models.Model):
         search_fields = ['name']
         show_full_result_count = True
 
+    # the __str__ method tell django how to display an instance of this class as a string
     def __str__(self):
         return self.name
 
