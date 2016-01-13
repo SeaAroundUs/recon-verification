@@ -18,6 +18,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# this class handles the uploaded spreadsheet
 class ContributedFile:
     def __init__(self, contributed_file, user, ref_id, comment=None):
         self.user = user
@@ -40,6 +41,8 @@ class ContributedFile:
         else:
             raise ValidationError('uploaded file does not match template')
 
+    # this breaks apart the sheet into a clean data iterator for insertion into the DB.
+    # it recasts some data types below
     def _get_data_iterator(self, sheet):
         for rx in range(1, sheet.nrows):
             row_values = sheet.row_values(rx)
@@ -59,6 +62,7 @@ class ContributedFile:
 
             yield ('\t'.join(repeat('{}', len(args))) + '\n').format(*args)
 
+    # this method physically inserts the data into the DB
     def _insert_recon_data(self, sheet):
         with connection.cursor() as cursor:
             cursor.copy_from(IteratorFile(self._get_data_iterator(sheet)),
@@ -68,6 +72,8 @@ class ContributedFile:
                              columns=RawCatch.inserted_fields())
 
 
+# given a list of raw_catch ids, this returns a list of hashes for all warnings found
+# warnings are driven by v_raw_catch_ views
 def get_warnings(ids):
     warnings = []
     for view in RawCatch.warning_views():
@@ -75,12 +81,21 @@ def get_warnings(ids):
     return warnings
 
 
+# given a list of raw_catch ids, this returns a list of hashes for all errors found
+# errors are partially driven by RawCatch.warning_views() views, and partially driven by logic here
 def get_errors(ids):
     errors = []
+    # this iterator uses RawCatch.error_views() to drive the error checking
     for view in (set(RawCatch.error_views()) - {RawCatchLookupMismatch, RawCatchMissingRequiredField}):
         errors += [{'row': ids.index(row[0]), 'col': view.col, 'reason': view.message} for row in view.any(ids)]
+
+    # lines below are non-view error checking
     for idx, row in enumerate(RawCatch.objects.filter(id__in=ids).order_by('id')):
         # Lookup table mismatch
+        # we check for errors here by seeing if the value is 0. zero means the normalization
+        # process couldn't match a value to a row in the db.
+        # ex: taxon_name is checked against the db in normalization. a miss results in a zero
+        # in the taxon_key field which is flagged here as an error
         id_fields = [
             'taxon_key',
             'original_taxon_name_id',
@@ -98,22 +113,27 @@ def get_errors(ids):
                 errors.append({'row': idx, 'col': field,  'reason': 'Lookup table mismatch'})
 
         # Lookup table mismatch (EEZ)
+        # we check EEZ separately because zero is a legit EEZ so we check for NULL (None in Python) here
         try:
             EEZ.objects.get(eez_id=row.eez_id)
         except EEZ.DoesNotExist:
             errors.append({'row': idx, 'col': 'eez_id', 'reason': 'Lookup table mismatch'})
 
         # Lookup table mismatch (year)
+        # here we check that the given year is an OK one
         if row.year not in Year.valid_years():
             errors.append({'row': idx, 'col': 'year', 'reason': 'Lookup table mismatch'})
 
         # Missing required field
+        # here we check for require fields (listed by RawCatch.required_fields()) that are empty
         for field in RawCatch.required_fields():
             if not str(getattr(row, field)).strip():
                 errors.append({'row': idx, 'col': field,  'reason': 'Missing required field'})
     return errors
 
 
+# this method returns a list of rows in raw_catch that have not been changed since they were committed
+# NOTE: if this functioanlity is acting funny make sure the database has timezones set up correctly
 def get_committed_ids(ids):
     return list(RawCatch.objects.filter(
         id__in=ids,
@@ -123,8 +143,12 @@ def get_committed_ids(ids):
     ).order_by('id').values_list('id', flat=True))
 
 
+# this is the normalization method that handles checking the data against the db and
+# recording the ids in the proper fields
 def normalize(ids):
+    # this iterates through all rows provided
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
+        # these blocks check a text field against a row in the db and record an id in the associated field
         try:
             taxon = Taxon.objects.filter(scientific_name__iexact=row.taxon_name.strip())[0]
             row.taxon_key = taxon.taxon_key
@@ -212,6 +236,7 @@ def normalize(ids):
             row.save()
 
 
+# this method handles committing data from raw_catch to catch
 def commit(ids):
     rows = RawCatch.objects.filter(id__in=ids)
     for row in rows:
@@ -272,6 +297,8 @@ def commit(ids):
         except Gear.DoesNotExist:
             values.update({'gear_type': None})
 
+        # never got rules for these, but making models for the appropriate db tables and replicating
+        # the above logic should handle things fine
         # TODO forward_carry_rule
         # TODO disaggregation_rule
         # TODO layer_rule

@@ -7,6 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# used by the spreadsheet upload process
 class FileUploadForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

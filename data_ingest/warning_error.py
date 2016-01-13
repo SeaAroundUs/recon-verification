@@ -1,6 +1,7 @@
 from django.db import connection
 
 
+# base class used by all views providing some common functionality
 class ReconView:
     @classmethod
     def view_name(cls):
@@ -25,6 +26,7 @@ class ReconView:
             return cursor.fetchone()[0]
 
 
+# the next two classes are marker pattern classes indicating raw_catch or catch
 class RawCatchMixin:
     prefix = 'v_raw_catch_'
 
@@ -33,6 +35,7 @@ class CatchMixin:
     prefix = 'v_catch_'
 
 
+# the next two classes are marker pattern classes indicating warning or error
 class WarningView(ReconView):
     type = "warning"
 
@@ -41,6 +44,8 @@ class ErrorView(ReconView):
     type = "error"
 
 
+# base classes for warning/error views. these classes shouldn't be used for anythign but
+# creation of the class list at the bottom
 class AmountGreaterThanThreshold(WarningView):
     message = "Amount > 5e6"
     view = "amount_greater_than_threshold"
@@ -149,6 +154,7 @@ class YearMax(WarningView):
     col = "year"
 
 
+# these are the classes that should be consumed by the app's logic
 class RawCatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, RawCatchMixin): pass
 class RawCatchAmountZeroOrNegative(AmountZeroOrNegative, RawCatchMixin): pass
 class RawCatchFAO21NAFONull(FAO21NAFONull, RawCatchMixin): pass

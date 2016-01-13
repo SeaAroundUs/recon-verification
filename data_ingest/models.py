@@ -35,6 +35,7 @@ class FileUpload(models.Model):
         return self.file.name
 
 
+# the normal queryset here is extended for additional functionality used by the pagination
 class RawCatchQuerySet(models.QuerySet):
     def last_page(self):
         return (self.count() // ROWS_PER_PAGE) + 1
@@ -82,6 +83,7 @@ class RawCatchQuerySet(models.QuerySet):
         return self.filter(**kwargs)
 
 
+# this model handles the raw_catch table
 class RawCatch(DirtyFieldsMixin, models.Model):
     fishing_entity = models.CharField(max_length=200, null=True)
     fishing_entity_id = models.IntegerField(default=0)
@@ -137,6 +139,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
         db_table = 'raw_catch'
         managed = False
 
+    # this handles saving changed rows to the db
     @classmethod
     @atomic
     def bulk_save(cls, changes, request):
@@ -158,6 +161,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
         if changed_rows > 0:
             TableEdit.log_update(request.user, 'raw_catch', changed_rows)
 
+    # this lists the fields used in the javascript editor
     @classmethod
     def fields(cls):
         fields = list(map(lambda x: x.name, cls._meta.fields))[:-4]
@@ -167,6 +171,8 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     def to_dict(self):
         return OrderedDict((field, getattr(self, field, '')) for field in self.fields())
 
+    # list of fields used by the query tool to create a working set. adding to this method
+    # will allow you to add more working set options
     @staticmethod
     def allowed_query_fields():
         return [
@@ -237,6 +243,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             )
         ]
 
+    # list of required fields. if these fields are missing an error will be raised for the field
     @staticmethod
     def required_fields():
         return [
@@ -252,6 +259,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'input_type'
         ]
 
+    # list of fields in the template (in order). if the template is adjusted this needs to be adjusted too
     @staticmethod
     def template_fields():
         return [
@@ -283,10 +291,12 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'CCAMLR area'
         ]
 
+    # method to return list of warning views
     @staticmethod
     def warning_views():
         return [cls for cls in RawCatchMixin.__subclasses__() if cls.type == "warning"]
 
+    # method to return list of error views
     @staticmethod
     def error_views():
         return [cls for cls in RawCatchMixin.__subclasses__() if cls.type == "error"]

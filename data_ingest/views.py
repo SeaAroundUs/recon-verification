@@ -17,11 +17,13 @@ import os
 logger = logging.getLogger(__name__)
 
 
+# extended response class to keep web app responses pretty consistent
 class ReconResponse(object):
     def __new__(cls, payload):
         return HttpResponse(simplejson.dumps(payload, use_decimal=True), content_type='application/json')
 
 
+# method to ease grabbing raw_catch data on a page-by-page basis
 def get_raw_catch_data(page=None, ids=None, request=None):
     if page and request:
         raw_data = RawCatch.objects.from_request(request).order_by('id').page(page)
@@ -41,6 +43,7 @@ def get_raw_catch_data(page=None, ids=None, request=None):
     return raw_data_response
 
 
+# view that handles the spreadsheet upload; is only hit via AJAX
 class FileUploadCreateView(CreateView):
     model = FileUpload
     form_class = FileUploadForm
@@ -66,6 +69,7 @@ class FileUploadCreateView(CreateView):
         )
 
 
+# this view handles the working set generation page
 class DataBrowseView(View):
     template = 'browse_upload.html'
 
@@ -77,6 +81,7 @@ class DataBrowseView(View):
         return render(request, self.template, params)
 
 
+# this view handles the page that has the javascript editor
 class EditNormalizeView(View):
     template = 'edit_normalize.html'
 
@@ -105,11 +110,13 @@ class EditNormalizeView(View):
         return render(request, self.template, params)
 
 
+# json endpoint to list fields used by the javascript editor
 class CatchFieldsJsonView(View):
     def get(self, request):
         return ReconResponse(RawCatch.fields())
 
 
+# json endpoint to provide the data inside the javascript editor
 class UploadDataJsonView(View):
     def get(self, request, page):
         if not RawCatch.objects.from_request(request).exists():
@@ -127,6 +134,7 @@ class UploadDataJsonView(View):
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
 
+# endpoint that is POST'd to that normalizes the data inside the raw_catch table
 class DataNormalizationView(View):
     def post(self, request):
         ids = simplejson.loads(request.body).get('ids', '')
@@ -134,6 +142,7 @@ class DataNormalizationView(View):
         return ReconResponse(get_raw_catch_data(ids=ids))
 
 
+# endpoint that is POST'd to that commits data in raw_catch to catch
 class CommitView(View):
     def post(self, request):
         ids = simplejson.loads(request.body).get('ids', '')
@@ -145,6 +154,7 @@ class CommitView(View):
             return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
 
+# this view handles uploading of new references
 class UploadRefView(View):
     def post(self, request):
         file = request.FILES.get('file', None)
@@ -159,6 +169,7 @@ class UploadRefView(View):
         return ReconResponse({'result': 'ok'})
 
 
+# this endpoint handles deleting single rows via the javascript editor
 class DeleteRowView(View):
     def get(self, request):
         row_id = request.GET.get('rowId', None)
@@ -175,6 +186,7 @@ class DeleteRowView(View):
         return ReconResponse({'result': 'ok'})
 
 
+# view that handles the health section of the site
 class HealthView(View):
     template = 'health.html'
 
@@ -194,6 +206,7 @@ class HealthView(View):
         return render(request, self.template, params)
 
 
+# view that handles the custom view section of the site
 class CustomView(View):
     template = 'custom.html'
 
