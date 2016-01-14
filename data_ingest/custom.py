@@ -29,6 +29,7 @@ class Custom:
             .replace('_', ' ')
         for word in uppercase_words:
             name = name.replace(word, word.upper())
+        name = name[:1].upper() + name[1:]
         return name
 
     # this method returns a list of values, with the first row being a list of column names
