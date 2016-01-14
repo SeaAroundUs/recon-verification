@@ -770,3 +770,23 @@ class HighSeas(models.Model):
     class Admin(LoggedAdmin):
         list_display = ('fao_area_id', 'name', 'alternate_name')
         show_full_result_count = True
+
+
+class TaxonSubstitution(models.Model):
+    original_taxon_key = models.IntegerField(primary_key=True)
+    use_this_taxon_key_instead = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Taxon substitution'
+        verbose_name_plural = 'Taxon substitution'
+        ordering = ['original_taxon_key', 'use_this_taxon_key_instead']
+        db_table = 'taxon_distribution_substitute'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('original_taxon_key', 'use_this_taxon_key_instead')
+        show_full_result_count = True
+
+    @classmethod
+    def get_subs(cls):
+        return dict(cls.objects.all().values_list('original_taxon_key', 'use_this_taxon_key_instead'))

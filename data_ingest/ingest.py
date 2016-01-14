@@ -1,6 +1,7 @@
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
-    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year
+    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year, \
+    TaxonSubstitution
 from .warning_error import RawCatchLookupMismatch, RawCatchMissingRequiredField
 from decimal import Decimal
 from django.forms import ValidationError
@@ -133,7 +134,7 @@ def get_errors(ids):
 
 
 # this method returns a list of rows in raw_catch that have not been changed since they were committed
-# NOTE: if this functioanlity is acting funny make sure the database has timezones set up correctly
+# NOTE: if this functionality is acting funny make sure the database has timezones set up correctly
 def get_committed_ids(ids):
     return list(RawCatch.objects.filter(
         id__in=ids,
@@ -146,12 +147,15 @@ def get_committed_ids(ids):
 # this is the normalization method that handles checking the data against the db and
 # recording the ids in the proper fields
 def normalize(ids):
+    # grab taxon subs once up front
+    taxon_subs = TaxonSubstitution.get_subs()
+
     # this iterates through all rows provided
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
         # these blocks check a text field against a row in the db and record an id in the associated field
         try:
             taxon = Taxon.objects.filter(scientific_name__iexact=row.taxon_name.strip())[0]
-            row.taxon_key = taxon.taxon_key
+            row.taxon_key = taxon_subs[taxon.taxon_key] if taxon.taxon_key in taxon_subs else taxon.taxon_key
         except IndexError:  # no Taxon found
             row.taxon_key = 0
 
