@@ -4,6 +4,7 @@ from django.contrib import admin
 from data_ingest.models import RawCatch
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 from catch.logging import TableEdit
 from data_ingest.util import NullableCharField, NullableTextField
 from data_ingest.warning_error import *
@@ -790,3 +791,42 @@ class TaxonSubstitution(models.Model):
     @classmethod
     def get_subs(cls):
         return dict(cls.objects.all().values_list('original_taxon_key', 'use_this_taxon_key_instead'))
+
+
+class AdHocQuery(models.Model):
+    query = models.TextField()
+    notes = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_by_auth_user = models.ForeignKey(to=User, related_name='+')
+    reviewed_by_auth_user = models.ForeignKey(to=User, null=True, blank=True, related_name='+')
+    grantee_auth_user_id = ArrayField(models.IntegerField(), null=True, blank=True)
+    last_executed_by_auth_user = models.ForeignKey(to=User, null=True, blank=True, related_name='+')
+    last_executed = models.DateTimeField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Query'
+        verbose_name_plural = 'Queries'
+        ordering = ['last_executed', 'created']
+        db_table = 'adhoc_query'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('query', 'notes', 'is_active', 'created_by_auth_user', 'reviewed_by_auth_user')
+        search_fields = ('query', 'notes')
+        list_filter = ('is_active',)
+        exclude = (
+            'created_by_auth_user',
+            'reviewed_by_auth_user',
+            'grantee_auth_user_id',
+            'last_executed_by_auth_user',
+            'last_executed',
+            'created',
+            'last_modified')
+        show_full_result_count = True
+
+        def save_model(self, request, obj, form, change):
+            if not change:
+                obj.created_by_auth_user = request.user
+            super().save_model(request, obj, form, change)
