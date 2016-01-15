@@ -193,3 +193,7 @@ span.warning-reason {
 #warning-modal .modal-body a, #error-modal .modal-body a {
   font-weight: bold;
 }
+
+#adhoc form.run-query {
+  margin-bottom: 25px;
+}

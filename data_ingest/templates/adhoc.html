@@ -1,0 +1,50 @@
+{% extends '_layouts/base.html' %}
+{% load staticfiles %}
+{% block title %}Health{% endblock %}
+{% block content %}
+    <div id="adhoc" class="panel-group" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3>Ad hoc queries</h3>
+                {% if query %}
+                    <div class="well">
+                        {{ query.query }}
+                    </div>
+
+                    <form class="run-query" method="post" action="{% url 'adhoc' %}">
+                        {% csrf_token %}
+                        {{ form }}
+                        <button class="btn btn-primary">Run query</button>
+                    </form>
+
+                    <p>{{ query.notes }}</p>
+                    <p>Created by {{ query.created_by_auth_user }}</p>
+                    <p>Reviewed by {{ query.reviewed_by_auth_user|default:'nobody' }}</p>
+                    <p>Approved for use by {{ query.approved_users|default:'nobody' }}</p>
+                    <p>
+                        {% if q.last_executed %}
+                            Last execution by {{ q.last_executed_by_auth_user }} on {{ q.last_executed }}
+                        {% else %}
+                            <i>Never executed</i>
+                        {% endif %}
+                    </p>
+
+                {% elif queries %}
+                    <ul>
+                        {% for q in queries %}
+                            <li>
+                                <a href="{% url 'adhoc' %}?id={{ q.id }}">
+                                    {{ q.query|truncatechars:100 }}
+                                </a>
+                                {{ q.notes|truncatechars:100 }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                {% else %}
+                    <p><i>No active ad hoc queries have been approved for your use</i></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

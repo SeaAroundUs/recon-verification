@@ -805,6 +805,20 @@ class AdHocQuery(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
 
+    @classmethod
+    def get_for_view(cls, user, query_id=None):
+        queries = cls.objects.filter(is_active=True)
+        if not user.is_superuser:
+            queries = queries.filter(
+                    models.Q(grantee_auth_user_id__contain=[user.id]) | models.Q(created_by_auth_user=user))
+        if query_id is not None:
+            queries = queries.filter(id=query_id)
+        return queries.all()
+
+    def approved_users(self):
+        return None if self.grantee_auth_user_id is None \
+            else User.objects.filter(id__in=list(self.grantee_auth_user_id)).all()
+
     class Meta:
         verbose_name = 'Query'
         verbose_name_plural = 'Queries'

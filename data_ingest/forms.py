@@ -1,4 +1,4 @@
-from django.forms import ModelForm
+from django import forms
 from data_ingest.models import FileUpload
 from data_ingest.ingest import ContributedFile
 import logging
@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 # used by the spreadsheet upload process
-class FileUploadForm(ModelForm):
+class FileUploadForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
@@ -26,3 +26,7 @@ class FileUploadForm(ModelForm):
     class Meta:
         model = FileUpload
         fields = ['file']
+
+
+class RunQueryForm(forms.Form):
+    id = forms.IntegerField(widget=forms.HiddenInput)

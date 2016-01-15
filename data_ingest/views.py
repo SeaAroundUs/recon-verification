@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.views.generic.edit import CreateView
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseRedirect
 from data_ingest.models import FileUpload, RawCatch
-from data_ingest.forms import FileUploadForm
+from data_ingest.forms import FileUploadForm, RunQueryForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
-from catch.models import Reference, Catch
+from catch.models import Reference, Catch, AdHocQuery
 from storages.backends.s3boto import S3BotoStorage
 from catch.logging import TableEdit
 from data_ingest.custom import Custom
@@ -224,3 +224,25 @@ class CustomView(View):
                 'views': Custom.view_list()
             }
         return render(request, self.template, params)
+
+
+# view that handles the ad hoc query screen
+class AdHocView(View):
+    template = 'adhoc.html'
+
+    def get(self, request):
+        if 'id' in request.GET:
+            query = AdHocQuery.get_for_view(request.user, request.GET.get('id'))[0]
+            params = {
+                'form': RunQueryForm(initial={'id': query.id}),
+                'query': query
+            }
+        else:
+            params = {
+                'queries': AdHocQuery.get_for_view(request.user)
+            }
+        return render(request, self.template, params)
+
+    def post(self, request):
+        # TODO run query or update approved users
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
