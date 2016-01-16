@@ -194,6 +194,7 @@ span.warning-reason {
   font-weight: bold;
 }
 
-#adhoc form.run-query {
+#adhoc .forms form {
+  display: inline-block;
   margin-bottom: 25px;
 }

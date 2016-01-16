@@ -28,5 +28,14 @@ class FileUploadForm(forms.ModelForm):
         fields = ['file']
 
 
-class RunQueryForm(forms.Form):
+class QueryForm(forms.Form):
     id = forms.IntegerField(widget=forms.HiddenInput)
+    type = forms.CharField(widget=forms.HiddenInput)
+
+    @classmethod
+    def get_run_form(cls, query_id):
+        return cls(initial={'id': query_id, 'type': 'run'})
+
+    @classmethod
+    def get_approve_form(cls, query_id):
+        return cls(initial={'id': query_id, 'type': 'approve'})
