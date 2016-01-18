@@ -718,6 +718,9 @@ class LME(models.Model):
         search_fields = ('name',)
         show_full_result_count = True
 
+    def __str__(self):
+        return self.name
+
 
 class RFMO(models.Model):
     rfmo_id = models.IntegerField(primary_key=True)
@@ -844,3 +847,63 @@ class AdHocQuery(models.Model):
             if not change:
                 obj.created_by_auth_user = request.user
             super().save_model(request, obj, form, change)
+
+
+class Cell(models.Model):
+    cell_id = models.IntegerField(primary_key=True)
+    lon = models.FloatField()
+    lat = models.FloatField()
+    cell_row = models.IntegerField()
+    cell_col = models.IntegerField()
+    total_area = models.FloatField()
+    water_area = models.FloatField()
+    percent_water = models.FloatField()
+    ele_min = models.IntegerField()
+    ele_max = models.IntegerField()
+    ele_avg = models.IntegerField()
+    elevation_min = models.IntegerField()
+    elevation_max = models.IntegerField()
+    elevation_mean = models.IntegerField()
+    bathy_min = models.IntegerField()
+    bathy_max = models.IntegerField()
+    bathy_mean = models.IntegerField()
+    fao_area = models.ForeignKey(to=FAO)
+    lme = models.ForeignKey(to=LME)
+    bgcp = models.FloatField()
+    distance = models.FloatField()
+    coastal_prop = models.FloatField()
+    shelf = models.FloatField()
+    slope = models.FloatField()
+    abyssal = models.FloatField()
+    estuary = models.FloatField()
+    mangrove = models.FloatField()
+    seamount_saup = models.FloatField()
+    seamount = models.FloatField()
+    coral = models.FloatField()
+    pprod = models.FloatField()
+    ice_con = models.FloatField()
+    sst = models.FloatField()
+    eez_count = models.IntegerField()
+    sst_2001 = models.FloatField()
+    bt_2001 = models.FloatField()
+    pp_10yr_avg = models.FloatField()
+    sst_avg = models.FloatField()
+    pp_annual = models.FloatField()
+
+    class Meta:
+        verbose_name = 'Cell'
+        verbose_name_plural = 'Cells'
+        ordering = ['cell_id']
+        db_table = 'cell'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('cell_id', 'lat', 'lon', 'lme', 'fao_area')
+        list_filter = ('lme', 'fao_area')
+        show_full_result_count = True
+
+        def lme(self, obj):
+            return obj.lme.name
+
+        def fao_area(self, obj):
+            return obj.fao_area.name
