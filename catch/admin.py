@@ -3,7 +3,7 @@ from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     AccessAgreement, AccessType, GeoEntity, Taxon, CommercialGroup, \
     FunctionalGroup, TaxonLevel, TaxonGroup, Reference, RareTaxon, \
     Layer3Taxon, HabitatIndex, LME, RFMO, RFMOManagedTaxon, HighSeas, \
-    TaxonSubstitution, AdHocQuery, Cell
+    TaxonSubstitution, AdHocQuery, Cell, ExcludedTaxon, ISSCAAP
 
 # this line is disables bulk deletion on the admin list pages
 admin.site.disable_action('delete_selected')
@@ -34,3 +34,5 @@ admin.site.register(HighSeas, HighSeas.Admin)
 admin.site.register(TaxonSubstitution, TaxonSubstitution.Admin)
 admin.site.register(AdHocQuery, AdHocQuery.Admin)
 admin.site.register(Cell, Cell.Admin)
+admin.site.register(ExcludedTaxon, ExcludedTaxon.Admin)
+admin.site.register(ISSCAAP, ISSCAAP.Admin)

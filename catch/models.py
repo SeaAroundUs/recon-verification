@@ -907,3 +907,39 @@ class Cell(models.Model):
 
         def fao_area(self, obj):
             return obj.fao_area.name
+
+
+class ExcludedTaxon(models.Model):
+    taxon_key = models.IntegerField(primary_key=True)
+    scientific_name = models.CharField(max_length=255)
+    common_name = models.CharField(max_length=255)
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Excluded taxon'
+        verbose_name_plural = 'Excluded taxa'
+        ordering = ['common_name']
+        db_table = 'excluded_taxon'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('taxon_key', 'scientific_name', 'common_name')
+        show_full_result_count = True
+
+
+class ISSCAAP(models.Model):
+    isscaap_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=255)
+    is_excluded_group = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'ISSCAAP'
+        verbose_name_plural = 'ISSCAAP'
+        ordering = ['isscaap_id']
+        db_table = 'isscaap'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('isscaap_id', 'name', 'is_excluded_group')
+        list_filter = ('is_excluded_group',)
+        show_full_result_count = True
