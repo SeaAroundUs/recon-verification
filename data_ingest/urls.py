@@ -25,6 +25,6 @@ urlpatterns = patterns(
     url(r'^normalize/$', login_required(DataNormalizationView.as_view()), name='normalize-data'),
     url(r'^commit/$', login_required(CommitView.as_view()), name='commit-data'),
     url(r'^health/$', login_required(HealthView.as_view()), name='health'),
-    url(r'^custom/$', CustomView.as_view(), name='custom'),
-    url(r'^adhoc/$', AdHocView.as_view(), name='adhoc')
+    url(r'^custom/$', login_required(CustomView.as_view()), name='custom'),
+    url(r'^adhoc/$', login_required(AdHocView.as_view()), name='adhoc')
 )
