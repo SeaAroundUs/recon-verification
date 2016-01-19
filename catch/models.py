@@ -5,6 +5,7 @@ from data_ingest.models import RawCatch
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
+from django.utils import timezone
 from catch.logging import TableEdit
 from data_ingest.util import NullableCharField, NullableTextField
 from data_ingest.warning_error import *
@@ -818,9 +819,49 @@ class AdHocQuery(models.Model):
             queries = queries.filter(id=query_id)
         return queries.all()
 
+    def run(self, user):
+        if not self.runnable():
+            raise Exception('ad hoc query not runnable')
+        with connection.cursor() as cursor:
+            cursor.execute(self.query)
+        self.last_executed_by_auth_user = user
+        self.last_executed = timezone.now()
+        self.save()
+        return True
+
+    def approve(self, user):
+        if not self.approveable(user):
+            raise Exception('ad hoc query not approveable by current user')
+        self.reviewed_by_auth_user = user
+        self.save()
+        return True
+
+    def authorize(self, user, auth_user):
+        if not self.approveable(user):
+            raise Exception('ad hoc query not authorizable by current user')
+        if self.grantee_auth_user_id is None:
+            self.grantee_auth_user_id = [auth_user.id]
+            self.save()
+            return True
+        elif auth_user.id not in self.grantee_auth_user_id:
+            self.grantee_auth_user_id += [auth_user.id]
+            self.save()
+            return True
+        else:
+            return False
+
     def approved_users(self):
         return None if self.grantee_auth_user_id is None \
             else User.objects.filter(id__in=list(self.grantee_auth_user_id)).all()
+
+    def runnable(self):
+        return self.reviewed_by_auth_user is not None
+
+    def approveable(self, user):
+        return (self.reviewed_by_auth_user is None and self.created_by_auth_user != user) or user.is_superuser
+
+    def authorizable(self, user):
+        return user.is_superuser
 
     class Meta:
         verbose_name = 'Query'

@@ -12,30 +12,50 @@
                     </div>
 
                     <div class="forms">
-                        <form class="run-query" method="post" action="{% url 'adhoc' %}">
+                        <form class="form-inline run-query" method="post" action="{% url 'adhoc' %}">
                             {% csrf_token %}
                             {{ form }}
-                            <button class="btn btn-primary" {{ query.reviewed_by_auth_user|yesno:'"",disabled="disabled"' }}>
-                                Run query
-                            </button>
+                            <div class="form-group">
+                                <button class="btn btn-primary" {{ runnable|yesno:'"",disabled="disabled"' }}>
+                                    Run query
+                                </button>
+                            </div>
                         </form>
 
-                        <form class="approve-query" method="post" action="{% url 'adhoc' %}">
+                        <form class="form-inline approve-query" method="post" action="{% url 'adhoc' %}">
                             {% csrf_token %}
                             {{ approve_form }}
-                            <button class="btn btn-info" {{ approveable|yesno:'"",disabled="disabled"' }}>
-                                Approve query
-                            </button>
+                            <div class="form-group">
+                                <button class="btn btn-info" {{ approveable|yesno:'"",disabled="disabled"' }}>
+                                    Approve query
+                                </button>
+                            </div>
+                        </form>
+
+                        <form class="form-inline authorize-user" method="post" action="{% url 'adhoc' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                {{ authorize_form }}
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-warning" {{ authorizable|yesno:'"",disabled="disabled"' }}>
+                                    Authorize user
+                                </button>
+                            </div>
                         </form>
                     </div>
 
                     <p>{{ query.notes }}</p>
                     <p>Created by {{ query.created_by_auth_user }}</p>
                     <p>Approved by {{ query.reviewed_by_auth_user|default:'nobody' }}</p>
-                    <p>Authorized for use by {{ query.approved_users|default:'nobody' }}</p>
+                    {% if query.approved_users %}
+                        <p>Authorized for use by {{ query.approved_users|join:', ' }}</p>
+                    {% else %}
+                        <p>Authorized for use by nobody</p>
+                    {% endif %}
                     <p>
-                        {% if q.last_executed %}
-                            Last execution by {{ q.last_executed_by_auth_user }} on {{ q.last_executed }}
+                        {% if query.last_executed %}
+                            Last execution by {{ query.last_executed_by_auth_user }} on {{ query.last_executed }}
                         {% else %}
                             <i>Never executed</i>
                         {% endif %}

@@ -194,7 +194,15 @@ span.warning-reason {
   font-weight: bold;
 }
 
+#adhoc .forms {
+  margin-bottom: 25px;
+}
+
 #adhoc .forms form {
   display: inline-block;
-  margin-bottom: 25px;
+  margin-right: 15px;
+}
+
+#adhoc .forms form label {
+  margin-right: 5px;
 }

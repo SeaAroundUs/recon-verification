@@ -1,5 +1,5 @@
 from django import forms
-from data_ingest.models import FileUpload
+from data_ingest.models import FileUpload, User
 from data_ingest.ingest import ContributedFile
 import logging
 
@@ -39,3 +39,10 @@ class QueryForm(forms.Form):
     @classmethod
     def get_approve_form(cls, query_id):
         return cls(initial={'id': query_id, 'type': 'approve'})
+
+
+class AuthorizeForm(forms.Form):
+    id = forms.IntegerField(widget=forms.HiddenInput)
+    type = forms.CharField(widget=forms.HiddenInput, initial='authorize')
+    user = forms.ModelChoiceField(queryset=User.objects.all(),
+                                  widget=forms.Select(attrs={'class': 'form-control'}))

@@ -1,11 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic.base import View
 from django.views.generic.edit import CreateView
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, \
+    HttpResponseRedirect, HttpResponseForbidden
+from django.core.urlresolvers import reverse
 from data_ingest.models import FileUpload, RawCatch
-from data_ingest.forms import FileUploadForm, QueryForm
+from data_ingest.forms import FileUploadForm, QueryForm, AuthorizeForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
-from catch.models import Reference, Catch, AdHocQuery
+from catch.models import Reference, Catch, AdHocQuery, User
 from storages.backends.s3boto import S3BotoStorage
 from catch.logging import TableEdit
 from data_ingest.custom import Custom
@@ -233,12 +235,16 @@ class AdHocView(View):
     def get(self, request):
         if 'id' in request.GET:
             query = AdHocQuery.get_for_view(request.user, request.GET.get('id'))[0]
+
             params = {
                 'form': QueryForm.get_run_form(query.id),
                 'approve_form': QueryForm.get_approve_form(query.id),
-                'approveable': query.reviewed_by_auth_user is None and query.created_by_auth_user != request.user,
+                'authorize_form': AuthorizeForm(initial={'id': query.id}),
+                'runnable': query.runnable(),
+                'approveable': query.approveable(request.user),
+                'authorizable': query.authorizable(request.user),
                 'created_by_self': query.created_by_auth_user == request.user,
-                'query': query
+                'query': query,
             }
         else:
             params = {
@@ -247,5 +253,20 @@ class AdHocView(View):
         return render(request, self.template, params)
 
     def post(self, request):
-        # TODO run query or update approved users
-        return HttpResponse()
+        type = request.POST.get('type')
+        query = get_object_or_404(AdHocQuery, pk=request.POST.get('id'))
+
+        if type == 'run' and query.runnable():
+            query.run(request.user)
+
+        elif type == 'approve' and query.approveable(request.user):
+            query.approve(request.user)
+
+        elif type == 'authorize' and query.authorizable(request.user):
+            auth_user = get_object_or_404(User, pk=request.POST.get('user'))
+            query.authorize(request.user, auth_user)
+
+        else:
+            return HttpResponseForbidden()
+
+        return HttpResponseRedirect(reverse('adhoc') + '?id=' + str(query.id))
