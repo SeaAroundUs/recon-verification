@@ -28,6 +28,10 @@ var Table = {
                     Table.updateErrors(res.errors);
                     Table.updateCommitted(res.committed);
 
+                    if (res.errors.length > 0 || res.warnings.length > 0) {
+                        $('.click-message').show().delay(4000).fadeOut();
+                    }
+
                     Table.dataTable.loadData(res.data);
                     Util.setMessage('<span class="glyphicon glyphicon-link"></span> Data normalized');
 
@@ -267,6 +271,10 @@ var Table = {
             Table.updateErrors(res.errors);
             Table.updateWarnings(res.warnings);
             Table.updateCommitted();
+
+            if (res.errors.length > 0 || res.warnings.length > 0) {
+                $('.click-message').show().delay(4000).fadeOut();
+            }
 
             if ($.isFunction(callback)) {
                 callback();

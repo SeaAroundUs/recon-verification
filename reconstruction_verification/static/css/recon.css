@@ -11,6 +11,18 @@ button:focus {
 .table-controls {
   overflow: auto;
   zoom: 1;
+  position: relative;
+}
+
+.table-controls .click-message {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 340px;
+  border: 1px solid #333;
+  z-index: 100;
+  background: #fff;
+  padding: 5px 10px;
 }
 
 .table-controls label {
