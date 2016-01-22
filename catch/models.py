@@ -396,6 +396,11 @@ class Gear(models.Model):
         db_table = 'gear'
         managed = False
 
+    class Admin(LoggedAdmin):
+        list_display = ('gear_id', 'name')
+        search_fields = ['name']
+        show_full_result_count = True
+
     def __str__(self):
         return self.name
 
