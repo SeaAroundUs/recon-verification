@@ -392,6 +392,8 @@ class Gear(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
+        verbose_name = 'Gear'
+        verbose_name_plural = 'Gear'
         ordering = ['gear_id']
         db_table = 'gear'
         managed = False
