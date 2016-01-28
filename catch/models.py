@@ -991,3 +991,30 @@ class ISSCAAP(models.Model):
         list_display = ('isscaap_id', 'name', 'is_excluded_group')
         list_filter = ('is_excluded_group',)
         show_full_result_count = True
+
+
+class ProcedureAndOutcome(models.Model):
+    rfmo_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=50)
+    area = models.TextField()
+    content = models.TextField()
+    contracting_parties = models.TextField()
+    date_entered_into_force = models.IntegerField(null=True, blank=True)
+    fao_association = models.BooleanField()
+    fao_statistical_area = models.CharField(max_length=50, null=True, blank=True)
+    objectives = models.TextField()
+    primary_species = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'rfmo_procedure_and_outcome'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'Procedure and Outcome'
+        verbose_name_plural = 'Procedures and Outcomes'
+        list_display = ('rfmo_id', 'name')
+        list_filter = ('fao_association',)
+        show_full_result_count = True
