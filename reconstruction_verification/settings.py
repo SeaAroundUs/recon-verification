@@ -31,6 +31,7 @@ TEMPLATE_CONTEXT_PROCESSORS = TEMPLATE_CONTEXT_PROCESSORS + ('django.core.contex
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = (
+    'admin_override',
     'django_admin_bootstrapped',
     'django.contrib.admin',
     'django.contrib.auth',

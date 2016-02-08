@@ -9,6 +9,6 @@ urlpatterns = patterns(
     url(r'', include('catch.urls')),
 )
 
-admin.site.site_title = 'Reconstruction Data Administration'
-admin.site.site_header = 'Reconstruction Data Administration'
+admin.site.site_title = 'Reconstruction Data'
+admin.site.site_header = 'Reconstruction Data'
 admin.site.index_title = ''
