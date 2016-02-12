@@ -844,7 +844,7 @@ class AdHocQuery(models.Model):
         return True
 
     def authorize(self, user, auth_user):
-        if not self.approveable(user):
+        if not self.authorizable(user):
             raise Exception('ad hoc query not authorizable by current user')
         if self.grantee_auth_user_id is None:
             self.grantee_auth_user_id = [auth_user.id]
