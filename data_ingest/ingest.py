@@ -170,9 +170,9 @@ def normalize(ids):
 
         if row.original_fao_name:
             try:
-                original_fao = FAO.objects.filter(scientific_name__iexact=row.original_fao_name.strip())[0]
+                original_fao = Taxon.objects.filter(scientific_name__iexact=row.original_fao_name.strip())[0]
                 row.original_fao_name_id = original_fao.taxon_key
-            except IndexError:  # no FAO found
+            except IndexError:  # no Taxon found
                 row.original_fao_name_id = 0
         else:
             row.original_fao_name_id = None
