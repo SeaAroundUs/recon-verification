@@ -865,7 +865,7 @@ class AdHocQuery(models.Model):
         return self.reviewed_by_auth_user is not None
 
     def approveable(self, user):
-        return (self.reviewed_by_auth_user is None and self.created_by_auth_user != user) or user.is_superuser
+        return self.reviewed_by_auth_user is None and user.is_superuser
 
     def authorizable(self, user):
         return user.is_superuser
