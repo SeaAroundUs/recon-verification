@@ -173,7 +173,9 @@ PIPELINE_JS = {
         'source_filenames': (
             'js/vendor/jquery.min.js',
             'js/vendor/jquery.ui.widget.js',
-            'js/vendor/jquery.*.js',
+            'js/vendor/jquery.iframe-transport.js',
+            'js/vendor/jquery.fileupload.js',
+            'js/vendor/jquery.tablesorter.min.js',
             'js/vendor/moment.min.js',
             'js/vendor/pikaday.js',
             'js/vendor/ZeroClipboard.js',
