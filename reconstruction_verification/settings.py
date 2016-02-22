@@ -169,12 +169,17 @@ PIPELINE_JS = {
         ),
         'output_filename': 'js/scripts.js'
     },
+    'fileupload': {
+        'source_filenames': (
+            'js/fileupload/jquery.fileupload.js',
+        ),
+        'output_filename': 'js/fileupload.js'
+    },
     'vendor': {
         'source_filenames': (
             'js/vendor/jquery.min.js',
             'js/vendor/jquery.ui.widget.js',
             'js/vendor/jquery.iframe-transport.js',
-            'js/vendor/jquery.fileupload.js',
             'js/vendor/jquery.tablesorter.min.js',
             'js/vendor/moment.min.js',
             'js/vendor/pikaday.js',
