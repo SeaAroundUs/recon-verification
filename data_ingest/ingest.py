@@ -168,14 +168,17 @@ def normalize(ids):
         else:
             row.original_taxon_name_id = None
 
-        if row.original_fao_name:
-            try:
-                original_fao = Taxon.objects.filter(scientific_name__iexact=row.original_fao_name.strip())[0]
-                row.original_fao_name_id = original_fao.taxon_key
-            except IndexError:  # no Taxon found
-                row.original_fao_name_id = 0
-        else:
-            row.original_fao_name_id = None
+        #
+        # Check for this column is deferred until we have a proper FAO taxon lookup table created an populated in the db
+        #
+        # if row.original_fao_name:
+        #     try:
+        #         original_fao = Taxon.objects.filter(scientific_name__iexact=row.original_fao_name.strip())[0]
+        #         row.original_fao_name_id = original_fao.taxon_key
+        #     except IndexError:  # no Taxon found
+        #         row.original_fao_name_id = 0
+        # else:
+        #     row.original_fao_name_id = None
 
         try:
             catch_type = CatchType.objects.get(name__iexact=row.catch_type.strip())
@@ -291,10 +294,13 @@ def commit(ids):
         except Taxon.DoesNotExist:
             values.update({'original_taxon_name': None})
 
-        try:
-            values.update({'original_fao_name': Taxon.objects.get(taxon_key=row.original_fao_name_id)})
-        except Taxon.DoesNotExist:
-            values.update({'original_fao_name': None})
+        #
+        # Check for this column is deferred until we have a proper FAO taxon lookup table created an populated in the db
+        #
+        # try:
+        #     values.update({'original_fao_name': Taxon.objects.get(taxon_key=row.original_fao_name_id)})
+        # except Taxon.DoesNotExist:
+        #     values.update({'original_fao_name': None})
 
         try:
             values.update({'gear_type': Gear.objects.get(gear_id=row.gear_type_id)})

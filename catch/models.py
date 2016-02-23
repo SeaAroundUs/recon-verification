@@ -421,8 +421,19 @@ class InputType(models.Model):
 
 
 class Reference(models.Model):
-    reference_id = models.AutoField(primary_key=True)
+    class Meta:
+        unique_together = (('reference_id', 'marine_layer_id', 'main_area_id'),)
+
+    reference_id = models.DecimalField(max_digits=10, decimal_places=1)
     filename = models.CharField(max_length=200)
+    original_ref_id = models.IntegerField(null=True, blank=True)
+    marine_layer_id = models.IntegerField()
+    main_area_id = models.IntegerField()
+    main_area_name = models.CharField(max_length=200)
+    end_note_id = models.IntegerField(null=True, blank=True)
+    type = models.CharField(max_length=255)
+    citation = models.CharField(max_length=255, null=True, blank=True)
+    row_id = models.IntegerField(primary_key=True)
 
     class Meta:
         db_table = 'reference'
@@ -430,8 +441,13 @@ class Reference(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = (
+            'row_id',
             'reference_id',
-            'filename'
+            'marine_layer_id',
+            'main_area_id',
+            'main_area_name',
+            'filename',
+            'type',
         )
         search_fields = ['filename']
         show_full_result_count = True

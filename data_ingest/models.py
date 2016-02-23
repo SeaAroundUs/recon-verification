@@ -128,7 +128,11 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     nafo_division = NullableCharField(max_length=200, null=True)
     nafo_division_id = models.IntegerField(null=True)
     ccamlr_area = NullableCharField(max_length=200, null=True)
-    user = models.ForeignKey(to=User)
+    taxon_notes = NullableTextField(null=True)
+    #
+    # NOTE: New fields should be added above this comment line
+    #
+    user = models.ForeignKey(to=User, db_column='user_id')
     source_file = models.ForeignKey(to=FileUpload)
     last_committed = models.DateTimeField(null=True)
     last_modified = models.DateTimeField(null=True)
@@ -164,6 +168,10 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     # this lists the fields used in the javascript editor
     @classmethod
     def fields(cls):
+        #
+        # List returned includes all fields in the model excluding the last 4 columns
+        # Care should be taken when adding new field to the model class to avoid interferences to this exclusion scheme
+        #
         fields = list(map(lambda x: x.name, cls._meta.fields))[:-4]
         fields.append('delete_row')
         return fields
@@ -288,7 +296,8 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'notes',
             'ICES area',
             'NAFO division',
-            'CCAMLR area'
+            'CCAMLR area',
+            'taxon notes'
         ]
 
     # method to return list of warning views
