@@ -433,7 +433,7 @@ class Reference(models.Model):
     end_note_id = models.IntegerField(null=True, blank=True)
     type = models.CharField(max_length=255)
     citation = models.CharField(max_length=255, null=True, blank=True)
-    row_id = models.IntegerField(primary_key=True)
+    row_id = models.IntegerField(primary_key=True, blank=True, editable=False)
 
     class Meta:
         db_table = 'reference'
@@ -457,7 +457,7 @@ class Reference(models.Model):
 
 
 class Year(models.Model):
-    id = models.IntegerField(db_column='time_key', primary_key=True)
+    id = models.IntegerField(db_column='time_key', primary_key=True, editable=False)
     year = models.IntegerField()
 
     class Meta:
@@ -575,7 +575,7 @@ def aa_functional_group_validator(value):
 
 
 class AccessAgreement(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True, editable=False)
     fishing_entity = models.ForeignKey(to=FishingEntity)
     eez = models.ForeignKey(to=EEZ)
     title_of_agreement = models.CharField(max_length=255)
