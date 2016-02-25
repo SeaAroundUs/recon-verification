@@ -425,14 +425,14 @@ class Reference(models.Model):
         unique_together = (('reference_id', 'marine_layer_id', 'main_area_id'),)
 
     reference_id = models.DecimalField(max_digits=10, decimal_places=1)
-    filename = models.CharField(max_length=200)
+    filename = models.CharField(max_length=300)
     original_ref_id = models.IntegerField(null=True, blank=True)
     marine_layer_id = models.IntegerField()
     main_area_id = models.IntegerField()
     main_area_name = models.CharField(max_length=200)
     end_note_id = models.IntegerField(null=True, blank=True)
     type = models.CharField(max_length=255)
-    citation = models.CharField(max_length=255, null=True, blank=True)
+    citation = models.CharField(max_length=700, null=True, blank=True)
     row_id = models.IntegerField(primary_key=True, blank=True, editable=False)
 
     class Meta:
