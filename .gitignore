@@ -49,6 +49,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+*.whl
 media/
 
 # Sphinx documentation
@@ -74,3 +75,4 @@ Thumbs.db
 
 # Env settings
 local_settings.py
+*.*~
