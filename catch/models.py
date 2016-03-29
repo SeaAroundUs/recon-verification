@@ -1035,3 +1035,21 @@ class ProcedureAndOutcome(models.Model):
         list_display = ('rfmo_id', 'name')
         list_filter = ('fao_association',)
         show_full_result_count = True
+
+
+class UncertaintyEEZ(models.Model):
+    row_id = models.IntegerField(editable=False, primary_key=True)
+    eez_id = models.IntegerField(editable=False)
+    eez_name = models.CharField(max_length=50, editable=False)
+    sector_type = models.ForeignKey(to=Sector)
+    sector = models.CharField(max_length=50, editable=False)
+    period_id = models.IntegerField(editable=True);
+    score = models.IntegerField(editable=True);
+
+    class Meta:
+        ordering = ['eez_id']
+        db_table = 'uncertainty_eez'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'Uncertainty EEZ'
