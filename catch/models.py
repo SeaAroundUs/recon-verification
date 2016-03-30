@@ -1037,6 +1037,26 @@ class ProcedureAndOutcome(models.Model):
         show_full_result_count = True
 
 
+class UncertaintyScore(models.Model):
+    score = models.IntegerField(editable=False,primary_key=True, db_column='score_id')
+    score_name = models.CharField(editable=False,max_length=30)
+    tolerance = models.IntegerField(editable=False)
+    ipcc_criteria = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ['score']
+        db_table = 'uncertainty_score'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'UncertaintyScore'
+        list_display = (
+            'score',
+            'score_name',
+            'tolerance',
+            'ipcc_criteria'
+        )
+
 class UncertaintyEEZ(models.Model):
     row_id = models.IntegerField(editable=False, primary_key=True)
     eez_id = models.IntegerField(editable=False)
@@ -1044,7 +1064,7 @@ class UncertaintyEEZ(models.Model):
     sector_type = models.ForeignKey(to=Sector)
     sector = models.CharField(max_length=50, editable=False)
     period_id = models.IntegerField(editable=True);
-    score = models.IntegerField(editable=True);
+    score_id = models.ForeignKey(to=UncertaintyScore,editable=True, db_column='score_id');
 
     class Meta:
         ordering = ['eez_id']
@@ -1060,5 +1080,8 @@ class UncertaintyEEZ(models.Model):
             'sector_type',
             'sector',
             'period_id',
-            'score',
+            'score_id',
         )
+        show_full_result_count = True
+
+
