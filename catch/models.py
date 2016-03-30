@@ -1053,3 +1053,12 @@ class UncertaintyEEZ(models.Model):
 
     class Admin(LoggedAdmin):
         verbose_name = 'Uncertainty EEZ'
+        list_display = (
+            'row_id',
+            'eez_id',
+            'eez_name',
+            'sector_type',
+            'sector',
+            'period_id',
+            'score',
+        )
