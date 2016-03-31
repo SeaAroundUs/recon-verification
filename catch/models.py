@@ -1035,3 +1035,53 @@ class ProcedureAndOutcome(models.Model):
         list_display = ('rfmo_id', 'name')
         list_filter = ('fao_association',)
         show_full_result_count = True
+
+
+class UncertaintyScore(models.Model):
+    score = models.IntegerField(editable=False,primary_key=True, db_column='score_id')
+    score_name = models.CharField(editable=False,max_length=30)
+    tolerance = models.IntegerField(editable=False)
+    ipcc_criteria = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ['score']
+        db_table = 'uncertainty_score'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'UncertaintyScore'
+        list_display = (
+            'score',
+            'score_name',
+            'tolerance',
+            'ipcc_criteria'
+        )
+
+class UncertaintyEEZ(models.Model):
+    row_id = models.IntegerField(editable=False, primary_key=True)
+    eez_id = models.IntegerField(editable=False)
+    eez_name = models.CharField(max_length=50, editable=False)
+    sector_type = models.ForeignKey(to=Sector)
+    sector = models.CharField(max_length=50, editable=False)
+    period_id = models.IntegerField(editable=True);
+    score_id = models.ForeignKey(to=UncertaintyScore,editable=True, db_column='score_id');
+
+    class Meta:
+        ordering = ['eez_id']
+        db_table = 'uncertainty_eez'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'Uncertainty EEZ'
+        list_display = (
+            'row_id',
+            'eez_id',
+            'eez_name',
+            'sector_type',
+            'sector',
+            'period_id',
+            'score_id',
+        )
+        show_full_result_count = True
+
+
