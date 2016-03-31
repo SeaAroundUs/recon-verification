@@ -1035,3 +1035,29 @@ class ProcedureAndOutcome(models.Model):
         list_display = ('rfmo_id', 'name')
         list_filter = ('fao_association',)
         show_full_result_count = True
+
+
+class AreaInvisible(models.Model):
+    row_id = models.IntegerField(primary_key=True, db_column='area_invisible_id')
+    marine_layer_id = models.IntegerField(null=False, blank=False)
+    main_area_id = models.IntegerField(null=False, blank=False)
+    sub_area_id = models.IntegerField(null=False, blank=False, default=0)
+
+    class Meta:
+        db_table = 'area_invisible'
+        ordering = ['row_id']
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'Area Under Review'
+        verbose_name_plural = 'Areas Under Review'
+        list_display = (
+            'row_id',
+            'marine_layer_id',
+            'main_area_id',
+            'sub_area_id'
+        )
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name
