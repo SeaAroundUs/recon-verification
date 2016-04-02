@@ -4,7 +4,8 @@ from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     FunctionalGroup, TaxonLevel, TaxonGroup, Reference, RareTaxon, \
     Layer3Taxon, HabitatIndex, LME, RFMO, RFMOManagedTaxon, HighSeas, \
     TaxonSubstitution, AdHocQuery, Cell, ExcludedTaxon, ISSCAAP, Gear, \
-    ProcedureAndOutcome, AreaInvisible
+    ProcedureAndOutcome, UncertaintyEEZ, UncertaintyScore, UncertaintyTimePeriod, \
+    AreaInvisible
 
 # this line is disables bulk deletion on the admin list pages
 admin.site.disable_action('delete_selected')
@@ -39,4 +40,7 @@ admin.site.register(ExcludedTaxon, ExcludedTaxon.Admin)
 admin.site.register(ISSCAAP, ISSCAAP.Admin)
 admin.site.register(Gear, Gear.Admin)
 admin.site.register(ProcedureAndOutcome, ProcedureAndOutcome.Admin)
+admin.site.register(UncertaintyEEZ, UncertaintyEEZ.Admin)
+admin.site.register(UncertaintyScore, UncertaintyScore.Admin)
+admin.site.register(UncertaintyTimePeriod, UncertaintyTimePeriod.Admin)
 admin.site.register(AreaInvisible, AreaInvisible.Admin)

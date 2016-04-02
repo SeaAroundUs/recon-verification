@@ -1037,9 +1037,115 @@ class ProcedureAndOutcome(models.Model):
         show_full_result_count = True
 
 
+class UncertaintyTimePeriod(models.Model):
+    period_id = models.IntegerField(primary_key=True)
+    begin_year = models.IntegerField(null=False)
+    end_year = models.IntegerField(null=True)
+
+    def __str__(self):
+        if self.end_year:
+            return '{}-{}'.format(self.begin_year, self.end_year)
+        else:
+            return '{}-'.format(self.begin_year)
+
+    class Meta:
+        ordering = ['period_id']
+        db_table = 'uncertainty_time_period'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'UncertaintyTimePeriod'
+        list_display = (
+            'period_id',
+            'begin_year',
+            'end_year'
+        )
+
+
+class UncertaintyScore(models.Model):
+    score_id = models.IntegerField(primary_key=True)
+    score_name = models.CharField(max_length=30, null=True)
+    tolerance = models.IntegerField(null=True)
+    ipcc_criteria = models.CharField(max_length=255)
+
+    def __str__(self):
+        if self.score_name:
+            return self.score_name
+        else:
+            return str(self.score_id)
+
+    class Meta:
+        ordering = ['score_id']
+        db_table = 'uncertainty_score'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'UncertaintyScore'
+        list_display = (
+            'score_id',
+            'score_name',
+            'tolerance',
+            'ipcc_criteria'
+        )
+
+
+class UncertaintyEEZ(models.Model):
+    row_id = models.IntegerField(blank=False, primary_key=True)
+    eez_id = models.ForeignKey(to=EEZ, editable=True, db_column='eez_id')
+    eez_name = models.CharField(max_length=50, editable=False)
+    sector_type = models.ForeignKey(to=Sector)
+    sector = models.CharField(max_length=50, editable=False)
+    period_id = models.ForeignKey(to=UncertaintyTimePeriod, editable=True, db_column='period_id')
+    score_id = models.ForeignKey(to=UncertaintyScore,editable=True, db_column='score_id')
+
+    class Meta:
+        ordering = ['eez_id']
+        db_table = 'uncertainty_eez'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'Uncertainty EEZ'
+        list_display = (
+            'row_id',
+            'eez_id',
+            'eez_name',
+            'sector_type',
+            'sector',
+            'period_id',
+            'score_id',
+        )
+        show_full_result_count = True
+
+
+class MarineLayer(models.Model):
+    marine_layer_id = models.IntegerField(primary_key=True, blank=False, null=False)
+    remarks = models.CharField(max_length=50, null=False, blank=True)
+    name = models.CharField(max_length=50, null=False, blank=True)
+    bread_crumb_name = models.CharField(max_length=50, null=False, blank=True)
+    show_sub_areas = models.BooleanField(default=False, null=False)
+    last_report_year = models.IntegerField(null=False, blank=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'marine_layer'
+        ordering = ['marine_layer_id']
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'Marine Layer'
+        verbose_name_plural = 'Marine Layers'
+        list_display = (
+            'marine_layer_id',
+            'name',
+            'remarks'
+        )
+
+
 class AreaInvisible(models.Model):
-    row_id = models.IntegerField(primary_key=True, db_column='area_invisible_id')
-    marine_layer_id = models.IntegerField(null=False, blank=False)
+    row_id = models.IntegerField(primary_key=True, blank=False, db_column='area_invisible_id')
+    marine_layer_id = models.ForeignKey(to=MarineLayer, db_column='marine_layer_id')
     main_area_id = models.IntegerField(null=False, blank=False)
     sub_area_id = models.IntegerField(null=False, blank=False, default=0)
 
@@ -1058,6 +1164,3 @@ class AreaInvisible(models.Model):
             'sub_area_id'
         )
         show_full_result_count = True
-
-    def __str__(self):
-        return self.name
