@@ -702,7 +702,6 @@ class HabitatIndex(models.Model):
     abyssal = models.FloatField(null=True, blank=True)
     inshore = models.FloatField(null=True, blank=True)
     offshore = models.FloatField(null=True, blank=True)
-    offshore_back = models.FloatField(null=True, blank=True)
     max_depth = models.IntegerField(null=True, blank=True)
     min_depth = models.IntegerField(null=True, blank=True)
     lat_north = models.IntegerField(null=True, blank=True)
