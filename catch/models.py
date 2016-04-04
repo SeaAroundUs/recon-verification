@@ -339,7 +339,7 @@ class Taxon(models.Model):
     common_name = models.CharField(max_length=255)
     commercial_group = models.ForeignKey(to=CommercialGroup)
     functional_group = models.ForeignKey(to=FunctionalGroup)
-    sl_max = models.IntegerField()
+    sl_max = models.DecimalField()
     tl = models.DecimalField(max_digits=50, decimal_places=20)
     taxon_level = models.ForeignKey(to=TaxonLevel, null=True, blank=True)
     taxon_group = models.ForeignKey(to=TaxonGroup, null=True, blank=True)
@@ -708,7 +708,7 @@ class HabitatIndex(models.Model):
     lat_south = models.IntegerField(null=True, blank=True)
     found_in_fao_area_id = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
     fao_limits = models.IntegerField(null=True, blank=True)
-    sl_max = models.IntegerField(null=True, blank=True)
+    sl_max = models.FloatField(null=True, blank=True)
     intertidal = models.NullBooleanField(null=True, blank=True)
 
     class Meta:
