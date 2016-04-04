@@ -339,7 +339,7 @@ class Taxon(models.Model):
     common_name = models.CharField(max_length=255)
     commercial_group = models.ForeignKey(to=CommercialGroup)
     functional_group = models.ForeignKey(to=FunctionalGroup)
-    sl_max = models.DecimalField()
+    sl_max = models.FloatField()
     tl = models.DecimalField(max_digits=50, decimal_places=20)
     taxon_level = models.ForeignKey(to=TaxonLevel, null=True, blank=True)
     taxon_group = models.ForeignKey(to=TaxonGroup, null=True, blank=True)
