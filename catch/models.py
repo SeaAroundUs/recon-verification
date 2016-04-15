@@ -358,6 +358,7 @@ class Taxon(models.Model):
     has_habitat_index = models.BooleanField()
     has_map = models.BooleanField()
     is_baltic_only = models.BooleanField()
+    is_retired = models.BooleanField()
 
     @property
     def is_rare(self):
@@ -378,7 +379,12 @@ class Taxon(models.Model):
         list_display = (
             'taxon_key',
             'common_name',
-            'scientific_name'
+            'scientific_name',
+            'is_retired',
+            'lat_north',
+            'lat_south',
+            'min_depth',
+            'max_depth'
         )
         search_fields = ['taxon_key', 'common_name', 'scientific_name']
         show_full_result_count = True
