@@ -33,10 +33,14 @@ class DistributionView(View):
     def get(self, request):
         try:
             with db.Session() as session:
-                taxa = session.query(Taxon) \
-                    .options(joinedload(Taxon.distribution_log)) \
-                    .join(TaxonExtent, Taxon.taxon_key == TaxonExtent.taxon_key)  \
-                    .order_by(Taxon.taxon_key)
+                query = """SELECT t.*, l.modified_timestamp, (e.taxon_key IS NOT NULL) AS is_extent_available
+                    FROM master.taxon t
+                    JOIN distribution.taxon_distribution_log l ON (l.taxon_key = t.taxon_key)
+                    LEFT JOIN distribution.taxon_extent e ON (e.taxon_key = t.taxon_key)
+                    WHERE NOT t.is_retired
+                """
+
+                taxa = session.execute(query).fetchall()
                 return render(request, self.template, {'taxa': taxa})
         except:
             msg = 'unable to query species_distribution'

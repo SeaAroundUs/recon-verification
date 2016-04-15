@@ -34,6 +34,7 @@
                             <th>Common name</th>
                             <th>Scientific name</th>
                             <th>Distribution Timestamp</th>
+                            <th>Extent Available</th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -49,12 +50,14 @@
                             </td>
                             <td class="common_name">{{ taxon.common_name }}</td>
                             <td class="scientific_name">{{ taxon.scientific_name }}</td>
-                            <td>{{ taxon.distribution_log.modified_timestamp }}</td>
+                            <td>{{ taxon.modified_timestamp }}</td>
+                            <td class="extent_available">{{ taxon.is_extent_available }}</td>
                             <td>
                                 <button
                                     data-taxon_key="{{taxon.taxon_key}}"
                                     data-csrfmiddlewaretoken="{{csrf_token}}"
-                                    class="run">
+                                    class="run"
+                                    {% if taxon.is_extent_available == False %}disabled{% endif %}>
                                     Regenerate distribution
                                 </button>
                             </td>

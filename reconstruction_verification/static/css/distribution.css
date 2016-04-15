@@ -64,6 +64,15 @@
   font-size: 30px;
   display: none;
 }
+
+#distribution button:disabled
+{
+  cursor: default;
+  pointer-events: none;
+  color: #c0c0c0;
+  background-color: #ffffff;
+}
+
 table.tablesorter thead tr .header {
   background-image: url(bg.gif);
   background-repeat: no-repeat;
