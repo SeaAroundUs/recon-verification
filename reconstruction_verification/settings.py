@@ -184,7 +184,15 @@ PIPELINE_JS = {
             'js/vendor/moment.min.js',
             'js/vendor/pikaday.js',
             'js/vendor/ZeroClipboard.js',
-            'js/vendor/*.js'
+            'js/vendor/bootstrap.min.js',
+            'js/vendor/d3.min.js',
+            'js/vendor/d3.z-grid-map.js',
+            'js/vendor/d3.z.geo.projection.min.js',
+            'js/vendor/colorbrewer.js',
+            'js/vendor/handsontable.full.js',
+            'js/vendor/jquery.fileupload.js',
+            'js/vendor/topojson.js',
+            'js/vendor/ZeroClipboard.swf'
         ),
         'output_filename': 'js/vendor.js'
     }
