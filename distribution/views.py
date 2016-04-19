@@ -33,11 +33,14 @@ class DistributionView(View):
     def get(self, request):
         try:
             with db.Session() as session:
-                query = """SELECT t.*, l.modified_timestamp, (e.taxon_key IS NOT NULL) AS is_extent_available
+                query = """SELECT t.*, l.modified_timestamp,
+                                  (e.taxon_key IS NOT NULL) AS is_extent_available,
+                                  EXISTS (SELECT 1 FROM allocation.taxon_distribution_old o WHERE o.taxon_key = t.taxon_key LIMIT 1) AS is_v40_distribution_available
                     FROM master.taxon t
                     JOIN distribution.taxon_distribution_log l ON (l.taxon_key = t.taxon_key)
                     LEFT JOIN distribution.taxon_extent e ON (e.taxon_key = t.taxon_key)
                     WHERE NOT t.is_retired
+                    ORDER BY l.modified_timestamp DESC NULLS FIRST
                 """
 
                 taxa = session.execute(query).fetchall()
@@ -105,7 +108,6 @@ class TaxonExtentView(View):
 class TaxonDistributionView(View):
 
     def get(self, request, taxon_key=None):
-
 
         with db.Session() as session:
             raw_conn = session.connection().connection
