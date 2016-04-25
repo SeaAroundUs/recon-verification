@@ -11,7 +11,7 @@
                         <div class="modal-content">
                             <span class="x glyphicon glyphicon-remove"></span>
                             <h2>
-                                Distribution for <span id="taxon_name"></span>
+                                <span id="map_type"></span> for <span id="taxon_name"></span>
                                 (<span id="taxon_key"></span>)
 
                                 <span id="aquamaps-missing">No Aquamaps available</span>
@@ -37,6 +37,7 @@
                             <th>Extent Available</th>
                             <th></th>
                             <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,7 +52,21 @@
                             <td class="common_name">{{ taxon.common_name }}</td>
                             <td class="scientific_name">{{ taxon.scientific_name }}</td>
                             <td>{{ taxon.modified_timestamp }}</td>
-                            <td class="extent_available">{{ taxon.is_extent_available }}</td>
+                            <td class="extent_available">
+                                {% if taxon.is_extent_available == False %}
+                                    False
+                                {% else %}
+                                    True
+                                    <button
+                                    data-taxon_key="{{taxon.taxon_key}}"
+                                    data-taxon_name="{{taxon.common_name}}"
+                                    data-taxon_level="{{taxon.taxon_level_id}}"
+                                    class="view-extent-link"
+                                    >
+                                    ...
+                                    </button>
+                                {% endif %}
+                            </td>
                             <td>
                                 <button
                                     data-taxon_key="{{taxon.taxon_key}}"
@@ -68,6 +83,17 @@
                                     data-taxon_level="{{taxon.taxon_level_id}}"
                                     class="view-taxon-link">
                                     View distribution
+                                </button>
+                            </td>
+                            <td>
+                                <button
+                                    data-taxon_key="{{taxon.taxon_key}}"
+                                    data-taxon_name="{{taxon.common_name}}"
+                                    data-taxon_level="{{taxon.taxon_level_id}}"
+                                    class="view-old-taxon-link"
+                                    {% if taxon.is_old_distribution_available == False %}disabled{% endif %}
+                                >
+                                    View old distribution
                                 </button>
                             </td>
                         </tr>

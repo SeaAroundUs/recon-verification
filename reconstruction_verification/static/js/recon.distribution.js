@@ -14,8 +14,16 @@ var Distribution = {
   initMap: function() {
 
     var greenToRedColorScale = d3.scale.linear()
-      .domain([0,127,255])
-      .range(['green', 'yellow', 'red'] );
+      .domain([0,42.5,85.0,127.5,170.0,212.5,255.0])
+      .range([
+        d3.rgb(55, 190, 255),
+        d3.rgb(85, 255, 225),
+        d3.rgb(180, 250, 140),
+        d3.rgb(235, 250, 75),
+        d3.rgb(255, 200, 0),
+        d3.rgb(255, 120, 0),
+        d3.rgb(255, 0, 0)
+      ]);
 
     var aquamapsColorScale = d3.scale.linear()
       .domain([0.0, 63.75, 127.5, 191.25, 255.0])
@@ -35,7 +43,8 @@ var Distribution = {
       },
       projection: d3.geo.equirectangular(),
       legend: true,
-      colorScale: aquamapsColorScale,
+      //colorScale: aquamapsColorScale,
+      colorScale: greenToRedColorScale,
       geoJsonColor: 'rgba(255,255,255,0.5)',
       onCellHover: function(feature) { console.debug('hovering over ', feature);}
     };
@@ -48,8 +57,8 @@ var Distribution = {
     });
   },
 
-  loadTaxonDistribution: function(taxon_key) {
-    d3.xhr('taxon/' + taxon_key)
+  loadTaxonDistribution: function(taxon_key, show_old_distribution) {
+    d3.xhr('taxon/' + taxon_key + (show_old_distribution ? '/old' : '/new'))
       .responseType('arraybuffer')
       .get(function(error, xhr) {
         var buff = xhr.response;
@@ -73,7 +82,7 @@ var Distribution = {
     });
   },
 
-  showTaxon: function(taxon_key, taxon_name, taxon_level) {
+  showTaxon: function(taxon_key, taxon_name, taxon_level, show_old_distribution, show_extent_only) {
 
     $('#aquamaps-link').data('taxon_key', taxon_key);
     if (taxon_level == 6) {
@@ -87,10 +96,21 @@ var Distribution = {
 
     $('#taxon_name').html(taxon_name);
     $('#taxon_key').html(taxon_key);
+    if (show_extent_only) {
+      $('#map_type').html("Extent");
+    }
+    else if (show_old_distribution) {
+      $('#map_type').html("Old Distribution");
+    }
+    else {
+      $('#map_type').html("Distribution");
+    }
 
     modal.off('shown.bs.modal');
     modal.on('shown.bs.modal', function(event) {
-      Distribution.loadTaxonDistribution(taxon_key);
+      if (show_extent_only == false) {
+        Distribution.loadTaxonDistribution(taxon_key, show_old_distribution);
+      }
       Distribution.loadTaxonExtent(taxon_key);
     });
 
@@ -145,11 +165,12 @@ var Distribution = {
         }
       });
     });
+
     var taxon_key = location.hash.slice(1)|0;
     if (taxon_key) {
       var taxon_name = $('button.view-taxon-link[data-taxon_key="' + taxon_key + '"]').data().taxon_name;
       var taxon_level = $('button.view-taxon-link[data-taxon_key="' + taxon_key + '"]').data().taxon_level;
-      Distribution.showTaxon(taxon_key, taxon_name, taxon_level);
+      Distribution.showTaxon(taxon_key, taxon_name, taxon_level, false, false);
     }
   },
 
@@ -173,9 +194,31 @@ var Distribution = {
       var taxon_name = $(event.target).data().taxon_name;
       var taxon_level = $(event.target).data().taxon_level;
 
-      window.location.hash = taxon_key;
+      //window.location.hash = taxon_key;
 
-      Distribution.showTaxon(taxon_key, taxon_name, taxon_level);
+      Distribution.showTaxon(taxon_key, taxon_name, taxon_level, false, false);
+    });
+
+    $(".view-old-taxon-link").click(function(event) {
+      event.stopPropagation();
+      var taxon_key = $(event.target).data().taxon_key;
+      var taxon_name = $(event.target).data().taxon_name;
+      var taxon_level = $(event.target).data().taxon_level;
+
+      //window.location.hash = taxon_key;
+
+      Distribution.showTaxon(taxon_key, taxon_name, taxon_level, true, false);
+    });
+
+    $(".view-extent-link").click(function(event) {
+      event.stopPropagation();
+      var taxon_key = $(event.target).data().taxon_key;
+      var taxon_name = $(event.target).data().taxon_name;
+      var taxon_level = $(event.target).data().taxon_level;
+
+      //window.location.hash = taxon_key;
+
+      Distribution.showTaxon(taxon_key, taxon_name, taxon_level, false, true);
     });
 
     $('#aquamaps-link').click(function(event) {

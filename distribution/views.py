@@ -35,7 +35,7 @@ class DistributionView(View):
             with db.Session() as session:
                 query = """SELECT t.*, l.modified_timestamp,
                                   (e.taxon_key IS NOT NULL) AS is_extent_available,
-                                  EXISTS (SELECT 1 FROM allocation.taxon_distribution_old o WHERE o.taxon_key = t.taxon_key LIMIT 1) AS is_v40_distribution_available
+                                  EXISTS (SELECT 1 FROM allocation.taxon_distribution_old o WHERE o.taxon_key = t.taxon_key LIMIT 1) AS is_old_distribution_available
                     FROM master.taxon t
                     JOIN distribution.taxon_distribution_log l ON (l.taxon_key = t.taxon_key)
                     LEFT JOIN distribution.taxon_extent e ON (e.taxon_key = t.taxon_key)
@@ -107,16 +107,21 @@ class TaxonExtentView(View):
 
 class TaxonDistributionView(View):
 
-    def get(self, request, taxon_key=None):
+    def get(self, request, taxon_key=None, source=None):
 
         with db.Session() as session:
             raw_conn = session.connection().connection
             cursor = raw_conn.cursor()
 
+            if (source == 'new'):
+                distribution_table_name = 'distribution.taxon_distribution'
+            elif (source == 'old'):
+                distribution_table_name = 'allocation.taxon_distribution_old'
+
             if request.GET.get('format','').lower() == 'csv':
-                query = """select cell_id, relative_abundance as relative_abundance
-                    from distribution.taxon_distribution d
-                    where taxon_key=%(id)s order by cell_id"""
+                query = "select cell_id, relative_abundance as relative_abundance " + \
+                        "from " + distribution_table_name + " d " + \
+                        "where taxon_key=%(id)s order by cell_id"
                 cursor.execute(query, {'id': taxon_key})
                 rows = ((x[0], '{:.15f}'.format(x[1])) for x in cursor)
                 f = io.StringIO()
@@ -126,10 +131,10 @@ class TaxonDistributionView(View):
                 f.seek(0)
                 return HttpResponse(f, content_type='text/csv')
             else:
-                query = """select cell_id, round(((relative_abundance-s.min)/s.max)*255)::int as relative_abundance
-                    from distribution.taxon_distribution d,
-                    (SELECT max(relative_abundance) as max, min(relative_abundance) as min from distribution.taxon_distribution where taxon_key=%(id)s) s
-                    where taxon_key=%(id)s order by cell_id"""
+                query = "select cell_id, (width_bucket(relative_abundance, s.min, s.max, 255)-1) as relative_abundance " + \
+                        "from " + distribution_table_name + " d," + \
+                        "(SELECT max(relative_abundance) as max, min(relative_abundance) as min from " + distribution_table_name + " where taxon_key=%(id)s) s " + \
+                        "where taxon_key=%(id)s order by cell_id"
                 cursor.execute(query, {'id': taxon_key})
                 # return packed binary
                 data = ((cell_id | (x << 24)) for cell_id, x in cursor)
