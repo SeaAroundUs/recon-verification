@@ -51,7 +51,7 @@ class GeoEntity(models.Model):
             'geo_entity_id',
             'name'
         )
-        search_fields = ['name']
+        search_fields = ('geo_entity_id', 'name',)
         show_full_result_count = True
 
     # the __str__ method tell django how to display an instance of this class as a string
@@ -83,7 +83,7 @@ class FishingEntity(models.Model):
             'name'
         )
         list_filter = ('is_currently_used_for_web',)
-        search_fields = ['name']
+        search_fields = ('fishing_entity_id', 'name',)
         show_full_result_count = True
 
     def __str__(self):
@@ -123,7 +123,7 @@ class EEZ(models.Model):
             'fishing_entity'
         )
         list_filter = ('is_currently_used_for_web',)
-        search_fields = ['name', 'fishing_entity__name']
+        search_fields = ('eez_id', 'name', 'fishing_entity__name',)
         show_full_result_count = True
 
     def __str__(self):
@@ -147,7 +147,7 @@ class FAO(models.Model):
             'fao_area_id',
             'name'
         )
-        search_fields = ['name']
+        search_fields = ('name',)
         show_full_result_count = True
 
     def __str__(self):
@@ -170,7 +170,7 @@ class ICESArea(models.Model):
             'ices_area_id',
             'ices_area'
         )
-        search_fields = ['ices_area']
+        search_fields = ('ices_area_id', 'ices_area',)
         show_full_result_count = True
 
     def __str__(self):
@@ -192,7 +192,7 @@ class NAFO(models.Model):
             'nafo_division_id',
             'nafo_division'
         )
-        search_fields = ['nafo_division']
+        search_fields = ('nafo_division',)
         show_full_result_count = True
 
     def __str__(self):
@@ -386,7 +386,7 @@ class Taxon(models.Model):
             'min_depth',
             'max_depth'
         )
-        search_fields = ['taxon_key', 'common_name', 'scientific_name']
+        search_fields = ('taxon_key', 'common_name', 'scientific_name',)
         show_full_result_count = True
 
     def __str__(self):
@@ -406,7 +406,7 @@ class Gear(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('gear_id', 'name')
-        search_fields = ['name']
+        search_fields = ('gear_id', 'name',)
         show_full_result_count = True
 
     def __str__(self):
@@ -455,7 +455,7 @@ class Reference(models.Model):
             'filename',
             'type',
         )
-        search_fields = ['filename']
+        search_fields = ('reference_id',  'filename',)
         show_full_result_count = True
 
     def __str__(self):
@@ -542,7 +542,7 @@ class AccessType(models.Model):
             'id',
             'description'
         )
-        search_fields = ['description']
+        search_fields = ('description',)
         show_full_result_count = True
 
     def __str__(self):
@@ -565,7 +565,7 @@ class AgreementType(models.Model):
             'id',
             'description'
         )
-        search_fields = ['description']
+        search_fields = ('description',)
         show_full_result_count = True
 
     def __str__(self):
@@ -645,7 +645,7 @@ class AccessAgreement(models.Model):
             'end_year'
         )
         list_filter = ('access_type',)
-        search_fields = ['fishing_entity__name', 'eez__name', 'title_of_agreement']
+        search_fields = ('id', 'fishing_entity__name', 'eez__name', 'title_of_agreement',)
         show_full_result_count = True
 
     def __str__(self):
@@ -666,7 +666,7 @@ class RareTaxon(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('taxon_key', 'scientific_name', 'common_name')
-        search_fields = ('scientific_name', 'common_name')
+        search_fields = ('taxon_key', 'scientific_name', 'common_name',)
         show_full_result_count = True
 
 
@@ -684,7 +684,7 @@ class Layer3Taxon(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('taxon_key', 'scientific_name', 'common_name')
-        search_fields = ('scientific_name', 'common_name')
+        search_fields = ('taxon_key', 'scientific_name', 'common_name',)
         show_full_result_count = True
 
 
@@ -727,7 +727,7 @@ class HabitatIndex(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('taxon_key', 'taxon_name', 'common_name')
-        search_fields = ('taxon_name', 'common_name')
+        search_fields = ('taxon_key', 'taxon_name', 'common_name',)
         show_full_result_count = True
 
 
@@ -745,7 +745,7 @@ class LME(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('lme_id', 'name', 'profile_url')
-        search_fields = ('name',)
+        search_fields = ('name', 'lme_id',)
         show_full_result_count = True
 
     def __str__(self):
@@ -767,7 +767,7 @@ class RFMO(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('rfmo_id', 'name', 'long_name', 'profile_url')
-        search_fields = ('name', 'long_name')
+        search_fields = ('name', 'long_name',)
         show_full_result_count = True
 
 
@@ -820,6 +820,7 @@ class TaxonSubstitution(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('original_taxon_key', 'use_this_taxon_key_instead', 'is_manual_override')
+        search_fields = ('original_taxon_key', 'use_this_taxon_key_instead',)
         show_full_result_count = True
 
     @classmethod
@@ -902,7 +903,7 @@ class AdHocQuery(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('query', 'notes', 'is_active', 'created_by_auth_user', 'reviewed_by_auth_user')
-        search_fields = ('query', 'notes')
+        search_fields = ('query', 'notes',)
         list_filter = ('is_active',)
         exclude = (
             'created_by_auth_user',
@@ -971,6 +972,7 @@ class Cell(models.Model):
     class Admin(LoggedAdmin):
         list_display = ('cell_id', 'lat', 'lon', 'lme', 'fao_area')
         list_filter = ('lme', 'fao_area')
+        search_fields = ('cell_id',)
         show_full_result_count = True
 
         def lme(self, obj):
@@ -1149,7 +1151,7 @@ class MarineLayer(models.Model):
         )
 
 
-class AreaInvisible(models.Model):
+class UnderReviewArea(models.Model):
     row_id = models.IntegerField(primary_key=True, blank=False, db_column='area_invisible_id')
     marine_layer_id = models.ForeignKey(to=MarineLayer, db_column='marine_layer_id')
     main_area_id = models.IntegerField(null=False, blank=False)
@@ -1161,8 +1163,8 @@ class AreaInvisible(models.Model):
         managed = False
 
     class Admin(LoggedAdmin):
-        verbose_name = 'Area Under Review'
-        verbose_name_plural = 'Areas Under Review'
+        verbose_name = 'Under Review Area'
+        verbose_name_plural = 'Under Review Areas'
         list_display = (
             'row_id',
             'marine_layer_id',
