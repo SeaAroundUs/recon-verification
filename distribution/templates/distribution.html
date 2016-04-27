@@ -17,13 +17,11 @@
                                 <span id="aquamaps-missing">No Aquamaps available</span>
                                 <a style="cursor: pointer" data-taxon_key="" data-taxon_name="" id="aquamaps-link">Compare with Aquamaps</a>
                                 <span class="glyphicon glyphicon-refresh spin"></span>
-
                             </h2>
                             <div id="maps">
                                 <div id="gridMap"></div>
                                 <div id="aquamaps"></div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -33,8 +31,9 @@
                             <th>Taxon key</th>
                             <th>Common name</th>
                             <th>Scientific name</th>
-                            <th>Distribution Timestamp</th>
                             <th>Extent Available</th>
+                            <th>Habitat Available</th>
+                            <th>Distribution Timestamp</th>
                             <th></th>
                             <th></th>
                             <th></th>
@@ -51,7 +50,6 @@
                             </td>
                             <td class="common_name">{{ taxon.common_name }}</td>
                             <td class="scientific_name">{{ taxon.scientific_name }}</td>
-                            <td>{{ taxon.modified_timestamp }}</td>
                             <td class="extent_available">
                                 {% if taxon.is_extent_available == False %}
                                     False
@@ -67,6 +65,20 @@
                                     </button>
                                 {% endif %}
                             </td>
+                            <td class="habitat_available">
+                                {% if taxon.is_habitat_available == False %}
+                                    False
+                                {% else %}
+                                    True
+                                    <button
+                                    data-taxon_key="{{taxon.taxon_key}}"
+                                    class="view-habitat-link"
+                                    >
+                                    ...
+                                    </button>
+                                {% endif %}
+                            </td>
+                            <td>{{ taxon.modified_timestamp }}</td>
                             <td>
                                 <button
                                     data-taxon_key="{{taxon.taxon_key}}"

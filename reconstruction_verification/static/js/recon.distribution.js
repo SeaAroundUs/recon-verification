@@ -221,6 +221,13 @@ var Distribution = {
       Distribution.showTaxon(taxon_key, taxon_name, taxon_level, false, true);
     });
 
+    $(".view-habitat-link").click(function(event) {
+      event.stopPropagation();
+      var taxon_key = $(event.target).data().taxon_key;
+
+      window.open("/admin/catch/habitatindex/" + taxon_key);
+    });
+
     $('#aquamaps-link').click(function(event) {
       $(event.target).hide();
       $('.spin').show();
