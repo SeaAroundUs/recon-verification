@@ -19,7 +19,7 @@ try:
     from species_distribution.models.taxa import Taxon
     from species_distribution.models.taxa import TaxonDistributionLog
     from species_distribution.models.taxa import TaxonExtent
-    from species_distribution.distribution import create_and_save_taxon
+    from species_distribution.distribution import create_and_save_distribution
 
     from sqlalchemy.orm import joinedload
 
@@ -35,10 +35,12 @@ class DistributionView(View):
             with db.Session() as session:
                 query = """SELECT t.*, l.modified_timestamp,
                                   (e.taxon_key IS NOT NULL) AS is_extent_available,
+                                  (h.taxon_key IS NOT NULL) AS is_habitat_available,
                                   EXISTS (SELECT 1 FROM allocation.taxon_distribution_old o WHERE o.taxon_key = t.taxon_key LIMIT 1) AS is_old_distribution_available
                     FROM master.taxon t
                     JOIN distribution.taxon_distribution_log l ON (l.taxon_key = t.taxon_key)
                     LEFT JOIN distribution.taxon_extent e ON (e.taxon_key = t.taxon_key)
+                    LEFT JOIN distribution.taxon_habitat h ON (h.taxon_key = t.taxon_key)
                     WHERE NOT t.is_retired
                     ORDER BY l.modified_timestamp DESC NULLS FIRST
                 """
@@ -53,7 +55,7 @@ class DistributionView(View):
     def post(self, request):
         taxon_key = request.POST['taxon_key']
         thread = threading.Thread(
-            target=create_and_save_taxon,
+            target=create_and_save_distribution,
             args=(taxon_key,),
             kwargs={'force': True}
         )
