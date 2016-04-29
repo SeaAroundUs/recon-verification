@@ -14,6 +14,7 @@ import xlrd
 import re
 import time
 import logging
+import sys
 
 
 logger = logging.getLogger(__name__)
@@ -148,7 +149,11 @@ def get_committed_ids(ids):
 # recording the ids in the proper fields
 def normalize(ids):
     # grab taxon subs once up front
-    taxon_subs = TaxonSubstitution.get_subs()
+    try:
+        taxon_subs = TaxonSubstitution.get_subs()
+    except Exception:
+        print(sys.exc_info())
+        raise
 
     # this iterates through all rows provided
     for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
