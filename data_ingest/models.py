@@ -96,6 +96,8 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     sector_type_id = models.IntegerField(default=0)
     catch_type = NullableCharField(max_length=200, null=True)
     catch_type_id = models.IntegerField(default=0)
+    reporting_status = NullableCharField(max_length=200, null=True)
+    reporting_status_id = models.IntegerField(default=0)
     year = models.IntegerField(default=0)
     taxon_name = NullableCharField(max_length=200, null=True)
     taxon_key = models.IntegerField(default=0)
@@ -215,6 +217,11 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 catch.models.CatchType.objects.order_by('catch_type_id').values_list('catch_type_id', 'name')
             ),
             (
+                'reporting_status_id',
+                'Reporting status',
+                catch.models.ReportingStatus.objects.order_by('reporting_status_id').values_list('reporting_status_id', 'name')
+            ),
+            (
                 'year',
                 'Year',
                 list((y,) for y in catch.models.Year.valid_years())
@@ -261,6 +268,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'layer',
             'sector',
             'catch_type',
+            'reporting_status',
             'year',
             'taxon_name',
             'amount',
@@ -277,6 +285,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'layer',
             'sector',
             'catch type',
+            'reporting_status',
             'year',
             'taxon name',
             'amount',

@@ -241,6 +241,29 @@ class CatchType(models.Model):
         return self.name
 
 
+class ReportingStatus(models.Model):
+    reporting_status_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=200)
+    abbreviation = models.CharField(max_length=1)
+
+    class Meta:
+        verbose_name = 'Reporting Status'
+        verbose_name_plural = 'Reporting Statuses'
+        db_table = 'reporting_status'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = (
+            'reporting_status_id',
+            'name',
+            'abbreviation'
+        )
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name
+
+
 class CommercialGroup(models.Model):
     commercial_group_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -498,6 +521,7 @@ class Catch(models.Model):
     sector = models.ForeignKey(to=Sector, db_column='sector_type_id')
     original_sector = NullableCharField(max_length=200, null=True)
     catch_type = models.ForeignKey(to=CatchType)
+    reporting_status = models.ForeignKey(to=ReportingStatus)
     year = models.IntegerField(default=0)
     taxon = models.ForeignKey(to=Taxon, db_column='taxon_key', related_name='+')
     original_taxon_name = models.ForeignKey(to=Taxon, related_name='+', null=True)
@@ -825,7 +849,8 @@ class TaxonSubstitution(models.Model):
 
     @classmethod
     def get_subs(cls):
-        return dict(cls.objects.all().values_list('original_taxon_key', 'use_this_taxon_key_instead', 'is_manual_override'))
+        #return dict(cls.objects.all().values_list('original_taxon_key', 'use_this_taxon_key_instead', 'is_manual_override'))
+        return dict(cls.objects.all().values_list('original_taxon_key', 'use_this_taxon_key_instead'))
 
 
 class AdHocQuery(models.Model):
