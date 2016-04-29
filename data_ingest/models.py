@@ -285,7 +285,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'layer',
             'sector',
             'catch type',
-            'reporting_status',
+            'reporting status',
             'year',
             'taxon name',
             'amount',
