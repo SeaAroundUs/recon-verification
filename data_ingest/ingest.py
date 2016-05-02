@@ -103,7 +103,6 @@ def get_errors(ids):
             'catch_type_id',
             'reporting_status_id',
             'fishing_entity_id',
-            'original_country_fishing_id',
             'fao_area_id',
             'sector_type_id',
             'input_type_id',
@@ -207,7 +206,7 @@ def normalize(ids):
                 original_country_fishing = FishingEntity.objects.get(name__iexact=row.original_country_fishing.strip())
                 row.original_country_fishing_id = original_country_fishing.fishing_entity_id
             except FishingEntity.DoesNotExist:  # no Country found
-                row.original_country_fishing_id = 0
+                row.original_country_fishing_id = None
         else:
             row.original_country_fishing_id = None
 

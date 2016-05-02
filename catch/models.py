@@ -741,6 +741,7 @@ class HabitatIndex(models.Model):
     fao_limits = models.IntegerField(null=True, blank=True)
     sl_max = models.FloatField(null=True, blank=True)
     intertidal = models.NullBooleanField(null=True, blank=True)
+    temperature = models.FloatField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Habitat index'
