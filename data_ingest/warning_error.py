@@ -76,15 +76,27 @@ class FishingEntityAndEEZNotAligned(ErrorView):
     col = "layer"
 
 
+class InputReconstructedCatchTypeReported(ErrorView):
+    message = "Input type is reconstructed and Catch type is reported landings"
+    view = "input_reconstructed_catch_type_reported"
+    col = "input_type_id"
+
+
 class InputNotReconstructedCatchTypeNotReported(ErrorView):
     message = "Input type is not reconstructed and Catch type not reported landings"
     view = "input_not_reconstructed_catch_type_not_reported"
     col = "input_type_id"
 
 
-class InputReconstructedCatchTypeReported(ErrorView):
-    message = "Input type is reconstructed and Catch type is reported landings"
-    view = "input_reconstructed_catch_type_reported"
+class InputReconstructedReportingStatusReported(ErrorView):
+    message = "Input type is reconstructed and Reporting status is reported"
+    view = "input_reconstructed_reporting_status_reported"
+    col = "input_type_id"
+
+
+class InputNotReconstructedReportingStatusUnreported(ErrorView):
+    message = "Input type is not reconstructed and Reporting status is unreported"
+    view = "input_not_reconstructed_reporting_staus_unreported"
     col = "input_type_id"
 
 
@@ -160,8 +172,10 @@ class RawCatchAmountZeroOrNegative(AmountZeroOrNegative, RawCatchMixin): pass
 class RawCatchFAO21NAFONull(FAO21NAFONull, RawCatchMixin): pass
 class RawCatchFAO27ICESNull(FAO27ICESNull, RawCatchMixin): pass
 class RawCatchFishingEntityAndEEZNotAligned(FishingEntityAndEEZNotAligned, RawCatchMixin): pass
-class RawCatchInputNotReconstructedCatchTypeNotReported(InputNotReconstructedCatchTypeNotReported, RawCatchMixin): pass
 class RawCatchInputReconstructedCatchTypeReported(InputReconstructedCatchTypeReported, RawCatchMixin): pass
+class RawCatchInputNotReconstructedCatchTypeNotReported(InputNotReconstructedCatchTypeNotReported, RawCatchMixin): pass
+class RawCatchInputReconstructedReportingStatusReported(InputReconstructedReportingStatusReported, RawCatchMixin): pass
+class RawCatchInputNotReconstructedReportingStatusUnreported(InputNotReconstructedReportingStatusUnreported, RawCatchMixin): pass
 class RawCatchLayer2Or3AndSectorNotIndustrial(Layer2Or3AndSectorNotIndustrial, RawCatchMixin): pass
 class RawCatchLayerNotInRange(LayerNotInRange, RawCatchMixin): pass
 class RawCatchLookupMismatch(LookupMismatch, RawCatchMixin): pass
@@ -180,8 +194,10 @@ class CatchAmountZeroOrNegative(AmountZeroOrNegative, CatchMixin): pass
 class CatchFAO21NAFONull(FAO21NAFONull, CatchMixin): pass
 class CatchFAO27ICESNull(FAO27ICESNull, CatchMixin): pass
 class CatchFishingEntityAndEEZNotAligned(FishingEntityAndEEZNotAligned, CatchMixin): pass
-class CatchInputNotReconstructedCatchTypeNotReported(InputNotReconstructedCatchTypeNotReported, CatchMixin): pass
 class CatchInputReconstructedCatchTypeReported(InputReconstructedCatchTypeReported, CatchMixin): pass
+class CatchInputNotReconstructedCatchTypeNotReported(InputNotReconstructedCatchTypeNotReported, CatchMixin): pass
+class CatchInputReconstructedReportingStatusReported(InputReconstructedReportingStatusReported, RawCatchMixin): pass
+class CatchInputNotReconstructedReportingStatusUnreported(InputNotReconstructedReportingStatusUnreported, RawCatchMixin): pass
 class CatchLayer2Or3AndSectorNotIndustrial(Layer2Or3AndSectorNotIndustrial, CatchMixin): pass
 class CatchLayerNotInRange(LayerNotInRange, CatchMixin): pass
 class CatchOriginalCountryFishingNotNull(OriginalCountryFishingNotNull, CatchMixin): pass

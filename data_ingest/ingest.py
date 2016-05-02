@@ -1,6 +1,6 @@
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
-    Sector, CatchType, Taxon, Gear, InputType, Reference, Catch, Year, \
+    Sector, CatchType, ReportingStatus, Taxon, Gear, InputType, Reference, Catch, Year, \
     TaxonSubstitution
 from .warning_error import RawCatchLookupMismatch, RawCatchMissingRequiredField
 from decimal import Decimal
@@ -100,9 +100,8 @@ def get_errors(ids):
         # in the taxon_key field which is flagged here as an error
         id_fields = [
             'taxon_key',
-            'original_taxon_name_id',
-            'original_fao_name_id',
             'catch_type_id',
+            'reporting_status_id',
             'fishing_entity_id',
             'original_country_fishing_id',
             'fao_area_id',
@@ -192,6 +191,12 @@ def normalize(ids):
             row.catch_type_id = 0
 
         try:
+            reporting_status = ReportingStatus.objects.get(name__iexact=row.reporting_status.strip())
+            row.reporting_status_id = reporting_status.reporting_status_id
+        except ReportingStatus.DoesNotExist:  # no ReportingStatus found
+            row.reporting_status_id = 0
+
+        try:
             fishing_entity = FishingEntity.objects.get(name__iexact=row.fishing_entity.strip())
             row.fishing_entity_id = fishing_entity.fishing_entity_id
         except FishingEntity.DoesNotExist:  # no Country found
@@ -260,6 +265,7 @@ def commit(ids):
             'layer': row.layer,
             'sector': Sector.objects.get(sector_type_id=row.sector_type_id),
             'catch_type': CatchType.objects.get(catch_type_id=row.catch_type_id),
+            'reporting_status': ReportingStatus.objects.get(reporting_status_id=row.reporting_status_id),
             'year': row.year,
             'taxon': Taxon.objects.get(taxon_key=row.taxon_key),
             'amount': row.amount,

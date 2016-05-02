@@ -39,7 +39,7 @@
                             <select id="reference" name="reference">
                                 <option value="0">-- SELECT --</option>
                                 {% for id, ref in references %}
-                                    <option value="{{ id }}">{{ ref }}</option>
+                                    <option value="{{ id }}">{{ ref }} ({{ id }})</option>
                                 {% endfor %}
                             </select>
                         </div>
