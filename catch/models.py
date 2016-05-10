@@ -478,7 +478,7 @@ class Reference(models.Model):
             'filename',
             'type',
         )
-        search_fields = ('reference_id',  'filename',)
+        search_fields = ('reference_id',  'filename', 'main_area_name')
         show_full_result_count = True
 
     def __str__(self):
