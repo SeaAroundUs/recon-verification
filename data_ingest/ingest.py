@@ -305,7 +305,7 @@ def commit(ids):
             values.update({'original_taxon_name': None})
 
         #
-        # Check for this column is deferred until we have a proper FAO taxon lookup table created an populated in the db
+        # Check for this column is deferred until we have a proper FAO taxon lookup table created and populated in the db
         #
         # try:
         #     values.update({'original_fao_name': Taxon.objects.get(taxon_key=row.original_fao_name_id)})
