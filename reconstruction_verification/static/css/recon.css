@@ -29,6 +29,10 @@ button:focus {
   font-weight: normal;
 }
 
+.table-controls #total-count {
+  color: green;
+}
+
 .table-controls #error-count, .table-controls #warning-count {
   cursor: pointer;
 }
@@ -145,6 +149,11 @@ span.warning-reason {
   margin-bottom: 25px;
 }
 
+#browse-upload .upload-ref .form-group {
+  display: inline;
+  margin-right: 25px;
+}
+
 #browse-upload .upload-file .form-group {
   display: inline;
   margin-right: 25px;
@@ -152,6 +161,11 @@ span.warning-reason {
 
 #browse-upload .upload-file .form-group input#comment {
   width: 300px;
+}
+
+#browse-upload .normalize-source-file .form-group {
+  display: inline;
+  margin-right: 25px;
 }
 
 #browse-upload .working-set .form-group {
