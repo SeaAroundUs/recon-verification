@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadReque
     HttpResponseRedirect, HttpResponseForbidden
 from django.core.urlresolvers import reverse
 from data_ingest.models import FileUpload, RawCatch
-from data_ingest.forms import FileUploadForm, QueryForm, AuthorizeForm
+from data_ingest.forms import FileUploadForm, QueryForm, AuthorizeForm, NormalizeSourceForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
 from catch.models import Reference, Catch, AdHocQuery, User
 from storages.backends.s3boto import S3BotoStorage
@@ -78,7 +78,8 @@ class DataBrowseView(View):
     def get(self, request):
         params = {
             'fields': RawCatch.allowed_query_fields(),
-            'references': Reference.objects.exclude(type="Historic").order_by('filename', 'main_area_name').values_list('reference_id', 'filename', 'main_area_name')
+            'references': Reference.objects.exclude(type="Historic").order_by('filename', 'main_area_name').values_list('reference_id', 'filename', 'main_area_name'),
+            'sources': FileUpload.objects.order_by('-create_datetime').values_list('id', 'file', 'comment')
         }
         return render(request, self.template, params)
 
@@ -88,9 +89,9 @@ class EditNormalizeView(View):
     template = 'edit_normalize.html'
 
     def get(self, request):
+        count = RawCatch.objects.from_request(request).count()
 
         if 'get_count' in request.GET:
-            count = RawCatch.objects.from_request(request).count()
             return ReconResponse({'count': count})
 
         page = int(request.GET.get('page', 1))
@@ -109,6 +110,8 @@ class EditNormalizeView(View):
         else:
             params['querystring'] = request.GET.urlencode()
 
+        params['total_count'] = count
+
         return render(request, self.template, params)
 
 
@@ -116,7 +119,6 @@ class EditNormalizeView(View):
 class CatchFieldsJsonView(View):
     def get(self, request):
         return ReconResponse(RawCatch.fields())
-
 
 # json endpoint to provide the data inside the javascript editor
 class UploadDataJsonView(View):
@@ -142,6 +144,23 @@ class DataNormalizationView(View):
         ids = simplejson.loads(request.body).get('ids', '')
         normalize(ids)
         return ReconResponse(get_raw_catch_data(ids=ids))
+
+
+# view that handles the spreadsheet upload; is only hit via AJAX
+class NormalizeSourceView(View):
+    model = RawCatch
+    form_class = NormalizeSourceForm
+
+    def post(self, request):
+        try:
+            sourceFileId = simplejson.loads(request.body).get('source-file-id', '')
+            ids = self.model.objects.filter(source_file_id=sourceFileId).values_list('id', flat=True)
+            normalize(ids)
+            return ReconResponse({'result': 'ok'})
+
+        except Exception as e:
+            logger.exception('Normalize source file error')
+            return ReconResponse({'result': 'not ok', 'exception': e.__str__()})
 
 
 # endpoint that is POST'd to that commits data in raw_catch to catch

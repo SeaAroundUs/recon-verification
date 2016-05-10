@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from data_ingest.views import EditNormalizeView, DataBrowseView, FileUploadCreateView, \
-    UploadDataJsonView, CatchFieldsJsonView, DataNormalizationView, CommitView, \
+    UploadDataJsonView, CatchFieldsJsonView, DataNormalizationView, NormalizeSourceView, CommitView, \
     UploadRefView, DeleteRowView, HealthView, CustomView, AdHocView
 
 
@@ -23,6 +23,7 @@ urlpatterns = patterns(
         name='save-data'),
     url(r'^fields/$', login_required(CatchFieldsJsonView.as_view()), name='catch-fields-json'),
     url(r'^normalize/$', login_required(DataNormalizationView.as_view()), name='normalize-data'),
+    url(r'^normalize-source/$', login_required(NormalizeSourceView.as_view()), name='normalize-source'),
     url(r'^commit/$', login_required(CommitView.as_view()), name='commit-data'),
     url(r'^health/$', login_required(HealthView.as_view()), name='health'),
     url(r'^custom/$', login_required(CustomView.as_view()), name='custom'),

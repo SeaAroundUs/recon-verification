@@ -1,6 +1,6 @@
 from django import forms
-from data_ingest.models import FileUpload, User
-from data_ingest.ingest import ContributedFile
+from data_ingest.models import FileUpload, User, RawCatch
+from data_ingest.ingest import ContributedFile, normalize
 import logging
 
 
@@ -46,3 +46,16 @@ class AuthorizeForm(forms.Form):
     type = forms.CharField(widget=forms.HiddenInput, initial='authorize')
     user = forms.ModelChoiceField(queryset=User.objects.all(),
                                   widget=forms.Select(attrs={'class': 'form-control'}))
+
+
+# used by the source normalization process
+class NormalizeSourceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = RawCatch
+        fields = ['id', 'source_file']
+
+

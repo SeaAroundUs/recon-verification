@@ -1,19 +1,22 @@
 {% extends '_layouts/base.html' %}
 {% load staticfiles %}
 {% block title %}Browse & Upload{% endblock %}
+{% block extra_urls %}
+<input type="hidden" id="normalizeSource" class="djangoURL" value="{% url 'normalize-source' %}" />
+{% endblock %}
 {% block content %}
     <div id="browse-upload" class="panel-group" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default">
             <div class="panel-body">
                 <div class="section">
                     <h3>Upload new reference</h3>
-                    <p>
-                        Upload a new reference document to S3 to associate catch data sets with. The document
-                        will also be added to the reference table.
-                    </p>
 
                     <form role="form" enctype="multipart/form-data" class="upload-ref">
                         <div class="form-group">
+                            <span>
+                                Upload a new reference document to S3 to associate catch data sets with. The document
+                                will also be added to the reference table.
+                            </span>
                             <span class="btn btn-success fileinput-button">
                                 <i class="glyphicon glyphicon-plus"></i>
                                 <span>Select reference file</span>
@@ -59,6 +62,29 @@
                                 <span>Select data file</span>
                                 <input id="fileupload" type="file" name="file">
                             </span>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h3>Normalize uploaded source file</h3>
+                    <p>
+                        Choose an uploaded source file to normalize.
+                    </p>
+
+                    <form role="form" class="normalize-source-file">
+                        <div class="form-group">
+                            <label for="source-file">Source file:</label>
+                            <select id="source-file" name="source-file">
+                                <option value="0">-- SELECT --</option>
+                                {% for id, filename, comment in sources %}
+                                    <option value="{{ id }}">{{ filename }} ({{ id }})</option>
+                                {% endfor %}
+                            </select>
+                            &nbsp;
+                            <button id="normalize-source" class="btn btn-primary">
+                                <i class="glyphicon glyphicon-link"></i> Normalize source file
+                            </button>
                         </div>
                     </form>
                 </div>
