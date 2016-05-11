@@ -142,10 +142,14 @@ def get_committed_ids(ids):
         last_committed__isnull=True
     ).order_by('id').values_list('id', flat=True))
 
-
 # this is the normalization method that handles checking the data against the db and
 # recording the ids in the proper fields
 def normalize(ids):
+    with connection.cursor() as cursor:
+        for i in range(0, len(ids), 2500):
+            normalize_query = ("SELECT recon.normalize_raw_catch_by_ids('{%s}'::INT[]);" % ','.join(map(str, ids[i:i+2500])))
+            cursor.execute(normalize_query)
+    """
     # grab taxon subs once up front
     try:
         taxon_subs = TaxonSubstitution.get_subs()
@@ -250,6 +254,7 @@ def normalize(ids):
         if row.is_dirty():
             row.last_modified = timezone.now()
             row.save()
+    """
 
 
 # this method handles committing data from raw_catch to catch
