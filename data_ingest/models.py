@@ -239,7 +239,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             (
                 'reference_id',
                 'Reference',
-                catch.models.Reference.objects.order_by('filename').values_list('reference_id', 'filename')
+                catch.models.Reference.objects.order_by('filename').values_list('reference_id', 'filename', 'main_area_name')
             ),
             (
                 'source_file_id',
