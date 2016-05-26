@@ -4,8 +4,8 @@ from django.views.generic.edit import CreateView
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, \
     HttpResponseRedirect, HttpResponseForbidden
 from django.core.urlresolvers import reverse
-from data_ingest.models import FileUpload, RawCatch
-from data_ingest.forms import FileUploadForm, QueryForm, AuthorizeForm, NormalizeSourceForm
+from data_ingest.models import FileUpload, RawCatch, ValidationRule
+from data_ingest.forms import FileUploadForm, QueryForm, AuthorizeForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
 from catch.models import Reference, Catch, AdHocQuery, User
 from storages.backends.s3boto import S3BotoStorage
@@ -146,10 +146,9 @@ class DataNormalizationView(View):
         return ReconResponse(get_raw_catch_data(ids=ids))
 
 
-# view that handles the spreadsheet upload; is only hit via AJAX
+# view that handles the normalize source file feature; is only hit via AJAX
 class NormalizeSourceView(View):
     model = RawCatch
-    form_class = NormalizeSourceForm
 
     def post(self, request):
         try:
@@ -212,13 +211,13 @@ class HealthView(View):
     template = 'health.html'
 
     def get(self, request):
-        raw_catch_warnings = [(view.view, view.message, view.count())
+        raw_catch_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                               for view in RawCatch.warning_views()]
-        raw_catch_errors = [(view.view, view.message, view.count())
+        raw_catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                             for view in RawCatch.error_views()]
-        catch_warnings = [(view.view, view.message, view.count())
+        catch_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                           for view in Catch.warning_views()]
-        catch_errors = [(view.view, view.message, view.count())
+        catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                         for view in Catch.error_views()]
         params = {'raw_catch_warnings': raw_catch_warnings,
                   'raw_catch_errors': raw_catch_errors,
@@ -226,6 +225,10 @@ class HealthView(View):
                   'catch_errors': catch_errors}
         return render(request, self.template, params)
 
+    def post(self, request):
+        view_name = request.GET['view_name']
+        ValidationRule.refresh_rule_partition(view_name)
+        return HttpResponseRedirect(reverse('health'))
 
 # view that handles the custom view section of the site
 class CustomView(View):

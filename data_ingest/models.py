@@ -323,3 +323,25 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     def inserted_fields(cls):
         fields = list(field.lower().replace(' ', '_') for field in cls.template_fields())
         return fields[:10] + ['reference_id'] + fields[10:] + ['user_id', 'source_file_id']
+
+
+class ValidationRule(models.Model):
+    rule_id = models.IntegerField(primary_key=True)
+    rule_type = models.CharField(max_length=1)
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=500)
+    last_executed = models.DateTimeField(auto_now_add=False)
+
+    class Meta:
+        db_table = 'validation_rule'
+        managed = False
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def refresh_rule_partition(view_name):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM recon.refresh_validation_result_partition('%s');"
+                           % view_name)
+            return cursor.fetchone()[0]

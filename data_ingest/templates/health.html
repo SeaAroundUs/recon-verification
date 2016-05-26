@@ -18,23 +18,47 @@
             <div class="row">
               <div class="col-md-6">
                 <h4>Warnings:</h4>
-                {% for query, label, count in raw_catch_warnings %}
+                {% for query, label, count, vname, executed in raw_catch_warnings %}
                   <p>
-                    <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
-                      {{ label }}
-                    </a> ::
-                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
+                                {{ label }}
+                            </a> ::
+                        </div>
+                        <div class="form-group">
+                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            &nbsp
+                        </div>
+                        <div class="form-group">
+                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                        </div>
+                    </form>
                   </p>
                 {% endfor %}
               </div>
               <div class="col-md-6">
                 <h4>Errors:</h4>
-                {% for query, label, count in raw_catch_errors %}
+                {% for query, label, count, vname, executed in raw_catch_errors %}
                   <p>
-                    <a class="view-link" href="{% url 'edit-normalize' %}?error_view={{ query }}" data-count="{{ count }}">
-                      {{ label }}
-                    </a> ::
-                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
+                                {{ label }}
+                            </a> ::
+                        </div>
+                        <div class="form-group">
+                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            &nbsp
+                        </div>
+                        <div class="form-group">
+                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                        </div>
+                    </form>
                   </p>
                 {% endfor %}
               </div>
@@ -46,19 +70,43 @@
             <div class="row">
               <div class="col-md-6">
                 <h4>Warnings:</h4>
-                {% for query, label, count in catch_warnings %}
+                {% for query, label, count, vname, executed in catch_warnings %}
                   <p>
-                    <span>{{ label }}</span> ::
-                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <span>{{ label }}</span> ::
+                        </div>
+                        <div class="form-group">
+                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            &nbsp
+                        </div>
+                        <div class="form-group">
+                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                        </div>
+                    </form>
                   </p>
                 {% endfor %}
               </div>
               <div class="col-md-6">
                 <h4>Errors:</h4>
-                {% for query, label, count in catch_errors %}
+                {% for query, label, count, vname, executed in catch_errors %}
                   <p>
-                    <span>{{ label }}</span> ::
-                    <span class="{{ count|yesno:"error,clear" }}">{{ count }}</span> rows
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <span>{{ label }}</span> ::
+                        </div>
+                        <div class="form-group">
+                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            &nbsp
+                        </div>
+                        <div class="form-group">
+                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                        </div>
+                    </form>
                   </p>
                 {% endfor %}
               </div>

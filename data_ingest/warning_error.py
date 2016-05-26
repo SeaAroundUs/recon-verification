@@ -10,20 +10,59 @@ class ReconView:
     @classmethod
     def all(cls):
         with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM %s;' % cls.view_name())
-            return cursor.fetchall()
+            cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
+                           % cls.view_name())
+            if cursor.description is None:
+                return ()
+            else:
+                cursor.execute("SELECT * FROM recon.validation_result WHERE rule_id = %s;"
+                               % int(cursor.fetchone()[0]))
+                return cursor.fetchall()
 
     @classmethod
     def any(cls, ids):
         with connection.cursor() as cursor:
-            cursor.execute('SELECT * FROM %s WHERE id IN (%s);' % (cls.view_name(), ','.join(map(str, ids))))
-            return cursor.fetchall()
+            cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
+                           % cls.view_name())
+            if cursor.description is None:
+                return ()
+            else:
+                cursor.execute('SELECT * FROM recon.validation_result WHERE rule_id = %s AND id IN (%s);'
+                               % (int(cursor.fetchone()[0]), ','.join(map(str, ids))))
+                return cursor.fetchall()
 
     @classmethod
     def count(cls):
         with connection.cursor() as cursor:
-            cursor.execute('SELECT count(1) FROM %s;' % cls.view_name())
-            return cursor.fetchone()[0]
+            cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
+                           % cls.view_name())
+            if cursor.description is None:
+                return 0
+            else:
+                cursor.execute('SELECT count(1) FROM recon.validation_result WHERE rule_id = %s;'
+                               % int(cursor.fetchone()[0]))
+                return cursor.fetchone()[0]
+
+    @classmethod
+    def update(cls):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM recon.refresh_validation_result_partition('%s')"
+                            % cls.view_name())
+            if cursor.description is None:
+                return ""
+            else:
+                return cursor.fetchone()[0]
+
+
+    @classmethod
+    def executed(cls):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT to_char(last_executed, 'YYYY-MM-DD HH24:MI') FROM recon.validation_rule WHERE name='%s'"
+                            % cls.view_name())
+            if cursor.description is None:
+                return ""
+            else:
+                return cursor.fetchone()[0]
 
 
 # the next two classes are marker pattern classes indicating raw_catch or catch
@@ -44,30 +83,12 @@ class ErrorView(ReconView):
     type = "error"
 
 
-# base classes for warning/error views. these classes shouldn't be used for anythign but
+# base classes for error views. these classes shouldn't be used for anythign but
 # creation of the class list at the bottom
-class AmountGreaterThanThreshold(WarningView):
-    message = "Amount > 5e6"
-    view = "amount_greater_than_threshold"
-    col = "amount"
-
-
 class AmountZeroOrNegative(ErrorView):
     message = "Catch amount is zero or negative"
     view = "amount_zero_or_negative"
     col = "amount"
-
-
-class FAO21NAFONull(WarningView):
-    message = "Null NAFO for FAO 21"
-    view = "fao_21_nafo_null"
-    col = "nafo_division_id"
-
-
-class FAO27ICESNull(WarningView):
-    message = "Null ICES for FAO 27"
-    view = "fao_27_ices_null"
-    col = "ices_area_id"
 
 
 class FishingEntityAndEEZNotAligned(ErrorView):
@@ -88,12 +109,6 @@ class InputNotReconstructedReportingStatusUnreported(ErrorView):
     col = "input_type_id"
 
 
-class Layer2Or3AndSectorNotIndustrial(WarningView):
-    message = "Layer is 2 or 3 and Sector is not industrial"
-    view = "layer_2_or_3_and_sector_not_industrial"
-    col = "layer"
-
-
 class LayerNotInRange(ErrorView):
     message = "Unknown layer"
     view = "layer_not_in_range"
@@ -110,6 +125,38 @@ class MissingRequiredField(ErrorView):
     message = "Missing required field"
     view = "missing_required_field"
     col = None
+
+
+class TaxaIsRare(ErrorView):
+    message = "Rare taxa should be excluded"
+    view = "taxa_is_rare"
+    col = "taxon_key"
+
+
+# base classes for warning views. these classes shouldn't be used for anythign but
+# creation of the class list at the bottom
+class Layer2Or3AndSectorNotIndustrial(WarningView):
+    message = "Layer is 2 or 3 and Sector is not industrial"
+    view = "layer_2_or_3_and_sector_not_industrial"
+    col = "layer"
+
+
+class AmountGreaterThanThreshold(WarningView):
+    message = "Amount > 5e6"
+    view = "amount_greater_than_threshold"
+    col = "amount"
+
+
+class FAO21NAFONull(WarningView):
+    message = "Null NAFO for FAO 21"
+    view = "fao_21_nafo_null"
+    col = "nafo_division_id"
+
+
+class FAO27ICESNull(WarningView):
+    message = "Null ICES for FAO 27"
+    view = "fao_27_ices_null"
+    col = "ices_area_id"
 
 
 class OriginalCountryFishingNotNull(WarningView):
@@ -140,12 +187,6 @@ class SubsistenceAndLayerNot1(WarningView):
     message = "Sector is subsistence and Layer is not 1"
     view = "subsistence_and_layer_not_1"
     col = "layer"
-
-
-class TaxaIsRare(ErrorView):
-    message = "Rare taxa should be excluded"
-    view = "taxa_is_rare"
-    col = "taxon_key"
 
 
 class YearMax(WarningView):
