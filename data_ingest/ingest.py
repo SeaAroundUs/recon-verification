@@ -1,7 +1,6 @@
 from data_ingest.models import FileUpload, RawCatch
 from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
-    Sector, CatchType, ReportingStatus, Taxon, Gear, InputType, Reference, Catch, Year, \
-    TaxonSubstitution
+    Sector, CatchType, ReportingStatus, Taxon, Gear, InputType, Reference, Catch, Year
 from .warning_error import RawCatchLookupMismatch, RawCatchMissingRequiredField
 from decimal import Decimal
 from django.forms import ValidationError
@@ -14,7 +13,6 @@ import xlrd
 import re
 import time
 import logging
-import sys
 
 
 logger = logging.getLogger(__name__)
@@ -142,120 +140,19 @@ def get_committed_ids(ids):
         last_committed__isnull=True
     ).order_by('id').values_list('id', flat=True))
 
+
 # this is the normalization method that handles checking the data against the db and
 # recording the ids in the proper fields
-def normalize(ids):
+def normalize(ids, source_file_id=None):
+    number_of_ids = len(ids)
+    batch_size = 2500
+
     with connection.cursor() as cursor:
-        for i in range(0, len(ids), 2500):
-            normalize_query = ("SELECT recon.normalize_raw_catch_by_ids('{%s}'::INT[]);" % ','.join(map(str, ids[i:i+2500])))
+        for i in range(0, number_of_ids, batch_size):
+            normalize_query = ("SELECT recon.normalize_raw_catch_by_ids('{%s}'::INT[]);"
+                               % ','.join(map(str, ids[i:i+batch_size])))
             cursor.execute(normalize_query)
-    """
-    # grab taxon subs once up front
-    try:
-        taxon_subs = TaxonSubstitution.get_subs()
-    except Exception:
-        print(sys.exc_info())
-        raise
-
-    # this iterates through all rows provided
-    for row in RawCatch.objects.filter(id__in=ids).order_by('id'):
-        # these blocks check a text field against a row in the db and record an id in the associated field
-        try:
-            taxon = Taxon.objects.filter(scientific_name__iexact=row.taxon_name.strip())[0]
-            row.taxon_key = taxon_subs[taxon.taxon_key] if taxon.taxon_key in taxon_subs else taxon.taxon_key
-        except IndexError:  # no Taxon found
-            row.taxon_key = 0
-
-        if row.original_taxon_name:
-            try:
-                original_taxon = Taxon.objects.filter(scientific_name__iexact=row.original_taxon_name.strip())[0]
-                row.original_taxon_name_id = original_taxon.taxon_key
-            except IndexError:  # no Taxon found
-                row.original_taxon_name_id = 0
-        else:
-            row.original_taxon_name_id = None
-
-        #
-        # Check for this column is deferred until we have a proper FAO taxon lookup table created an populated in the db
-        #
-        if row.original_fao_name:
-            try:
-                original_fao = Taxon.objects.filter(scientific_name__iexact=row.original_fao_name.strip())[0]
-                row.original_fao_name_id = original_fao.taxon_key
-            except IndexError:  # no Taxon found
-                row.original_fao_name_id = None
-        else:
-            row.original_fao_name_id = None
-
-        try:
-            catch_type = CatchType.objects.get(name__iexact=row.catch_type.strip())
-            row.catch_type_id = catch_type.catch_type_id
-        except CatchType.DoesNotExist:  # no CatchType found
-            row.catch_type_id = 0
-
-        try:
-            reporting_status = ReportingStatus.objects.get(name__iexact=row.reporting_status.strip())
-            row.reporting_status_id = reporting_status.reporting_status_id
-        except ReportingStatus.DoesNotExist:  # no ReportingStatus found
-            row.reporting_status_id = 0
-
-        try:
-            fishing_entity = FishingEntity.objects.get(name__iexact=row.fishing_entity.strip())
-            row.fishing_entity_id = fishing_entity.fishing_entity_id
-        except FishingEntity.DoesNotExist:  # no Country found
-            row.fishing_entity_id = 0
-
-        if row.original_country_fishing:
-            try:
-                original_country_fishing = FishingEntity.objects.get(name__iexact=row.original_country_fishing.strip())
-                row.original_country_fishing_id = original_country_fishing.fishing_entity_id
-            except FishingEntity.DoesNotExist:  # no Country found
-                row.original_country_fishing_id = None
-        else:
-            row.original_country_fishing_id = None
-
-        try:
-            eez = EEZ.objects.get(name__iexact=row.eez.strip())
-            row.eez_id = eez.eez_id
-        except EEZ.DoesNotExist:  # no EEZ found
-            row.eez_id = None
-
-        try:
-            fao_area = FAO.objects.get(name__iexact=row.fao_area.strip())
-            row.fao_area_id = fao_area.fao_area_id
-        except FAO.DoesNotExist:  # no FAO found
-            row.fao_area_id = 0
-
-        try:
-            sector = Sector.objects.get(name__iexact=row.sector.strip())
-            row.sector_type_id = sector.sector_type_id
-        except Sector.DoesNotExist:  # no Sector found
-            row.sector_type_id = 0
-
-        try:
-            input_type = InputType.objects.get(name__iexact=row.input_type.strip())
-            row.input_type_id = input_type.input_type_id
-        except InputType.DoesNotExist:  # no Input Type found
-            row.input_type_id = 0
-
-        try:
-            if row.eez_id is not None and row.fishing_entity_id != 0 and row.layer == 0:
-                eez_owner = EEZ.objects.get(eez_id=row.eez_id).fishing_entity
-                row.layer = 1 if eez_owner.fishing_entity_id == row.fishing_entity_id else 2
-        except EEZ.DoesNotExist:
-            row.layer = 0
-
-        try:
-            Reference.objects.get(reference_id=row.reference_id)
-        except Reference.DoesNotExist:  # no Reference found
-            row.reference_id = 0
-
-        # only save rows that change
-        if row.is_dirty():
-            row.last_modified = timezone.now()
-            row.save()
-    """
-
+            records_processed_sofar = (i+1) * batch_size
 
 # this method handles committing data from raw_catch to catch
 def commit(ids):
@@ -339,6 +236,12 @@ def commit(ids):
                 setattr(catch, field, value)
         except Catch.DoesNotExist:
             catch = Catch(**values)
+
+        # quick patch to have the reference_id column in the recon.catch table be populated with reference_id instead of
+        # the row_id from the reference table.
+        # TODO if there's a better to have the reference_id pushed to the recon.catch table, this code should be retired
+        if catch.reference != None:
+            catch.reference_id = row.reference_id
 
         catch.save()
 
