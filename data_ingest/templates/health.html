@@ -46,7 +46,7 @@
                     <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
                         {% csrf_token %}
                         <div class="form-group">
-                            <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
+                            <a class="view-link" href="{% url 'edit-normalize' %}?error_view={{ query }}" data-count="{{ count }}">
                                 {{ label }}
                             </a> ::
                         </div>
