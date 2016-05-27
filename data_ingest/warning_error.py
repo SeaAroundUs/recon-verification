@@ -13,9 +13,9 @@ class ReconView:
             cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
                            % cls.view_name())
             if cursor.description is None:
-                return ()
+                return []
             else:
-                cursor.execute("SELECT * FROM recon.validation_result WHERE rule_id = %s;"
+                cursor.execute("SELECT id FROM recon.validation_result WHERE rule_id = %s;"
                                % int(cursor.fetchone()[0]))
                 return cursor.fetchall()
 
@@ -25,9 +25,9 @@ class ReconView:
             cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
                            % cls.view_name())
             if cursor.description is None:
-                return ()
+                return []
             else:
-                cursor.execute('SELECT * FROM recon.validation_result WHERE rule_id = %s AND id IN (%s);'
+                cursor.execute('SELECT id FROM recon.validation_result WHERE rule_id = %s AND id IN (%s);'
                                % (int(cursor.fetchone()[0]), ','.join(map(str, ids))))
                 return cursor.fetchall()
 
