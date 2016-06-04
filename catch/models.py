@@ -27,6 +27,28 @@ class LoggedAdmin(admin.ModelAdmin):
 
 
 # models represent tables in the db
+class Continent(models.Model):
+    code = models.CharField(max_length=2, primary_key=True)
+    name = models.CharField(max_length=128)
+
+    class Meta:
+        verbose_name = 'Continent'
+        verbose_name_plural = 'Continents'
+        db_table = 'continent'
+        ordering = ['code']
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = (
+            'code',
+            'name'
+        )
+        search_fields = ('code', 'name',)
+
+    def __str__(self):
+        return self.name
+
+
 class GeoEntity(models.Model):
     # the following assignments are informing the model to the table columns
     geo_entity_id = models.AutoField(primary_key=True)
@@ -36,6 +58,7 @@ class GeoEntity(models.Model):
     started_eez_at = models.CharField(max_length=50, null=True, blank=True)
     legacy_c_number = models.IntegerField()
     legacy_admin_c_number = models.IntegerField()
+    continent = models.ForeignKey(to=Continent, null=True, blank=True, db_column='continent_code')
 
     # this meta section gives additional context to django about the table
     class Meta:
@@ -761,20 +784,20 @@ class HabitatIndex(models.Model):
     habitat_diversity_index = models.FloatField(null=True, blank=True)
     effective_distance = models.FloatField(null=True, blank=True)
     estuaries = models.FloatField(null=True, blank=True)
-    coral = models.FloatField(null=True, blank=True)
+    coral = models.FloatField(null=True)
     seagrass = models.FloatField(null=True, blank=True, db_column="sea_grass")
-    seamount = models.FloatField(null=True, blank=True, db_column="sea_mount")
-    others = models.FloatField(null=True, blank=True)
-    shelf = models.FloatField(null=True, blank=True)
-    slope = models.FloatField(null=True, blank=True)
-    abyssal = models.FloatField(null=True, blank=True)
-    inshore = models.FloatField(null=True, blank=True)
-    offshore = models.FloatField(null=True, blank=True)
+    seamount = models.FloatField(null=True, db_column="sea_mount")
+    others = models.FloatField(null=True)
+    shelf = models.FloatField(null=True)
+    slope = models.FloatField(null=True)
+    abyssal = models.FloatField(null=True)
+    inshore = models.FloatField(null=True)
+    offshore = models.FloatField(null=True)
     max_depth = models.IntegerField(null=True, blank=True)
     min_depth = models.IntegerField(null=True, blank=True)
     lat_north = models.IntegerField(null=True, blank=True)
     lat_south = models.IntegerField(null=True, blank=True)
-    found_in_fao_area_id = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
+    found_in_fao_area_id = ArrayField(models.IntegerField(null=True), null=True)
     fao_limits = models.IntegerField(null=True, blank=True)
     sl_max = models.FloatField(null=True, blank=True)
     intertidal = models.NullBooleanField(null=True, blank=True)
