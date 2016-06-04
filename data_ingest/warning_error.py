@@ -105,7 +105,7 @@ class InputReconstructedReportingStatusReported(ErrorView):
 
 class InputNotReconstructedReportingStatusUnreported(ErrorView):
     message = "Input type is not reconstructed and Reporting status is unreported"
-    view = "input_not_reconstructed_reporting_staus_unreported"
+    view = "input_not_reconstructed_reporting_status_unreported"
     col = "input_type_id"
 
 
