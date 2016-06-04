@@ -580,11 +580,11 @@ class Catch(models.Model):
 
     @staticmethod
     def warning_views():
-        return [cls for cls in CatchMixin.__subclasses__() if cls.type == "warning"]
+        return sorted([cls for cls in CatchMixin.__subclasses__() if cls.type == "warning"], key=lambda x: x.view)
 
     @staticmethod
     def error_views():
-        return [cls for cls in CatchMixin.__subclasses__() if cls.type == "error"]
+        return sorted([cls for cls in CatchMixin.__subclasses__() if cls.type == "error"], key=lambda x: x.view)
 
 
 class AccessType(models.Model):
