@@ -221,8 +221,8 @@ class CatchAmountZeroOrNegative(AmountZeroOrNegative, CatchMixin): pass
 class CatchFAO21NAFONull(FAO21NAFONull, CatchMixin): pass
 class CatchFAO27ICESNull(FAO27ICESNull, CatchMixin): pass
 class CatchFishingEntityAndEEZNotAligned(FishingEntityAndEEZNotAligned, CatchMixin): pass
-class CatchInputReconstructedReportingStatusReported(InputReconstructedReportingStatusReported, RawCatchMixin): pass
-class CatchInputNotReconstructedReportingStatusUnreported(InputNotReconstructedReportingStatusUnreported, RawCatchMixin): pass
+class CatchInputReconstructedReportingStatusReported(InputReconstructedReportingStatusReported, CatchMixin): pass
+class CatchInputNotReconstructedReportingStatusUnreported(InputNotReconstructedReportingStatusUnreported, CatchMixin): pass
 class CatchLayer2Or3AndSectorNotIndustrial(Layer2Or3AndSectorNotIndustrial, CatchMixin): pass
 class CatchLayerNotInRange(LayerNotInRange, CatchMixin): pass
 class CatchOriginalCountryFishingNotNull(OriginalCountryFishingNotNull, CatchMixin): pass
