@@ -219,10 +219,13 @@ class HealthView(View):
                           for view in Catch.warning_views()]
         catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                         for view in Catch.error_views()]
+        distribution_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
+                        for view in Taxon.error_views()]
         params = {'raw_catch_warnings': raw_catch_warnings,
                   'raw_catch_errors': raw_catch_errors,
                   'catch_warnings': catch_warnings,
-                  'catch_errors': catch_errors}
+                  'catch_errors': catch_errors,
+                  'distribution_errors': distribution_errors}
         return render(request, self.template, params)
 
     def post(self, request):
