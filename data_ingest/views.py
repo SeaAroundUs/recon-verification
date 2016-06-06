@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from data_ingest.models import FileUpload, RawCatch, ValidationRule
 from data_ingest.forms import FileUploadForm, QueryForm, AuthorizeForm
 from data_ingest.ingest import normalize, commit, get_warnings, get_errors, get_committed_ids
-from catch.models import Reference, Catch, AdHocQuery, User
+from catch.models import Reference, Catch, AdHocQuery, User, Taxon
 from storages.backends.s3boto import S3BotoStorage
 from catch.logging import TableEdit
 from data_ingest.custom import Custom
