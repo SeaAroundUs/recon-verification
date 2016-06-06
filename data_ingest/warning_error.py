@@ -74,6 +74,9 @@ class CatchMixin:
     prefix = 'v_catch_'
 
 
+class DistributionMixin:
+    prefix = 'v_distribution_'
+
 # the next two classes are marker pattern classes indicating warning or error
 class WarningView(ReconView):
     type = "warning"
@@ -132,6 +135,29 @@ class TaxaIsRare(ErrorView):
     view = "taxa_is_rare"
     col = "taxon_key"
 
+
+class TaxonLatNorthNull(ErrorView):
+    message = "Master.taxon record with lat_north is null"
+    view = "taxon_lat_north_null"
+    col = "taxon_key"
+
+
+class TaxonLatSouthNull(ErrorView):
+    message = "Master.taxon record with lat_south is null"
+    view = "taxon_lat_south_null"
+    col = "taxon_key"
+
+
+class TaxonMinDepthNull(ErrorView):
+    message = "Master.taxon record with min_depth is null"
+    view = "taxon_min_depth_null"
+    col = "taxon_key"
+
+
+class TaxonMaxDepthNull(ErrorView):
+    message = "Master.taxon record with max_depth is null"
+    view = "taxon_max_depth_null"
+    col = "taxon_key"
 
 # base classes for warning views. these classes shouldn't be used for anythign but
 # creation of the class list at the bottom
@@ -232,3 +258,10 @@ class CatchPeruCatchAmountGreaterThanThreshold(PeruCatchAmountGreaterThanThresho
 class CatchSubsistenceAndLayerNot1(SubsistenceAndLayerNot1, CatchMixin): pass
 class CatchTaxaIsRare(TaxaIsRare, CatchMixin): pass
 class CatchYearMax(YearMax, CatchMixin): pass
+
+
+class DistributionTaxonLatNorthNull(TaxonLatNorthNull, DistributionMixin): pass
+class DistributionTaxonLatSouthNull(TaxonLatSouthNull, DistributionMixin): pass
+class DistributionTaxonMinDepthNull(TaxonMinDepthNull, DistributionMixin): pass
+class DistributionTaxonMaxDepthNull(TaxonMaxDepthNull, DistributionMixin): pass
+

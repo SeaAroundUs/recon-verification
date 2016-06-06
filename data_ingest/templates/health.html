@@ -1,6 +1,9 @@
 {% extends '_layouts/base.html' %}
 {% load staticfiles %}
 {% block title %}Health{% endblock %}
+{% block extra_urls %}
+<input type="hidden" id="executeValidation" class="djangoURL" value="{% url 'health' %}?{{ request.GET.urlencode }}" />
+{% endblock %}
 {% block content %}
   <div id="health" class="panel-group" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
@@ -10,6 +13,7 @@
         <ul class="nav nav-tabs">
           <li role="presentation" class="active"><a href="#raw-catch" data-toggle="tab">Raw Catch</a></li>
           <li role="presentation"><a href="#catch" data-toggle="tab">Catch</a></li>
+          <li role="presentation"><a href="#distribution" data-toggle="tab">Distribution</a></li>
         </ul>
 
         <div class="tab-content">
@@ -111,7 +115,33 @@
                 {% endfor %}
               </div>
             </div>
+          </div>
 
+          <div role="tab-panel" class="tab-pane" id="distribution">
+            <h3>Distribution Health Report</h3>
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Errors:</h4>
+                {% for query, label, count, vname, executed in distribution_errors %}
+                  <p>
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <span>{{ label }}</span> ::
+                        </div>
+                        <div class="form-group">
+                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            &nbsp
+                        </div>
+                        <div class="form-group">
+                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                        </div>
+                    </form>
+                  </p>
+                {% endfor %}
+              </div>
+            </div>
           </div>
         </div>
       </div>

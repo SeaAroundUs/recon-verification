@@ -472,6 +472,11 @@ class Taxon(models.Model):
         search_fields = ('taxon_key', 'common_name', 'scientific_name',)
         show_full_result_count = True
 
+    # method to return list of error views
+    @staticmethod
+    def error_views():
+        return sorted([cls for cls in DistributionMixin.__subclasses__() if cls.type == "error"], key=lambda x: x.view)
+
     def __str__(self):
         return self.common_name
 
