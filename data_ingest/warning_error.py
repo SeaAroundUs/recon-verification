@@ -159,6 +159,12 @@ class TaxonMaxDepthNull(ErrorView):
     view = "taxon_max_depth_null"
     col = "taxon_key"
 
+
+class TaxonHabitatFaoNotOverlapExtent(ErrorView):
+    message = "Distribution.taxon_habitat record found_in_fao_area_id not overlapping with taxon extent"
+    view = "taxon_habitat_fao_not_overlap_extent"
+    col = "taxon_key"
+
 # base classes for warning views. these classes shouldn't be used for anythign but
 # creation of the class list at the bottom
 class Layer2Or3AndSectorNotIndustrial(WarningView):
@@ -264,4 +270,5 @@ class DistributionTaxonLatNorthNull(TaxonLatNorthNull, DistributionMixin): pass
 class DistributionTaxonLatSouthNull(TaxonLatSouthNull, DistributionMixin): pass
 class DistributionTaxonMinDepthNull(TaxonMinDepthNull, DistributionMixin): pass
 class DistributionTaxonMaxDepthNull(TaxonMaxDepthNull, DistributionMixin): pass
+class DistributionTaxonHabitatFaoNotOverlapExtent(TaxonHabitatFaoNotOverlapExtent, DistributionMixin): pass
 
