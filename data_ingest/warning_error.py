@@ -165,6 +165,13 @@ class TaxonHabitatFaoNotOverlapExtent(ErrorView):
     view = "taxon_habitat_fao_not_overlap_extent"
     col = "taxon_key"
 
+
+class TaxonExtentAvailableButNoHabitat(ErrorView):
+    message = "Distribution.taxon_extent record available, but no corresponding taxon habitat found"
+    view = "taxon_extent_available_but_no_habitat"
+    col = "taxon_key"
+
+
 # base classes for warning views. these classes shouldn't be used for anythign but
 # creation of the class list at the bottom
 class Layer2Or3AndSectorNotIndustrial(WarningView):
@@ -271,4 +278,4 @@ class DistributionTaxonLatSouthNull(TaxonLatSouthNull, DistributionMixin): pass
 class DistributionTaxonMinDepthNull(TaxonMinDepthNull, DistributionMixin): pass
 class DistributionTaxonMaxDepthNull(TaxonMaxDepthNull, DistributionMixin): pass
 class DistributionTaxonHabitatFaoNotOverlapExtent(TaxonHabitatFaoNotOverlapExtent, DistributionMixin): pass
-
+class DistributionTaxonExtentAvailableButNoHabitat(TaxonExtentAvailableButNoHabitat, DistributionMixin): pass
