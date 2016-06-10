@@ -136,6 +136,12 @@ class TaxaIsRare(ErrorView):
     col = "taxon_key"
 
 
+class NoCorrespondingAaFound(ErrorView):
+    message = "No matching access_agreement records found"
+    view = "no_corresponding_aa_found"
+    col = "none"
+
+
 class TaxonLatNorthNull(ErrorView):
     message = "Master.taxon record with lat_north is null"
     view = "taxon_lat_north_null"
@@ -271,6 +277,7 @@ class CatchPeruCatchAmountGreaterThanThreshold(PeruCatchAmountGreaterThanThresho
 class CatchSubsistenceAndLayerNot1(SubsistenceAndLayerNot1, CatchMixin): pass
 class CatchTaxaIsRare(TaxaIsRare, CatchMixin): pass
 class CatchYearMax(YearMax, CatchMixin): pass
+class CatchNoCorrespondingAaFound(NoCorrespondingAaFound, CatchMixin): pass
 
 
 class DistributionTaxonLatNorthNull(TaxonLatNorthNull, DistributionMixin): pass
