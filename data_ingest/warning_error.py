@@ -137,7 +137,7 @@ class TaxaIsRare(ErrorView):
 
 
 class NoCorrespondingAaFound(ErrorView):
-    message = "No matching access_agreement records found"
+    message = "No matching access agreement records found"
     view = "no_corresponding_aa_found"
     col = "none"
 
