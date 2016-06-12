@@ -145,7 +145,7 @@ def get_committed_ids(ids):
 # recording the ids in the proper fields
 def normalize(ids, source_file_id=None):
     number_of_ids = len(ids)
-    batch_size = 2500
+    batch_size = 5000
 
     with connection.cursor() as cursor:
         for i in range(0, number_of_ids, batch_size):
