@@ -211,6 +211,11 @@ class HealthView(View):
     template = 'health.html'
 
     def get(self, request):
+        if len(request.GET) == 0:
+            current_tab = 'raw_catch'
+        else:
+            current_tab = request.GET['current_tab']
+
         raw_catch_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                               for view in RawCatch.warning_views()]
         raw_catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
@@ -221,7 +226,8 @@ class HealthView(View):
                         for view in Catch.error_views()]
         distribution_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                         for view in Taxon.error_views()]
-        params = {'raw_catch_warnings': raw_catch_warnings,
+        params = {'current_tab': current_tab,
+                  'raw_catch_warnings': raw_catch_warnings,
                   'raw_catch_errors': raw_catch_errors,
                   'catch_warnings': catch_warnings,
                   'catch_errors': catch_errors,
@@ -230,8 +236,9 @@ class HealthView(View):
 
     def post(self, request):
         view_name = request.GET['view_name']
+        current_tab = request.GET['current_tab']
         ValidationRule.refresh_rule_partition(view_name)
-        return HttpResponseRedirect(reverse('health'))
+        return HttpResponseRedirect(reverse('health') + '?current_tab=' + str(current_tab))
 
 # view that handles the custom view section of the site
 class CustomView(View):

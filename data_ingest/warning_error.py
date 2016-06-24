@@ -136,6 +136,12 @@ class TaxaIsRare(ErrorView):
     col = "taxon_key"
 
 
+class NoCorrespondingAaFound(ErrorView):
+    message = "No matching access agreement records found"
+    view = "no_corresponding_aa_found"
+    col = "none"
+
+
 class TaxonLatNorthNull(ErrorView):
     message = "Master.taxon record with lat_north is null"
     view = "taxon_lat_north_null"
@@ -158,6 +164,19 @@ class TaxonMaxDepthNull(ErrorView):
     message = "Master.taxon record with max_depth is null"
     view = "taxon_max_depth_null"
     col = "taxon_key"
+
+
+class TaxonHabitatFaoNotOverlapExtent(ErrorView):
+    message = "Distribution.taxon_habitat record found_in_fao_area_id not overlapping with taxon extent"
+    view = "taxon_habitat_fao_not_overlap_extent"
+    col = "taxon_key"
+
+
+class TaxonExtentAvailableButNoHabitat(ErrorView):
+    message = "Distribution.taxon_extent record available, but no corresponding taxon habitat found"
+    view = "taxon_extent_available_but_no_habitat"
+    col = "taxon_key"
+
 
 # base classes for warning views. these classes shouldn't be used for anythign but
 # creation of the class list at the bottom
@@ -258,10 +277,12 @@ class CatchPeruCatchAmountGreaterThanThreshold(PeruCatchAmountGreaterThanThresho
 class CatchSubsistenceAndLayerNot1(SubsistenceAndLayerNot1, CatchMixin): pass
 class CatchTaxaIsRare(TaxaIsRare, CatchMixin): pass
 class CatchYearMax(YearMax, CatchMixin): pass
+class CatchNoCorrespondingAaFound(NoCorrespondingAaFound, CatchMixin): pass
 
 
 class DistributionTaxonLatNorthNull(TaxonLatNorthNull, DistributionMixin): pass
 class DistributionTaxonLatSouthNull(TaxonLatSouthNull, DistributionMixin): pass
 class DistributionTaxonMinDepthNull(TaxonMinDepthNull, DistributionMixin): pass
 class DistributionTaxonMaxDepthNull(TaxonMaxDepthNull, DistributionMixin): pass
-
+class DistributionTaxonHabitatFaoNotOverlapExtent(TaxonHabitatFaoNotOverlapExtent, DistributionMixin): pass
+class DistributionTaxonExtentAvailableButNoHabitat(TaxonExtentAvailableButNoHabitat, DistributionMixin): pass

@@ -11,20 +11,41 @@
         <h3>Data Health</h3>
 
         <ul class="nav nav-tabs">
-          <li role="presentation" class="active"><a href="#raw-catch" data-toggle="tab">Raw Catch</a></li>
-          <li role="presentation"><a href="#catch" data-toggle="tab">Catch</a></li>
-          <li role="presentation"><a href="#distribution" data-toggle="tab">Distribution</a></li>
+          <li role="presentation"
+            {% if current_tab == 'raw_catch' %}
+                class="active"
+            {% endif %}>
+            <a href="#raw-catch" data-toggle="tab">Raw Catch</a>
+          </li>
+          <li role="presentation"
+            {% if current_tab == 'catch' %}
+                class="active"
+            {% endif %}>
+            <a href="#catch" data-toggle="tab">Catch</a>
+          </li>
+          <li role="presentation"
+            {% if current_tab == 'distribution' %}
+                class="active"
+            {% endif %}>
+            <a href="#distribution" data-toggle="tab">Distribution</a>
+          </li>
         </ul>
 
         <div class="tab-content">
-          <div role="tab-panel" class="tab-pane active" id="raw-catch">
+          <div role="tab-panel" id="raw-catch"
+            {% if current_tab == 'raw_catch' %}
+                class="tab-pane active"
+            {% else %}
+                class="tab-pane"
+            {% endif %}
+          >
             <h3>Raw Catch Health Report</h3>
             <div class="row">
               <div class="col-md-6">
                 <h4>Warnings:</h4>
                 {% for query, label, count, vname, executed in raw_catch_warnings %}
                   <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=raw_catch">
                         {% csrf_token %}
                         <div class="form-group">
                             <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
@@ -47,7 +68,7 @@
                 <h4>Errors:</h4>
                 {% for query, label, count, vname, executed in raw_catch_errors %}
                   <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=raw_catch">
                         {% csrf_token %}
                         <div class="form-group">
                             <a class="view-link" href="{% url 'edit-normalize' %}?error_view={{ query }}" data-count="{{ count }}">
@@ -69,14 +90,20 @@
             </div>
           </div>
 
-          <div role="tab-panel" class="tab-pane" id="catch">
+          <div role="tab-panel" id="catch"
+            {% if current_tab == 'catch' %}
+                class="tab-pane active"
+            {% else %}
+                class="tab-pane"
+            {% endif %}
+          >
             <h3>Catch Health Report</h3>
             <div class="row">
               <div class="col-md-6">
                 <h4>Warnings:</h4>
                 {% for query, label, count, vname, executed in catch_warnings %}
                   <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=catch">
                         {% csrf_token %}
                         <div class="form-group">
                             <span>{{ label }}</span> ::
@@ -97,7 +124,7 @@
                 <h4>Errors:</h4>
                 {% for query, label, count, vname, executed in catch_errors %}
                   <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=catch">
                         {% csrf_token %}
                         <div class="form-group">
                             <span>{{ label }}</span> ::
@@ -117,14 +144,20 @@
             </div>
           </div>
 
-          <div role="tab-panel" class="tab-pane" id="distribution">
+          <div role="tab-panel" id="distribution"
+            {% if current_tab == 'distribution' %}
+                class="tab-pane active"
+            {% else %}
+                class="tab-pane"
+            {% endif %}
+          >
             <h3>Distribution Health Report</h3>
             <div class="row">
               <div class="col-md-6">
                 <h4>Errors:</h4>
                 {% for query, label, count, vname, executed in distribution_errors %}
                   <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}">
+                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=distribution">
                         {% csrf_token %}
                         <div class="form-group">
                             <span>{{ label }}</span> ::

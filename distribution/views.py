@@ -38,11 +38,12 @@ class DistributionView(View):
                                   (h.taxon_key IS NOT NULL) AS is_habitat_available,
                                   EXISTS (SELECT 1 FROM allocation.taxon_distribution_old o WHERE o.taxon_key = t.taxon_key LIMIT 1) AS is_old_distribution_available
                     FROM master.taxon t
-                    JOIN distribution.taxon_distribution_log l ON (l.taxon_key = t.taxon_key)
+                    LEFT JOIN distribution.taxon_distribution_log l ON (l.taxon_key = t.taxon_key)
                     LEFT JOIN distribution.taxon_extent e ON (e.taxon_key = t.taxon_key)
                     LEFT JOIN distribution.taxon_habitat h ON (h.taxon_key = t.taxon_key)
                     WHERE NOT t.is_retired
-                    ORDER BY l.modified_timestamp DESC NULLS FIRST
+                      AND (e.taxon_key IS NOT NULL OR h.taxon_key IS NOT NULL)
+                    ORDER BY l.modified_timestamp DESC NULLS LAST
                 """
 
                 taxa = session.execute(query).fetchall()

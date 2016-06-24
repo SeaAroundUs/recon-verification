@@ -1,3 +1,5 @@
-This is the reconstruction verification code which will be used in the near future. It is not currently used for the data on seaaroundus.org.
+This is the reconstruction verification code which is used to administer this project's [integration database](https://github.com/SeaAroundUs/integration-database).
+And since the integration database is the data hub for authoring domain and fact data, the data managed by this tool would subsequently make it way to the public
+www.seaaroundus.org site.
 
-also see /notes/reqs.txt
+Also see /notes/reqs.txt for the original requirement doc that was created to initiate development of this tool.
