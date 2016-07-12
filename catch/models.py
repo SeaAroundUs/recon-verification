@@ -789,7 +789,7 @@ class HabitatIndex(models.Model):
     spe_code = models.IntegerField(null=True, blank=True)
     habitat_diversity_index = models.FloatField(null=True, blank=True)
     effective_distance = models.FloatField(null=True, blank=True)
-    estuaries = models.FloatField(null=True, blank=True)
+    estuaries = models.FloatField(null=True)
     coral = models.FloatField(null=True)
     seagrass = models.FloatField(null=True, blank=True, db_column="sea_grass")
     seamount = models.FloatField(null=True, db_column="sea_mount")
@@ -808,6 +808,10 @@ class HabitatIndex(models.Model):
     sl_max = models.FloatField(null=True, blank=True)
     intertidal = models.NullBooleanField(null=True, blank=True)
     temperature = models.FloatField(null=True, blank=True)
+    water_column_position = models.CharField(max_length=255, null=True, blank=True)
+    depth_comments = models.CharField(max_length=255, null=True, blank=True)
+    general_comments = models.CharField(max_length=255, null=True, blank=True)
+    
 
     class Meta:
         verbose_name = 'Habitat index'
