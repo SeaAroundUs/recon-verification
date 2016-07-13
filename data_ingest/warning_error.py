@@ -176,6 +176,11 @@ class TaxonExtentAvailableButNoHabitat(ErrorView):
     message = "Distribution.taxon_extent record available, but no corresponding taxon habitat found"
     view = "taxon_extent_available_but_no_habitat"
     col = "taxon_key"
+    
+class TaxonExtentAvailableButNoDistribution(ErrorView):
+    message = "Distribution.taxon_extent record available, but no distribution generated yet"
+    view = "taxon_extent_available_but_no_distribution"
+    col = "taxon_key"
 
 
 # base classes for warning views. these classes shouldn't be used for anythign but
@@ -286,3 +291,4 @@ class DistributionTaxonMinDepthNull(TaxonMinDepthNull, DistributionMixin): pass
 class DistributionTaxonMaxDepthNull(TaxonMaxDepthNull, DistributionMixin): pass
 class DistributionTaxonHabitatFaoNotOverlapExtent(TaxonHabitatFaoNotOverlapExtent, DistributionMixin): pass
 class DistributionTaxonExtentAvailableButNoHabitat(TaxonExtentAvailableButNoHabitat, DistributionMixin): pass
+class DistributionTaxonExtentAvailableButNoDistribution(TaxonExtentAvailableButNoDistribution, DistributionMixin): pass
