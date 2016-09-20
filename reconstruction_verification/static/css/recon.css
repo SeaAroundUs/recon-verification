@@ -193,7 +193,7 @@ span.warning-reason {
 
 #browse-upload .working-set .form-group div.range {
   float: right;
-  margin-right: 80px;
+  margin-right: 100px;
 }
 
 #browse-upload .working-set .form-group div.range label {
@@ -216,8 +216,24 @@ span.warning-reason {
   font-weight: bold;
 }
 
+.modal .modal-dialog {
+  width: 70%;
+  overflow: auto;
+  word-wrap: break-word;
+}
+
 #warning-modal .modal-body a, #error-modal .modal-body a {
   font-weight: bold;
+}
+
+#error-modal .modal-footer .desc {
+  float: left;
+  font-weight: bold;
+}
+
+#error-modal .modal-footer .clipboard {
+  float: right;
+  color: green;
 }
 
 #adhoc .forms {
