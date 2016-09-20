@@ -70,10 +70,10 @@ WSGI_APPLICATION = 'reconstruction_verification.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'recon',
-        'USER': 'recon',
-        'PASSWORD': '',
-        'HOST': '',
+        'NAME': 'sau_int',
+        'USER': 'recon_int',
+        'PASSWORD': 'recon_int',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -184,6 +184,7 @@ PIPELINE_JS = {
             'js/vendor/jquery.tablesorter.min.js',
             'js/vendor/moment.min.js',
             'js/vendor/pikaday.js',
+            'js/vendor/clipboard.min.js',
             'js/vendor/ZeroClipboard.js',
             'js/vendor/bootstrap.min.js',
             'js/vendor/d3.min.js',
