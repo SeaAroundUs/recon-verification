@@ -8,7 +8,7 @@
   <div id="health" class="panel-group" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
       <div class="panel-body">
-        <h3>Data Health</h3>
+        <!--h3>Data Health</h3-->
 
         <ul class="nav nav-tabs">
           <li role="presentation"
@@ -76,7 +76,16 @@
                             </a> ::
                         </div>
                         <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            <span class="{{ count|yesno:"error,clear" }}">
+                                {% if count > 0 %}
+                                    <a id="error-count" data-toggle="modal" data-target="#error-modal"
+                                       fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
+                                       title="Click to display error ids">{{ count }}</a>
+                                    rows
+                                {% else %}
+                                    0 row
+                                {% endif %}
+                            </span>
                             &nbsp
                         </div>
                         <div class="form-group">
@@ -130,7 +139,16 @@
                             <span>{{ label }}</span> ::
                         </div>
                         <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            <span class="{{ count|yesno:"error,clear" }}">
+                                {% if count > 0 %}
+                                    <a id="error-count" data-toggle="modal" data-target="#error-modal"
+                                       fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
+                                       title="Click to display error ids">{{ count }}</a>
+                                    rows
+                                {% else %}
+                                    0 row
+                                {% endif %}
+                            </span>
                             &nbsp
                         </div>
                         <div class="form-group">
@@ -163,7 +181,16 @@
                             <span>{{ label }}</span> ::
                         </div>
                         <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                            <span class="{{ count|yesno:"error,clear" }}">
+                                {% if count > 0 %}
+                                    <a id="error-count" data-toggle="modal" data-target="#error-modal"
+                                       fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
+                                       title="Click to display error ids">{{ count }}</a>
+                                    rows
+                                {% else %}
+                                    0 row
+                                {% endif %}
+                            </span>
                             &nbsp
                         </div>
                         <div class="form-group">
@@ -178,6 +205,22 @@
           </div>
         </div>
       </div>
+    </div>
+
+      <!-- Error modal -->
+    <div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog custom-class" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Errors <span class="glyphicon glyphicon-remove-sign red" aria-hidden="true"></span>
+                    </h4>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
     </div>
   </div>
 {% endblock %}

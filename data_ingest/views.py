@@ -211,28 +211,43 @@ class HealthView(View):
     template = 'health.html'
 
     def get(self, request):
-        if len(request.GET) == 0:
-            current_tab = 'raw_catch'
-        else:
-            current_tab = request.GET['current_tab']
+        if 'get_ids_only' in request.GET:
+            view_name = request.GET['view_name']
 
-        raw_catch_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
-                              for view in RawCatch.warning_views()]
-        raw_catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
-                            for view in RawCatch.error_views()]
-        catch_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
-                          for view in Catch.warning_views()]
-        catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
-                        for view in Catch.error_views()]
-        distribution_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
-                        for view in Taxon.error_views()]
-        params = {'current_tab': current_tab,
-                  'raw_catch_warnings': raw_catch_warnings,
-                  'raw_catch_errors': raw_catch_errors,
-                  'catch_warnings': catch_warnings,
-                  'catch_errors': catch_errors,
-                  'distribution_errors': distribution_errors}
-        return render(request, self.template, params)
+            if view_name.startswith("v_distribution_"):
+                error_views = Taxon.error_views()
+            elif view_name.startswith("v_raw_"):
+                error_views = RawCatch.error_views()
+            elif view_name.startswith("v_raw_"):
+                error_views = Catch.error_views()
+
+            for view in error_views:
+                if view.view_name() == view_name:
+                    ids = view.all()
+                    return ReconResponse({'ids': [x[0] for x in ids], 'description': view.message})
+        else:
+            if len(request.GET) == 0:
+                current_tab = 'raw_catch'
+            else:
+                current_tab = request.GET['current_tab']
+
+            raw_catch_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
+                                  for view in RawCatch.warning_views()]
+            raw_catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
+                                for view in RawCatch.error_views()]
+            catch_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
+                              for view in Catch.warning_views()]
+            catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
+                            for view in Catch.error_views()]
+            distribution_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
+                            for view in Taxon.error_views()]
+            params = {'current_tab': current_tab,
+                      'raw_catch_warnings': raw_catch_warnings,
+                      'raw_catch_errors': raw_catch_errors,
+                      'catch_warnings': catch_warnings,
+                      'catch_errors': catch_errors,
+                      'distribution_errors': distribution_errors}
+            return render(request, self.template, params)
 
     def post(self, request):
         view_name = request.GET['view_name']
