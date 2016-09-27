@@ -143,25 +143,25 @@ class NoCorrespondingAaFound(ErrorView):
 
 
 class TaxonLatNorthNull(ErrorView):
-    message = "Master.taxon record with lat_north is null"
+    message = "Distribution.taxon_habitat record with lat_north is null"
     view = "taxon_lat_north_null"
     col = "taxon_key"
 
 
 class TaxonLatSouthNull(ErrorView):
-    message = "Master.taxon record with lat_south is null"
+    message = "Distribution.taxon_habitat record with lat_south is null"
     view = "taxon_lat_south_null"
     col = "taxon_key"
 
 
 class TaxonMinDepthNull(ErrorView):
-    message = "Master.taxon record with min_depth is null"
+    message = "Distribution.taxon_habitat record with min_depth is null"
     view = "taxon_min_depth_null"
     col = "taxon_key"
 
 
 class TaxonMaxDepthNull(ErrorView):
-    message = "Master.taxon record with max_depth is null"
+    message = "Distribution.taxon_habitat record with max_depth is null"
     view = "taxon_max_depth_null"
     col = "taxon_key"
 
