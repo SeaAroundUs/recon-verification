@@ -86,7 +86,7 @@ class ErrorView(ReconView):
     type = "error"
 
 
-# base classes for error views. these classes shouldn't be used for anythign but
+# base classes for error views. these classes shouldn't be used for anything but
 # creation of the class list at the bottom
 class AmountZeroOrNegative(ErrorView):
     message = "Catch amount is zero or negative"
@@ -136,6 +136,36 @@ class TaxaIsRare(ErrorView):
     col = "taxon_key"
 
 
+class TaxaIsRetired(ErrorView):
+    message = "Retired taxa should be excluded"
+    view = "taxa_is_retired"
+    col = "taxon_key"
+
+
+class AntarcticCCAMLRNull(ErrorView):
+    message = "CCAMLR null for FAO 48, 58 or 88"
+    view = "antarctic_ccamlr_null"
+    col = "ccamlr_area"
+
+
+class OutsideAntarcticCCAMLRNotNull(ErrorView):
+    message = "CCAMLR not null for catch outside of the Antarctic"
+    view = "outside_antarctic_ccamlr_not_null"
+    col = "ccamlr_area"
+
+
+class CCAMLRComboMismatch(ErrorView):
+    message = "CCAMLR combo does not exist"
+    view = "ccamlr_combo_mismatch"
+    col = "ccamlr_area"
+    
+
+class HighSeasMismatch(ErrorView):
+    message = "High Seas ID mismatch"
+    view = "high_seas_mismatch"
+    col = "eez"
+    
+
 class NoCorrespondingAaFound(ErrorView):
     message = "No matching access agreement records found"
     view = "no_corresponding_aa_found"
@@ -177,13 +207,26 @@ class TaxonExtentAvailableButNoHabitat(ErrorView):
     view = "taxon_extent_available_but_no_habitat"
     col = "taxon_key"
     
+    
 class TaxonExtentAvailableButNoDistribution(ErrorView):
     message = "Distribution.taxon_extent record available, but no distribution generated yet"
     view = "taxon_extent_available_but_no_distribution"
     col = "taxon_key"
+    
+    
+class TaxaHasNoDistributionLowCatch(ErrorView):
+    message = "No distribution for taxa and catch <= 1000"
+    view = "taxa_has_no_distribution_low_catch"
+    col = "taxon_key"
 
 
-# base classes for warning views. these classes shouldn't be used for anythign but
+class TaxaHasNoDistributionHighCatch(ErrorView):
+    message = "No distribution for taxa and catch > 1000"
+    view = "taxa_has_no_distribution_high_catch"
+    col = "taxon_key"
+
+
+# base classes for warning views. these classes shouldn't be used for anything but
 # creation of the class list at the bottom
 class Layer2Or3AndSectorNotIndustrial(WarningView):
     message = "Layer is 2 or 3 and Sector is not industrial"
@@ -264,6 +307,11 @@ class RawCatchPeruCatchAmountGreaterThanThreshold(PeruCatchAmountGreaterThanThre
 class RawCatchSubsistenceAndLayerNot1(SubsistenceAndLayerNot1, RawCatchMixin): pass
 class RawCatchTaxaIsRare(TaxaIsRare, RawCatchMixin): pass
 class RawCatchYearMax(YearMax, RawCatchMixin): pass
+class RawCatchTaxaIsRetired(TaxaIsRetired, RawCatchMixin): pass
+class RawCatchAntarcticCCAMLRNull(AntarcticCCAMLRNull, RawCatchMixin): pass
+class RawCatchOutsideAntarcticCCAMLRNotNull(OutsideAntarcticCCAMLRNotNull, RawCatchMixin): pass
+class RawCatchCCAMLRComboMismatch(CCAMLRComboMismatch, RawCatchMixin): pass
+class RawCatchHighSeasMismatch(HighSeasMismatch, RawCatchMixin): pass
 
 
 class CatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, CatchMixin): pass
@@ -283,6 +331,10 @@ class CatchSubsistenceAndLayerNot1(SubsistenceAndLayerNot1, CatchMixin): pass
 class CatchTaxaIsRare(TaxaIsRare, CatchMixin): pass
 class CatchYearMax(YearMax, CatchMixin): pass
 class CatchNoCorrespondingAaFound(NoCorrespondingAaFound, CatchMixin): pass
+class CatchTaxaIsRetired(TaxaIsRetired, CatchMixin): pass
+class CatchAntarcticCCAMLRNull(AntarcticCCAMLRNull, CatchMixin): pass
+class CatchOutsideAntarcticCCAMLRNotNull(OutsideAntarcticCCAMLRNotNull, CatchMixin): pass
+class CatchCCAMLRComboMismatch(CCAMLRComboMismatch, CatchMixin): pass
 
 
 class DistributionTaxonLatNorthNull(TaxonLatNorthNull, DistributionMixin): pass
@@ -292,3 +344,5 @@ class DistributionTaxonMaxDepthNull(TaxonMaxDepthNull, DistributionMixin): pass
 class DistributionTaxonHabitatFaoNotOverlapExtent(TaxonHabitatFaoNotOverlapExtent, DistributionMixin): pass
 class DistributionTaxonExtentAvailableButNoHabitat(TaxonExtentAvailableButNoHabitat, DistributionMixin): pass
 class DistributionTaxonExtentAvailableButNoDistribution(TaxonExtentAvailableButNoDistribution, DistributionMixin): pass
+class DistributionTaxaHasNoDistributionLowCatch(TaxaHasNoDistributionLowCatch, DistributionMixin): pass
+class DistributionTaxaHasNoDistributionHighCatch(TaxaHasNoDistributionHighCatch, DistributionMixin): pass
