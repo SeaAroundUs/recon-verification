@@ -12,7 +12,7 @@ class ReconView:
         with connection.cursor() as cursor:
             cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
                            % cls.view_name())
-            if cursor.description is None:
+            if cursor.rowcount == 0:
                 return []
             else:
                 cursor.execute("SELECT id FROM recon.validation_result WHERE rule_id = %s;"
@@ -24,7 +24,7 @@ class ReconView:
         with connection.cursor() as cursor:
             cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
                            % cls.view_name())
-            if cursor.description is None:
+            if cursor.rowcount == 0:
                 return []
             else:
                 cursor.execute('SELECT id FROM recon.validation_result WHERE rule_id = %s AND id IN (%s);'
@@ -36,7 +36,7 @@ class ReconView:
         with connection.cursor() as cursor:
             cursor.execute("SELECT rule_id FROM recon.validation_rule WHERE name='%s'"
                            % cls.view_name())
-            if cursor.description is None:
+            if cursor.rowcount == 0:
                 return 0
             else:
                 cursor.execute('SELECT count(1) FROM recon.validation_result WHERE rule_id = %s;'
@@ -48,7 +48,7 @@ class ReconView:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM recon.refresh_validation_result_partition('%s')"
                             % cls.view_name())
-            if cursor.description is None:
+            if cursor.rowcount == 0:
                 return ""
             else:
                 return cursor.fetchone()[0]
@@ -59,7 +59,7 @@ class ReconView:
         with connection.cursor() as cursor:
             cursor.execute("SELECT to_char(last_executed, 'YYYY-MM-DD HH24:MI') FROM recon.validation_rule WHERE name='%s'"
                             % cls.view_name())
-            if cursor.description is None:
+            if cursor.rowcount == 0:
                 return ""
             else:
                 return cursor.fetchone()[0]
