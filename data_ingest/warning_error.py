@@ -136,12 +136,6 @@ class TaxaIsRare(ErrorView):
     col = "taxon_key"
 
 
-class TaxaIsRetired(ErrorView):
-    message = "Retired taxa should be excluded"
-    view = "taxa_is_retired"
-    col = "taxon_key"
-
-
 class AntarcticCCAMLRNull(ErrorView):
     message = "CCAMLR null for FAO 48, 58 or 88"
     view = "antarctic_ccamlr_null"
@@ -307,13 +301,12 @@ class RawCatchPeruCatchAmountGreaterThanThreshold(PeruCatchAmountGreaterThanThre
 class RawCatchSubsistenceAndLayerNot1(SubsistenceAndLayerNot1, RawCatchMixin): pass
 class RawCatchTaxaIsRare(TaxaIsRare, RawCatchMixin): pass
 class RawCatchYearMax(YearMax, RawCatchMixin): pass
-class RawCatchTaxaIsRetired(TaxaIsRetired, RawCatchMixin): pass
 class RawCatchAntarcticCCAMLRNull(AntarcticCCAMLRNull, RawCatchMixin): pass
 class RawCatchOutsideAntarcticCCAMLRNotNull(OutsideAntarcticCCAMLRNotNull, RawCatchMixin): pass
 class RawCatchCCAMLRComboMismatch(CCAMLRComboMismatch, RawCatchMixin): pass
 class RawCatchHighSeasMismatch(HighSeasMismatch, RawCatchMixin): pass
-
-
+                              
+                                                 
 class CatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, CatchMixin): pass
 class CatchAmountZeroOrNegative(AmountZeroOrNegative, CatchMixin): pass
 class CatchFAO21NAFONull(FAO21NAFONull, CatchMixin): pass
@@ -331,7 +324,6 @@ class CatchSubsistenceAndLayerNot1(SubsistenceAndLayerNot1, CatchMixin): pass
 class CatchTaxaIsRare(TaxaIsRare, CatchMixin): pass
 class CatchYearMax(YearMax, CatchMixin): pass
 class CatchNoCorrespondingAaFound(NoCorrespondingAaFound, CatchMixin): pass
-class CatchTaxaIsRetired(TaxaIsRetired, CatchMixin): pass
 class CatchAntarcticCCAMLRNull(AntarcticCCAMLRNull, CatchMixin): pass
 class CatchOutsideAntarcticCCAMLRNotNull(OutsideAntarcticCCAMLRNotNull, CatchMixin): pass
 class CatchCCAMLRComboMismatch(CCAMLRComboMismatch, CatchMixin): pass
