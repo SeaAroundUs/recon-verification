@@ -208,15 +208,15 @@ class TaxonExtentAvailableButNoDistribution(ErrorView):
     col = "taxon_key"
     
     
-class TaxaHasNoDistributionLowCatch(ErrorView):
-    message = "No distribution for taxa and catch <= 1000"
-    view = "taxa_has_no_distribution_low_catch"
+class TaxaHasNoDistributionLowRawCatch(ErrorView):
+    message = "No distribution for taxa and raw catch <= 1000"
+    view = "taxa_has_no_distribution_low_raw_catch"
     col = "taxon_key"
 
 
-class TaxaHasNoDistributionHighCatch(ErrorView):
-    message = "No distribution for taxa and catch > 1000"
-    view = "taxa_has_no_distribution_high_catch"
+class TaxaHasNoDistributionHighRawCatch(ErrorView):
+    message = "No distribution for taxa and raw catch > 1000"
+    view = "taxa_has_no_distribution_high_raw_catch"
     col = "taxon_key"
 
 
@@ -336,5 +336,5 @@ class DistributionTaxonMaxDepthNull(TaxonMaxDepthNull, DistributionMixin): pass
 class DistributionTaxonHabitatFaoNotOverlapExtent(TaxonHabitatFaoNotOverlapExtent, DistributionMixin): pass
 class DistributionTaxonExtentAvailableButNoHabitat(TaxonExtentAvailableButNoHabitat, DistributionMixin): pass
 class DistributionTaxonExtentAvailableButNoDistribution(TaxonExtentAvailableButNoDistribution, DistributionMixin): pass
-class DistributionTaxaHasNoDistributionLowCatch(TaxaHasNoDistributionLowCatch, DistributionMixin): pass
-class DistributionTaxaHasNoDistributionHighCatch(TaxaHasNoDistributionHighCatch, DistributionMixin): pass
+class DistributionTaxaHasNoDistributionLowRawCatch(TaxaHasNoDistributionLowRawCatch, DistributionMixin): pass
+class DistributionTaxaHasNoDistributionHighRawCatch(TaxaHasNoDistributionHighRawCatch, DistributionMixin): pass
