@@ -2,225 +2,265 @@
 {% load staticfiles %}
 {% block title %}Health{% endblock %}
 {% block extra_urls %}
-<input type="hidden" id="executeValidation" class="djangoURL" value="{% url 'health' %}?{{ request.GET.urlencode }}" />
+    <input type="hidden" id="executeValidation" class="djangoURL" value="{% url 'health' %}?{{ request.GET.urlencode }}" />
 {% endblock %}
 {% block content %}
-  <div id="health" class="panel-group" role="tablist" aria-multiselectable="true">
+    <div id="health" class="panel-group" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
-      <div class="panel-body">
+    <div class="panel-body">
         <!--h3>Data Health</h3-->
 
         <ul class="nav nav-tabs">
-          <li role="presentation"
-            {% if current_tab == 'raw_catch' %}
+            <li role="presentation"
+                    {% if current_tab == 'raw_catch' %}
                 class="active"
-            {% endif %}>
-            <a href="#raw-catch" data-toggle="tab">Raw Catch</a>
-          </li>
-          <li role="presentation"
-            {% if current_tab == 'catch' %}
+                    {% endif %}>
+                <a href="#raw-catch" data-toggle="tab">Raw Catch</a>
+            </li>
+            <li role="presentation"
+                    {% if current_tab == 'catch' %}
                 class="active"
-            {% endif %}>
-            <a href="#catch" data-toggle="tab">Catch</a>
-          </li>
-          <li role="presentation"
-            {% if current_tab == 'distribution' %}
+                    {% endif %}>
+                <a href="#catch" data-toggle="tab">Catch</a>
+            </li>
+            <li role="presentation"
+                    {% if current_tab == 'distribution' %}
                 class="active"
-            {% endif %}>
-            <a href="#distribution" data-toggle="tab">Distribution</a>
-          </li>
+                    {% endif %}>
+                <a href="#distribution" data-toggle="tab">Distribution</a>
+            </li>
         </ul>
 
         <div class="tab-content">
-          <div role="tab-panel" id="raw-catch"
-            {% if current_tab == 'raw_catch' %}
-                class="tab-pane active"
-            {% else %}
-                class="tab-pane"
-            {% endif %}
-          >
-            <h3>Raw Catch Health Report</h3>
-            <div class="row">
-              <div class="col-md-6">
-                <h4>Warnings:</h4>
-                {% for query, label, count, vname, executed in raw_catch_warnings %}
-                  <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=raw_catch">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
-                                {{ label }}
-                            </a> ::
+            <div role="tab-panel" id="raw-catch"
+                    {% if current_tab == 'raw_catch' %}
+                 class="tab-pane active"
+                    {% else %}
+                 class="tab-pane"
+                    {% endif %}
+            >
+                <h3>Raw Catch Health Report</h3>
+                <div class="accordion" id="rawcatch_accordion">
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#rawcatch_accordion" href="#rawcatch_err_collapse">
+                                <h4>Errors:</h4>
+                            </a>
                         </div>
-                        <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
-                            &nbsp
+                        <div id="rawcatch_err_collapse" class="accordion-body collapse in">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    {% for query, label, count, vname, executed in raw_catch_errors %}
+                                        <p>
+                                        <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=raw_catch">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <a class="view-link" href="{% url 'edit-normalize' %}?error_view={{ query }}" data-count="{{ count }}">
+                                                    {{ label }}
+                                                </a> ::
+                                            </div>
+                                            <div class="form-group">
+                                    <span class="{{ count|yesno:"error,clear" }}">
+                                        {% if count > 0 %}
+                                            <a id="error-count" data-toggle="modal" data-target="#error-modal"
+                                               fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
+                                               title="Click to display error ids">{{ count }}</a>
+                                            rows
+                                        {% else %}
+                                            0 row
+                                        {% endif %}
+                                    </span>
+                                                &nbsp
+                                            </div>
+                                            <div class="form-group">
+                                    <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                             title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                                            </div>
+                                        </form>
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
-                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                    </div>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#rawcatch_accordion" href="#rawcatch_warn_collapse">
+                                <h4>Warnings:</h4>
+                            </a>
                         </div>
-                    </form>
-                  </p>
-                {% endfor %}
-              </div>
-              <div class="col-md-6">
-                <h4>Errors:</h4>
-                {% for query, label, count, vname, executed in raw_catch_errors %}
-                  <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=raw_catch">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <a class="view-link" href="{% url 'edit-normalize' %}?error_view={{ query }}" data-count="{{ count }}">
-                                {{ label }}
-                            </a> ::
+                        <div id="rawcatch_warn_collapse" class="accordion-body collapse">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    {% for query, label, count, vname, executed in raw_catch_warnings %}
+                                        <p>
+                                        <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=raw_catch">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <a class="view-link" href="{% url 'edit-normalize' %}?warning_view={{ query }}" data-count="{{ count }}">
+                                                    {{ label }}
+                                                </a> ::
+                                            </div>
+                                            <div class="form-group">
+                                                <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                                                &nbsp
+                                            </div>
+                                            <div class="form-group">
+                                    <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                             title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                                            </div>
+                                        </form>
+                                        </p>
+                                    {% endfor %}
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">
-                                {% if count > 0 %}
-                                    <a id="error-count" data-toggle="modal" data-target="#error-modal"
-                                       fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
-                                       title="Click to display error ids">{{ count }}</a>
-                                    rows
-                                {% else %}
-                                    0 row
-                                {% endif %}
-                            </span>
-                            &nbsp
-                        </div>
-                        <div class="form-group">
-                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
-                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
-                        </div>
-                    </form>
-                  </p>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-
-          <div role="tab-panel" id="catch"
-            {% if current_tab == 'catch' %}
-                class="tab-pane active"
-            {% else %}
-                class="tab-pane"
-            {% endif %}
-          >
-            <h3>Catch Health Report</h3>
-            <div class="row">
-              <div class="col-md-6">
-                <h4>Warnings:</h4>
-                {% for query, label, count, vname, executed in catch_warnings %}
-                  <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=catch">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <span>{{ label }}</span> ::
-                        </div>
-                        <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
-                            &nbsp
-                        </div>
-                        <div class="form-group">
-                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
-                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
-                        </div>
-                    </form>
-                  </p>
-                {% endfor %}
-              </div>
-              <div class="col-md-6">
-                <h4>Errors:</h4>
-                {% for query, label, count, vname, executed in catch_errors %}
-                  <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=catch">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <span>{{ label }}</span> ::
-                        </div>
-                        <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">
-                                {% if count > 0 %}
-                                    <a id="error-count" data-toggle="modal" data-target="#error-modal"
-                                       fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
-                                       title="Click to display error ids">{{ count }}</a>
-                                    rows
-                                {% else %}
-                                    0 row
-                                {% endif %}
-                            </span>
-                            &nbsp
-                        </div>
-                        <div class="form-group">
-                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
-                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
-                        </div>
-                    </form>
-                  </p>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-
-          <div role="tab-panel" id="distribution"
-            {% if current_tab == 'distribution' %}
-                class="tab-pane active"
-            {% else %}
-                class="tab-pane"
-            {% endif %}
-          >
-            <h3>Distribution Health Report</h3>
-            <div class="row">
-              <div class="col-md-6">
-                <h4>Errors:</h4>
-                {% for query, label, count, vname, executed in distribution_errors %}
-                  <p>
-                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=distribution">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <span>{{ label }}</span> ::
-                        </div>
-                        <div class="form-group">
-                            <span class="{{ count|yesno:"error,clear" }}">
-                                {% if count > 0 %}
-                                    <a id="error-count" data-toggle="modal" data-target="#error-modal"
-                                       fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
-                                       title="Click to display error ids">{{ count }}</a>
-                                    rows
-                                {% else %}
-                                    0 row
-                                {% endif %}
-                            </span>
-                            &nbsp
-                        </div>
-                        <div class="form-group">
-                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
-                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
-                        </div>
-                    </form>
-                  </p>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-      <!-- Error modal -->
-    <div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog custom-class" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">
-                        Errors <span class="glyphicon glyphicon-remove-sign red" aria-hidden="true"></span>
-                    </h4>
+                    </div>
                 </div>
-                <div class="modal-body"></div>
-                <div class="modal-footer"></div>
+            </div>
+
+                <div role="tab-panel" id="catch"
+                        {% if current_tab == 'catch' %}
+                     class="tab-pane active"
+                        {% else %}
+                     class="tab-pane"
+                        {% endif %}
+                >
+                    <h3>Catch Health Report</h3>
+                    <div class="accordion" id="catch_accordion">
+                        <div class="accordion-group">
+                            <div class="accordion-heading">
+                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#catch_accordion" href="#catch_err_collapse">
+                                    <h4>Errors:</h4>
+                                </a>
+                            </div>
+                            <div id="catch_err_collapse" class="accordion-body collapse in">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        {% for query, label, count, vname, executed in catch_errors %}
+                                            <p>
+                                            <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=catch">
+                                                {% csrf_token %}
+                                                <div class="form-group">
+                                                    <span>{{ label }}</span> ::
+                                                </div>
+                                                <div class="form-group">
+                                        <span class="{{ count|yesno:"error,clear" }}">
+                                            {% if count > 0 %}
+                                                <a id="error-count" data-toggle="modal" data-target="#error-modal"
+                                                   fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
+                                                   title="Click to display error ids">{{ count }}</a>
+                                                rows
+                                            {% else %}
+                                                0 row
+                                            {% endif %}
+                                        </span>
+                                                    &nbsp
+                                                </div>
+                                                <div class="form-group">
+                                        <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                                 title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                                                </div>
+                                            </form>
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-group">
+                                <div class="accordion-heading">
+                                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#catch_accordion" href="#catch_warn_collapse">
+                                        <h4>Warnings:</h4>
+                                    </a>
+                                </div>
+                                <div id="catch_warn_collapse" class="accordion-body collapse">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            {% for query, label, count, vname, executed in catch_warnings %}
+                                                <p>
+                                                <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=catch">
+                                                    {% csrf_token %}
+                                                    <div class="form-group">
+                                                        <span>{{ label }}</span> ::
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <span class="{{ count|yesno:"error,clear" }}">{{ count }} rows</span>
+                                                        &nbsp
+                                                    </div>
+                                                    <div class="form-group">
+                                        <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                                 title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                                                    </div>
+                                                </form>
+                                                </p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <div role="tab-panel" id="distribution"
+                            {% if current_tab == 'distribution' %}
+                         class="tab-pane active"
+                            {% else %}
+                         class="tab-pane"
+                            {% endif %}
+                    >
+                        <h3>Distribution Health Report</h3>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4>Errors:</h4>
+                                {% for query, label, count, vname, executed in distribution_errors %}
+                                    <p>
+                                    <form class="form-inline" id="{{ vname }}" method="post" action="{% url 'health' %}?view_name={{ vname }}&current_tab=distribution">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <span>{{ label }}</span> ::
+                                        </div>
+                                        <div class="form-group">
+                            <span class="{{ count|yesno:"error,clear" }}">
+                                {% if count > 0 %}
+                                    <a id="error-count" data-toggle="modal" data-target="#error-modal"
+                                       fetch-url="{% url 'health' %}?view_name={{ vname }}&get_ids_only=1"
+                                       title="Click to display error ids">{{ count }}</a>
+                                    rows
+                                {% else %}
+                                    0 row
+                                {% endif %}
+                            </span>
+                                            &nbsp
+                                        </div>
+                                        <div class="form-group">
+                            <span><a href="#" onclick="document.getElementById('{{ vname }}').submit();"
+                                     title="Click to re-execute validation rule">[{{ executed }}]</a></span>
+                                        </div>
+                                    </form>
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error modal -->
+        <div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog custom-class" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">
+                            Errors <span class="glyphicon glyphicon-remove-sign red" aria-hidden="true"></span>
+                        </h4>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer"></div>
+                </div>
             </div>
         </div>
     </div>
-  </div>
 {% endblock %}

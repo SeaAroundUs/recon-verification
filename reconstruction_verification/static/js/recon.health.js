@@ -40,7 +40,17 @@ var Health = {
 
             $.get($url).done(function(res) {
                 var ids = res.ids.toString()
-                $('#error-modal div.modal-body').html("<p>" + ids + "</p>");
+                if (res.description.startsWith("Distribution.taxon_habitat")) {
+                    var anchors = ""
+                    ids = ids.split(",")
+                    for (var len=ids.length, i=0; i < len; i++) {
+                        anchors = anchors + '<a target="_blank" href="/admin/catch/habitatindex/' + ids[i] + '">' + ids[i] + ",</a>";
+                    }
+                    $('#error-modal div.modal-body').html("<p>" + anchors + "</p>");
+                }
+                else {
+                    $('#error-modal div.modal-body').html("<p>" + ids + "</p>");
+                }
                 $('#error-modal div.modal-footer').html(
                     '<div class="desc"><b>' + res.description +
                     '</b></div><div class="clipboard"><button type="button" class="copy">Copy ids to clipboard</button></div>'
