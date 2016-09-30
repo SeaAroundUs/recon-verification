@@ -218,7 +218,7 @@ class HealthView(View):
                 error_views = Taxon.error_views()
             elif view_name.startswith("v_raw_"):
                 error_views = RawCatch.error_views()
-            elif view_name.startswith("v_raw_"):
+            elif view_name.startswith("v_catch_"):
                 error_views = Catch.error_views()
 
             for view in error_views:
