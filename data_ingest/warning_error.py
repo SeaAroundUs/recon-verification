@@ -209,16 +209,21 @@ class TaxonExtentAvailableButNoDistribution(ErrorView):
     
     
 class TaxaHasNoDistributionLowRawCatch(ErrorView):
-    message = "No distribution for taxa and raw catch <= 1000"
+    message = "Distribution.taxon_distribution record unavailable, but raw catch <= 1000 (add taxa to substitute table)"
     view = "taxa_has_no_distribution_low_raw_catch"
     col = "taxon_key"
 
 
 class TaxaHasNoDistributionHighRawCatch(ErrorView):
-    message = "No distribution for taxa and raw catch > 1000"
+    message = "Distribution.taxon_distribution record unavailable and raw catch > 1000 (create extent/distribution)"
     view = "taxa_has_no_distribution_high_raw_catch"
     col = "taxon_key"
-
+    
+class TaxaHasSubstituteHighRawCatch(ErrorView):
+    message = "Distribution.taxon_distribution_substitute available and raw catch > 1000 (create extent/distribution)"
+    view = "taxa_has_substitute_high_raw_catch"
+    col = "taxon_key"    
+    
 
 # base classes for warning views. these classes shouldn't be used for anything but
 # creation of the class list at the bottom
@@ -338,3 +343,4 @@ class DistributionTaxonExtentAvailableButNoHabitat(TaxonExtentAvailableButNoHabi
 class DistributionTaxonExtentAvailableButNoDistribution(TaxonExtentAvailableButNoDistribution, DistributionMixin): pass
 class DistributionTaxaHasNoDistributionLowRawCatch(TaxaHasNoDistributionLowRawCatch, DistributionMixin): pass
 class DistributionTaxaHasNoDistributionHighRawCatch(TaxaHasNoDistributionHighRawCatch, DistributionMixin): pass
+class DistributionTaxaHasSubstituteHighRawCatch(TaxaHasSubstituteHighRawCatch, DistributionMixin): pass
