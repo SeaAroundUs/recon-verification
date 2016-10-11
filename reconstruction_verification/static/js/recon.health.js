@@ -31,7 +31,7 @@ var Health = {
 
     initErrorModal: function () {
         $('#error-modal').on("hide.bs.modal", function (e) {
-            $('#errors div.errors-body').html("");
+            $('#error-modal div.modal-body').html("");
             $('#error-modal div.modal-footer').html("");
         });
 
