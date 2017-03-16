@@ -905,6 +905,7 @@ class TaxonSubstitution(models.Model):
     original_taxon_key = models.IntegerField(primary_key=True)
     use_this_taxon_key_instead = models.IntegerField()
     is_manual_override = models.BooleanField(null=False, default=False)
+    comments = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Taxon substitution'
@@ -915,7 +916,7 @@ class TaxonSubstitution(models.Model):
 
     class Admin(LoggedAdmin):
         list_display = ('original_taxon_key', 'use_this_taxon_key_instead', 'is_manual_override')
-        search_fields = ('original_taxon_key', 'use_this_taxon_key_instead',)
+        search_fields = ('original_taxon_key', 'use_this_taxon_key_instead')
         show_full_result_count = True
 
     @classmethod
