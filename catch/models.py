@@ -1050,6 +1050,7 @@ class Cell(models.Model):
     seamount_saup = models.FloatField()
     seamount = models.FloatField()
     coral = models.FloatField()
+    front = models.FloatField()
     pprod = models.FloatField()
     ice_con = models.FloatField()
     sst = models.FloatField()
