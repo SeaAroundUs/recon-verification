@@ -791,6 +791,7 @@ class HabitatIndex(models.Model):
     effective_distance = models.FloatField(null=True, blank=True)
     estuaries = models.FloatField(null=True)
     coral = models.FloatField(null=True)
+    front = models.FloatField(null=True)
     seagrass = models.FloatField(null=True, blank=True, db_column="sea_grass")
     seamount = models.FloatField(null=True, db_column="sea_mount")
     others = models.FloatField(null=True)
