@@ -795,24 +795,23 @@ class HabitatIndex(models.Model):
     seagrass = models.FloatField(null=True, blank=True, db_column="sea_grass")
     seamount = models.FloatField(null=True, db_column="sea_mount")
     others = models.FloatField(null=True)
-    shelf = models.FloatField(null=True)
     slope = models.FloatField(null=True)
+    shelf = models.FloatField(null=True)
     abyssal = models.FloatField(null=True)
     inshore = models.FloatField(null=True)
     offshore = models.FloatField(null=True)
     max_depth = models.IntegerField(null=True, blank=True)
     min_depth = models.IntegerField(null=True, blank=True)
+    true_max_depth = models.IntegerField(null=True, blank=True)
+    water_column_position = models.CharField(max_length=255, null=True, blank=True)
+    intertidal = models.NullBooleanField(null=True, blank=True)
     lat_north = models.IntegerField(null=True, blank=True)
     lat_south = models.IntegerField(null=True, blank=True)
     found_in_fao_area_id = ArrayField(models.IntegerField(null=True), null=True)
     fao_limits = models.IntegerField(null=True, blank=True)
     sl_max = models.FloatField(null=True, blank=True)
-    intertidal = models.NullBooleanField(null=True, blank=True)
     temperature = models.FloatField(null=True, blank=True)
-    water_column_position = models.CharField(max_length=255, null=True, blank=True)
-    depth_comments = models.CharField(max_length=255, null=True, blank=True)
     general_comments = models.CharField(max_length=255, null=True, blank=True)
-    
 
     class Meta:
         verbose_name = 'Habitat index'
