@@ -131,6 +131,8 @@ class EEZ(models.Model):
     fishing_entity = models.ForeignKey(to=FishingEntity, db_column='is_home_eez_of_fishing_entity_id')
     allows_coastal_fishing_for_layer2_data = models.BooleanField()
     ohi_link = models.CharField(max_length=400, null=True, blank=True)
+    is_retired = models.BooleanField(default=False)
+    gsi_link = models.CharField(max_length=400, null=True, blank=True)
 
     class Meta:
         verbose_name = 'EEZ'
