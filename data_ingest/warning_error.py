@@ -154,6 +154,30 @@ class CCAMLRComboMismatch(ErrorView):
     col = "ccamlr_area"
     
 
+class ICESNull(ErrorView):
+    message = "ICES area null for FAO 27"
+    view = "ices_null"
+    col = "ices_area"
+    
+    
+class OutsideICESNotNull(ErrorView):
+    message = "ICES area not null for catch outside of FAO 27"
+    view = "outside_ices_not_null"
+    col = "ices_area"    
+    
+
+class NAFONull(ErrorView):
+    message = "NAFO area null for FAO 21"
+    view = "nafo_null"
+    col = "nafo_division" 
+    
+    
+class OutsideNAFONotNull(ErrorView):
+    message = "NAFO area not null for catch outside of FAO 21"
+    view = "outside_nafo_not_null"
+    col = "nafo_division"
+    
+
 class HighSeasMismatch(ErrorView):
     message = "High Seas ID mismatch"
     view = "high_seas_mismatch"
@@ -239,18 +263,6 @@ class AmountGreaterThanThreshold(WarningView):
     col = "amount"
 
 
-class FAO21NAFONull(WarningView):
-    message = "Null NAFO for FAO 21"
-    view = "fao_21_nafo_null"
-    col = "nafo_division_id"
-
-
-class FAO27ICESNull(WarningView):
-    message = "Null ICES for FAO 27"
-    view = "fao_27_ices_null"
-    col = "ices_area_id"
-
-
 class OriginalCountryFishingNotNull(WarningView):
     message = "Original country fishing is not null"
     view = "original_country_fishing_not_null"
@@ -290,8 +302,6 @@ class YearMax(WarningView):
 # these are the classes that should be consumed by the app's logic
 class RawCatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, RawCatchMixin): pass
 class RawCatchAmountZeroOrNegative(AmountZeroOrNegative, RawCatchMixin): pass
-class RawCatchFAO21NAFONull(FAO21NAFONull, RawCatchMixin): pass
-class RawCatchFAO27ICESNull(FAO27ICESNull, RawCatchMixin): pass
 class RawCatchFishingEntityAndEEZNotAligned(FishingEntityAndEEZNotAligned, RawCatchMixin): pass
 class RawCatchInputReconstructedReportingStatusReported(InputReconstructedReportingStatusReported, RawCatchMixin): pass
 class RawCatchInputNotReconstructedReportingStatusUnreported(InputNotReconstructedReportingStatusUnreported, RawCatchMixin): pass
@@ -310,12 +320,14 @@ class RawCatchAntarcticCCAMLRNull(AntarcticCCAMLRNull, RawCatchMixin): pass
 class RawCatchOutsideAntarcticCCAMLRNotNull(OutsideAntarcticCCAMLRNotNull, RawCatchMixin): pass
 class RawCatchCCAMLRComboMismatch(CCAMLRComboMismatch, RawCatchMixin): pass
 class RawCatchHighSeasMismatch(HighSeasMismatch, RawCatchMixin): pass
+class RawCatchICESNull(ICESNull, RawCatchMixin): pass
+class RawCatchOutsideICESNotNull(OutsideICESNotNull, RawCatchMixin): pass
+class RawCatchNAFONull(NAFONull, RawCatchMixin): pass
+class RawCatchOutsideNAFONotNull(OutsideNAFONotNull, RawCatchMixin): pass
                               
-                                                 
+                                               
 class CatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, CatchMixin): pass
 class CatchAmountZeroOrNegative(AmountZeroOrNegative, CatchMixin): pass
-class CatchFAO21NAFONull(FAO21NAFONull, CatchMixin): pass
-class CatchFAO27ICESNull(FAO27ICESNull, CatchMixin): pass
 class CatchFishingEntityAndEEZNotAligned(FishingEntityAndEEZNotAligned, CatchMixin): pass
 class CatchInputReconstructedReportingStatusReported(InputReconstructedReportingStatusReported, CatchMixin): pass
 class CatchInputNotReconstructedReportingStatusUnreported(InputNotReconstructedReportingStatusUnreported, CatchMixin): pass
@@ -332,6 +344,10 @@ class CatchNoCorrespondingAaFound(NoCorrespondingAaFound, CatchMixin): pass
 class CatchAntarcticCCAMLRNull(AntarcticCCAMLRNull, CatchMixin): pass
 class CatchOutsideAntarcticCCAMLRNotNull(OutsideAntarcticCCAMLRNotNull, CatchMixin): pass
 class CatchCCAMLRComboMismatch(CCAMLRComboMismatch, CatchMixin): pass
+class CatchICESNull(ICESNull, CatchMixin): pass
+class CatchOutsideICESNotNull(OutsideICESNotNull, CatchMixin): pass
+class CatchNAFONull(NAFONull, CatchMixin): pass
+class CatchOutsideNAFONotNull(OutsideNAFONotNull, CatchMixin): pass
 
 
 class DistributionTaxonLatNorthNull(TaxonLatNorthNull, DistributionMixin): pass
