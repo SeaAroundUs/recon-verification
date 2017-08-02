@@ -813,7 +813,7 @@ class HabitatIndex(models.Model):
     fao_limits = models.IntegerField(null=True, blank=True)
     sl_max = models.FloatField(null=True, blank=True)
     temperature = models.FloatField(null=True, blank=True)
-    general_comments = models.CharField(max_length=255, null=True, blank=True)
+    general_comments = models.TextField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Habitat index'
@@ -1272,3 +1272,31 @@ class UnderReviewArea(models.Model):
             'sub_area_id'
         )
         show_full_result_count = True
+
+
+class CountryProfile(models.Model):
+    profile_id = models.IntegerField(primary_key=True, blank=False)
+    c_number = models.IntegerField(null=True, blank=True)
+    count_code = models.IntegerField(null=False, blank=False)
+    country_name = models.CharField(max_length=50)
+    fish_mgt_plan = models.TextField(null=True, blank=True)
+    url_fish_mgt_plan = models.TextField(null=True, blank=True)
+    gov_marine_fish = models.TextField(null=True, blank=True)
+    major_law_plan = models.TextField(null=True, blank=True)
+    url_major_law_plan = models.TextField(null=True, blank=True)
+    gov_protect_marine_env = models.TextField(null=True, blank=True)
+    url_gov_protect_marine_env = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'country_fishery_profile'
+        ordering = ['profile_id']
+        managed = False
+
+    class Admin(LoggedAdmin):
+        verbose_name = 'Country Fishery Profile'
+        verbose_name_plural = 'Country Fishery Profiles'
+        list_display = (
+            'profile_id',
+            'country_name'
+        )
+    
