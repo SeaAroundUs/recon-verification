@@ -248,6 +248,26 @@ class TaxaHasSubstituteHighRawCatch(ErrorView):
     view = "taxa_has_substitute_high_raw_catch"
     col = "taxon_key"    
     
+class TaxaSubstituteHasDistribution(ErrorView):
+    message = "Distribution.taxon_distribution_substitute original key already has a distribution, consider removing it from the table"
+    view = "taxa_substitute_has_distribution"
+    col = "original_taxon_key" 
+
+class TaxaSubstituteHasNoDistribution(ErrorView):
+    message = "Distribution.taxon_distribution_substitute suggested key does not have a distribution"
+    view = "taxa_substitute_has_no_distribution"
+    col = "use_this_taxon_key_instead" 
+
+class TaxaOverrideHasDistribution(ErrorView):
+    message = "Distribution.taxon_distribution_substitute original key with manual override has a distribution"
+    view = "taxa_override_has_distribution"
+    col = "original_taxon_key" 
+
+class TaxaSubstituteHasDifferentFunctionalGroups(ErrorView):
+    message = "Distribution.taxon_distribution_substitute original key and the substitute have different FunctionalGroupIDs and may interfere with Access Agreements"
+    view = "taxa_substitute_has_different_functional_groups"
+    col = "original_taxon_key" 
+
 
 # base classes for warning views. these classes shouldn't be used for anything but
 # creation of the class list at the bottom
@@ -360,3 +380,7 @@ class DistributionTaxonExtentAvailableButNoDistribution(TaxonExtentAvailableButN
 class DistributionTaxaHasNoDistributionLowRawCatch(TaxaHasNoDistributionLowRawCatch, DistributionMixin): pass
 class DistributionTaxaHasNoDistributionHighRawCatch(TaxaHasNoDistributionHighRawCatch, DistributionMixin): pass
 class DistributionTaxaHasSubstituteHighRawCatch(TaxaHasSubstituteHighRawCatch, DistributionMixin): pass
+class DistributionTaxaSubstituteHasDistribution(TaxaSubstituteHasDistribution, DistributionMixin): pass
+class DistributionTaxaSubstituteHasNoDistribution(TaxaSubstituteHasNoDistribution, DistributionMixin): pass
+class DistributionTaxaOverrideHasDistribution(TaxaOverrideHasDistribution, DistributionMixin): pass
+class DistributionTaxaSubstituteHasDifferentFunctionalGroups(TaxaSubstituteHasDifferentFunctionalGroups, DistributionMixin): pass
