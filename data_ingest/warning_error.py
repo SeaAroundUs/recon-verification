@@ -178,6 +178,34 @@ class OutsideNAFONotNull(ErrorView):
     col = "nafo_division"
     
 
+class IcesComboMismatch(ErrorView):
+    message = "ICES combo does not exist"
+    view = "ices_combo_mismatch"
+    col = "ices_area"
+    
+    
+class NafoComboMismatch(ErrorView):
+    message = "NAFO combo does not exist"
+    view = "nafo_combo_mismatch"
+    col = "nafo_division"
+    
+    
+class EezIcesComboIfaMismatch(ErrorView):
+    message = "The EEZ and ICES combination for small-scale catch does not occur in an IFA area"
+    view = "eez_ices_combo_ifa_mismatch"
+    col = "ices_area"
+    
+class EezNafoComboIfaMismatch(ErrorView):
+    message = "The EEZ and NAFO combination for small-scale catch does not occur in an IFA area"
+    view = "eez_nafo_combo_ifa_mismatch"
+    col = "nafo_division"
+    
+class CcamlrComboIfaMismatch(ErrorView):
+    message = "The EEZ and CCAMLR combination for small-scale catch does not occur in an IFA area"
+    view = "eez_ccamlr_combo_ifa_mismatch"
+    col = "ccamlr_area"
+
+
 class HighSeasMismatch(ErrorView):
     message = "High Seas ID mismatch"
     view = "high_seas_mismatch"
@@ -344,6 +372,11 @@ class RawCatchICESNull(ICESNull, RawCatchMixin): pass
 class RawCatchOutsideICESNotNull(OutsideICESNotNull, RawCatchMixin): pass
 class RawCatchNAFONull(NAFONull, RawCatchMixin): pass
 class RawCatchOutsideNAFONotNull(OutsideNAFONotNull, RawCatchMixin): pass
+class RawCatchIcesComboMismatch(IcesComboMismatch, RawCatchMixin): pass
+class RawCatchNafoComboMismatch(NafoComboMismatch, RawCatchMixin): pass
+class RawCatchEezIcesComboIfaMismatch(EezIcesComboIfaMismatch, RawCatchMixin): pass
+class RawCatchEezNafoComboIfaMismatch(EezNafoComboIfaMismatch, RawCatchMixin): pass
+class RawCatchEezCcamlrComboIfaMismatch(CcamlrComboIfaMismatch, RawCatchMixin): pass
                               
                                                
 class CatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, CatchMixin): pass
