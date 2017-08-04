@@ -237,6 +237,16 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 catch.models.InputType.objects.order_by('input_type_id').values_list('input_type_id', 'name')
             ),
             (
+                'ices_area_id',
+                'ICES area',
+                catch.models.ICESArea.objects.order_by('ices_area').values_list('ices_area_id', 'ices_area')
+            ),
+            (
+                'nafo_division',
+                'NAFO',
+                catch.models.NAFO.objects.order_by('nafo_division').values_list('nafo_division_id', 'nafo_division')
+            ),
+            (
                 'reference_id',
                 'Reference',
                 catch.models.Reference.objects.order_by('filename').values_list('reference_id', 'filename', 'main_area_name')
