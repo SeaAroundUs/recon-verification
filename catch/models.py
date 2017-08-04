@@ -475,7 +475,7 @@ class Taxon(models.Model):
     # method to return list of error views
     @staticmethod
     def error_views():
-        return sorted([cls for cls in DistributionMixin.__subclasses__() if cls.type == "error"], key=lambda x: x.view)
+        return sorted([cls for cls in DistributionMixin.__subclasses__() if cls.type == "error"], key=lambda x: x.message)
 
     def __str__(self):
         return self.common_name
@@ -609,11 +609,11 @@ class Catch(models.Model):
 
     @staticmethod
     def warning_views():
-        return sorted([cls for cls in CatchMixin.__subclasses__() if cls.type == "warning"], key=lambda x: x.view)
+        return sorted([cls for cls in CatchMixin.__subclasses__() if cls.type == "warning"], key=lambda x: x.message)
 
     @staticmethod
     def error_views():
-        return sorted([cls for cls in CatchMixin.__subclasses__() if cls.type == "error"], key=lambda x: x.view)
+        return sorted([cls for cls in CatchMixin.__subclasses__() if cls.type == "error"], key=lambda x: x.message)
 
 
 class AccessType(models.Model):

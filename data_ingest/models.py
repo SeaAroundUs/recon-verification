@@ -312,12 +312,12 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     # method to return list of warning views
     @staticmethod
     def warning_views():
-        return sorted([cls for cls in RawCatchMixin.__subclasses__() if cls.type == "warning"], key = lambda x: x.view)
+        return sorted([cls for cls in RawCatchMixin.__subclasses__() if cls.type == "warning"], key = lambda x: x.message)
 
     # method to return list of error views
     @staticmethod
     def error_views():
-        return sorted([cls for cls in RawCatchMixin.__subclasses__() if cls.type == "error"], key = lambda x: x.view)
+        return sorted([cls for cls in RawCatchMixin.__subclasses__() if cls.type == "error"], key = lambda x: x.message)
 
     @classmethod
     def inserted_fields(cls):
