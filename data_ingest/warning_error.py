@@ -242,6 +242,12 @@ class TaxonMaxDepthNull(ErrorView):
     col = "taxon_key"
 
 
+class TaxonSlMaxNull(ErrorView):
+    message = "Distribution.taxon_habitat record with sl_max is null"
+    view = "taxon_sl_max_null"
+    col = "taxon_key"
+
+
 class TaxonHabitatFaoNotOverlapExtent(ErrorView):
     message = "Distribution.taxon_habitat record found_in_fao_area_id not overlapping with taxon extent"
     view = "taxon_habitat_fao_not_overlap_extent"
@@ -417,3 +423,4 @@ class DistributionTaxaSubstituteHasDistribution(TaxaSubstituteHasDistribution, D
 class DistributionTaxaSubstituteHasNoDistribution(TaxaSubstituteHasNoDistribution, DistributionMixin): pass
 class DistributionTaxaOverrideHasDistribution(TaxaOverrideHasDistribution, DistributionMixin): pass
 class DistributionTaxaSubstituteHasDifferentFunctionalGroups(TaxaSubstituteHasDifferentFunctionalGroups, DistributionMixin): pass
+class DistributionTaxonSlMaxNull(TaxonSlMaxNull, DistributionMixin): pass
