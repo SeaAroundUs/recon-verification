@@ -41,13 +41,9 @@
                             <label for="reference">Reference:</label>
                             <select id="reference" name="reference">
                                 <option value="0">-- SELECT --</option>
-                                {% for id, ref, area_name in references %}
-                                    {% if ref == None %}
+                                    {% for id, ref, area_name in references %}
                                         <option value="{{ id }}">{{ area_name }} ({{ id }})</option>
-                                    {% else %}
-                                        <option value="{{ id }}">{{ ref }} ({{ id }})</option>
-                                    {% endif %}
-                                {% endfor %}
+                                    {% endfor %}
                             </select>
                         </div>
 

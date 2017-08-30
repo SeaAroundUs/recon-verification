@@ -78,7 +78,7 @@ class DataBrowseView(View):
     def get(self, request):
         params = {
             'fields': RawCatch.allowed_query_fields(),
-            'references': Reference.objects.exclude(type="Historic").order_by('filename', 'main_area_name').values_list('reference_id', 'filename', 'main_area_name'),
+            'references': Reference.objects.exclude(type="Historic").order_by('reference_id', 'main_area_name').values_list('reference_id', 'filename', 'main_area_name'),
             'sources': FileUpload.objects.order_by('-create_datetime').values_list('id', 'file', 'comment')
         }
         return render(request, self.template, params)
