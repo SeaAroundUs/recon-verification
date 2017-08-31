@@ -170,6 +170,7 @@ def commit(ids):
             'year': row.year,
             'taxon': Taxon.objects.get(taxon_key=row.taxon_key),
             'amount': row.amount,
+			'gear_type': Gear.objects.get(gear_id=row.gear_id),
             'input_type': InputType.objects.get(input_type_id=row.input_type_id),
             'raw_catch': row
         }
@@ -182,7 +183,9 @@ def commit(ids):
             'ccamlr_area': row.ccamlr_area,
             'original_sector': row.original_sector,
             'adjustment_factor': row.adjustment_factor,
-            'notes': row.notes
+            'notes': row.notes,
+			'taxon_notes': row.taxon_notes,
+			'gear_notes': row.gear_notes
         })
 
         # optional relations
@@ -214,10 +217,10 @@ def commit(ids):
         # except Taxon.DoesNotExist:
         #     values.update({'original_fao_name': None})
 
-        try:
-            values.update({'gear_type': Gear.objects.get(gear_id=row.gear_type_id)})
-        except Gear.DoesNotExist:
-            values.update({'gear_type': None})
+        #try:
+        #    values.update({'gear_type': Gear.objects.get(gear_id=row.gear_type_id)})
+        #except Gear.DoesNotExist:
+        #    values.update({'gear_type': None})
 
         # never got rules for these, but making models for the appropriate db tables and replicating
         # the above logic should handle things fine

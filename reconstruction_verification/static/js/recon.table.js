@@ -351,6 +351,7 @@ var Table = {
                         case 'sector_type_id':
                         case 'input_type_id':
                         case 'catch_type_id':
+                        case 'gear_type_id':
                         default:
                             url = '';
                             break;

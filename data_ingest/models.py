@@ -131,6 +131,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
     nafo_division_id = models.IntegerField(null=True)
     ccamlr_area = NullableCharField(max_length=200, null=True)
     taxon_notes = NullableTextField(null=True)
+    gear_notes = NullableTextField(null=True)
     #
     # NOTE: New fields should be added above this comment line
     #
@@ -221,6 +222,11 @@ class RawCatch(DirtyFieldsMixin, models.Model):
                 'Reporting status',
                 catch.models.ReportingStatus.objects.order_by('reporting_status_id').values_list('reporting_status_id', 'name')
             ),
+			(
+                'gear_id',
+                'Gear',
+                catch.models.Gear.objects.order_by('gear_id').values_list('gear_id', 'name')
+            ),
             (
                 'year',
                 'Year',
@@ -279,6 +285,7 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'sector',
             'catch_type',
             'reporting_status',
+			'gear_type',
             'year',
             'taxon_name',
             'amount',
@@ -300,6 +307,10 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'taxon name',
             'amount',
             'input type',
+			'gear type',
+            'ICES area',
+            'NAFO division',
+            'CCAMLR area',
             'original country fishing',
             'EEZ sub area',
             'subregional area',
@@ -308,15 +319,12 @@ class RawCatch(DirtyFieldsMixin, models.Model):
             'original taxon name',
             'original FAO name',
             'adjustment factor',
-            'gear type',
             'forward carry rule',
             'disaggregation rule',
             'layer rule',
             'notes',
-            'ICES area',
-            'NAFO division',
-            'CCAMLR area',
-            'taxon notes'
+            'taxon notes',
+			'gear notes'
         ]
 
     # method to return list of warning views
