@@ -485,6 +485,7 @@ class Gear(models.Model):
     gear_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
     super_code = models.CharField(max_length=20)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Gear'
