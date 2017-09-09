@@ -226,12 +226,12 @@ span.warning-reason {
   font-weight: bold;
 }
 
-#error-modal .modal-footer .desc {
+#warning-modal .modal-footer .desc , #error-modal .modal-footer .desc {
   float: left;
   font-weight: bold;
 }
 
-#error-modal .modal-footer .clipboard {
+#warning-modal .modal-footer .clipboard , #error-modal .modal-footer .clipboard {
   float: right;
   color: green;
 }
