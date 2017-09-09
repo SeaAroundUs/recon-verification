@@ -216,15 +216,24 @@ class HealthView(View):
 
             if view_name.startswith("v_distribution_"):
                 error_views = Taxon.error_views()
+                warning_views = Taxon.warning_views()
             elif view_name.startswith("v_raw_"):
                 error_views = RawCatch.error_views()
+                warning_views = RawCatch.warning_views()
             elif view_name.startswith("v_catch_"):
                 error_views = Catch.error_views()
+                warning_views = Catch.warning_views()
 
             for view in error_views:
                 if view.view_name() == view_name:
                     ids = view.all()
                     return ReconResponse({'ids': [x[0] for x in ids], 'description': view.message})
+
+            for view in warning_views:
+                if view.view_name() == view_name:
+                    ids = view.all()
+                    return ReconResponse({'ids': [x[0] for x in ids], 'description': view.message})
+                    
         else:
             if len(request.GET) == 0:
                 current_tab = 'raw_catch'
@@ -239,13 +248,16 @@ class HealthView(View):
                               for view in Catch.warning_views()]
             catch_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
                             for view in Catch.error_views()]
+            distribution_warnings = [(view.view, view.message, view.count(), view.view_name(), view.executed())
+                                     for view in Taxon.warning_views()]
             distribution_errors = [(view.view, view.message, view.count(), view.view_name(), view.executed())
-                            for view in Taxon.error_views()]
+                                   for view in Taxon.error_views()]
             params = {'current_tab': current_tab,
                       'raw_catch_warnings': raw_catch_warnings,
                       'raw_catch_errors': raw_catch_errors,
                       'catch_warnings': catch_warnings,
                       'catch_errors': catch_errors,
+                      'distribution_warnings': distribution_warnings,
                       'distribution_errors': distribution_errors}
             return render(request, self.template, params)
 

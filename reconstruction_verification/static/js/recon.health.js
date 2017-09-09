@@ -15,6 +15,7 @@ var Health = {
 
             Health.initViewLimits();
             Health.initErrorModal();
+            Health.initWarningModal();
         }
     },
 
@@ -64,6 +65,43 @@ var Health = {
         }
 
         $('a[id^=error-count]').on('click', function(e) {fetch_error_ids($(this));});
+    },
+    
+    initWarningModal: function () {
+        $('#warning-modal').on("hide.bs.modal", function (e) {
+            $('#warning-modal div.modal-body').html("");
+            $('#warning-modal div.modal-footer').html("");
+        });
+
+        function fetch_warning_ids(anchor) {
+            var $url = anchor.attr("fetch-url-w")
+
+            $.get($url).done(function(res) {
+                var ids = res.ids.toString()
+                if (res.description.startsWith("Distribution.taxon_habitat")) {
+                    var anchors = ""
+                    ids = ids.split(",")
+                    for (var len=ids.length, i=0; i < len; i++) {
+                        anchors = anchors + '<a target="_blank" href="/admin/catch/habitatindex/' + ids[i] + '">' + ids[i] + ",</a>";
+                    }
+                    $('#warning-modal div.modal-body').html("<p>" + anchors + "</p>");
+                }
+                else {
+                    $('#warning-modal div.modal-body').html("<p>" + ids + "</p>");
+                }
+                $('#warning-modal div.modal-footer').html(
+                    '<div class="desc"><b>' + res.description +
+                    '</b></div><div class="clipboard"><button type="button" class="copy">Copy ids to clipboard</button></div>'
+                );
+                $('#warning-modal div.modal-footer button.copy').on('click', function(){
+                    clipboard.copy(ids);
+                });
+            }).fail(function() {
+                $('#warning-modal div.modal-footer').html("<b>Attempt to fetch warning ids failed.</b>");
+            });
+        }
+
+        $('a[id^=warning-count]').on('click', function(e) {fetch_warning_ids($(this));});
     }
 };
 

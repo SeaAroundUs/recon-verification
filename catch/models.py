@@ -474,6 +474,10 @@ class Taxon(models.Model):
 
     # method to return list of error views
     @staticmethod
+    def warning_views():
+        return sorted([cls for cls in DistributionMixin.__subclasses__() if cls.type == "warning"], key=lambda x: x.message)
+    
+    @staticmethod
     def error_views():
         return sorted([cls for cls in DistributionMixin.__subclasses__() if cls.type == "error"], key=lambda x: x.message)
 
