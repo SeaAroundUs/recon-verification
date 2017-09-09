@@ -297,12 +297,6 @@ class TaxaOverrideHasDistribution(ErrorView):
     view = "taxa_override_has_distribution"
     col = "original_taxon_key" 
 
-class TaxaSubstituteHasDifferentFunctionalGroups(ErrorView):
-    message = "Distribution.taxon_distribution_substitute original key and the substitute have different FunctionalGroupIDs and may interfere with Access Agreements"
-    view = "taxa_substitute_has_different_functional_groups"
-    col = "original_taxon_key" 
-
-
 # base classes for warning views. these classes shouldn't be used for anything but
 # creation of the class list at the bottom
 class Layer2Or3AndSectorNotIndustrial(WarningView):
@@ -352,6 +346,10 @@ class YearMax(WarningView):
     view = "year_max"
     col = "year"
 
+class TaxaSubstituteHasDifferentFunctionalGroups(WarningView):
+    message = "Distribution.taxon_distribution_substitute original key and the substitute have different FunctionalGroupIDs and may interfere with Access Agreements"
+    view = "taxa_substitute_has_different_functional_groups"
+    col = "original_taxon_key" 
 
 # these are the classes that should be consumed by the app's logic
 class RawCatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, RawCatchMixin): pass
