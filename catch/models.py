@@ -931,9 +931,14 @@ class TaxonSubstitution(models.Model):
 
 
 class AdHocQuery(models.Model):
+    id = models.AutoField(primary_key=True)
+    description = models.TextField()
     query = models.TextField()
+    requested_by = models.CharField(max_length=100)
     notes = models.TextField(null=True, blank=True)
+    estimated_duration = models.DurationField(null=True)
     is_active = models.BooleanField(default=True)
+    is_allocated = models.BooleanField(default=False)
     created_by_auth_user = models.ForeignKey(to=User, related_name='+')
     reviewed_by_auth_user = models.ForeignKey(to=User, null=True, blank=True, related_name='+')
     grantee_auth_user_id = ArrayField(models.IntegerField(), null=True, blank=True)
@@ -1004,17 +1009,16 @@ class AdHocQuery(models.Model):
         managed = False
 
     class Admin(LoggedAdmin):
-        list_display = ('query', 'notes', 'is_active', 'created_by_auth_user', 'reviewed_by_auth_user')
-        search_fields = ('query', 'notes',)
-        list_filter = ('is_active',)
+        list_display = ('id', 'description', 'requested_by', 'estimated_duration', 'is_allocated', 'created_by_auth_user', 'last_modified')
+        search_fields = ('description', 'query', 'requested_by', 'notes',)
+        list_filter = ('is_active', 'is_allocated',)
         exclude = (
             'created_by_auth_user',
             'reviewed_by_auth_user',
             'grantee_auth_user_id',
             'last_executed_by_auth_user',
             'last_executed',
-            'created',
-            'last_modified')
+            'created')
         show_full_result_count = True
 
         def save_model(self, request, obj, form, change):
