@@ -505,7 +505,27 @@ class Gear(models.Model):
 
     def __str__(self):
         return self.name
+	
+#BEGIN SORTIZ 10/12/18	
+class EndUse(models.Model):
+    end_use_type_id = models.IntegerField(primary_key=True)
+    end_use_name = models.CharField(max_length=200)
 
+    class Meta:
+        verbose_name = 'End Use'
+        verbose_name_plural = 'End Use'
+        ordering = ['end_use_type_id']
+        db_table = 'end_use_type'
+        managed = False
+
+    class Admin(LoggedAdmin):
+        list_display = ('end_use_type_id', 'end_use_name')
+        search_fields = ('end_use_type_id', 'end_use_name',)
+        show_full_result_count = True
+
+    def __str__(self):
+        return self.name		
+#END SORTIZ 10/12/18	
 
 class InputType(models.Model):
     input_type_id = models.IntegerField(primary_key=True)
