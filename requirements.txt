@@ -1,4 +1,4 @@
-Django==1.11.19
+Django==1.11.20
 django-admin-bootstrapped==2.3.5
 pytz==2015.2
 simplejson==3.6.5
