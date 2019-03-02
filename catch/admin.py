@@ -5,7 +5,7 @@ from catch.models import FishingEntity, EEZ, FAO, ICESArea, NAFO, \
     Layer3Taxon, HabitatIndex, LME, RFMO, RFMOManagedTaxon, HighSeas, \
     TaxonSubstitution, AdHocQuery, Cell, ExcludedTaxon, ISSCAAP, Gear, \
     ProcedureAndOutcome, UncertaintyEEZ, UncertaintyScore, UncertaintyTimePeriod, \
-    UnderReviewArea, CountryProfile, MarineLayer
+    UnderReviewArea, CountryProfile, MarineLayer, EndUse
 
 # this line is disables bulk deletion on the admin list pages
 admin.site.disable_action('delete_selected')
