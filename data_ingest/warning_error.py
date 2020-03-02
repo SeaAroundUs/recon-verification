@@ -205,6 +205,45 @@ class CcamlrComboIfaMismatch(ErrorView):
     view = "eez_ccamlr_combo_ifa_mismatch"
     col = "ccamlr_area"
 
+class CheckAssessAgreements(ErrorView):
+    message = "Access agreements, Fishing entity and EEZ not existing"
+    view = "check_access_agreements"
+    col = ""
+
+class CheckFishingEntityHomeEEZ(ErrorView):
+    message = "EEZ in Layer 1 with different Home EEZ"
+    view = "check_fishing_entity_home_eez"
+    col = ""
+
+class CheckExistFishingEntityEEZ(ErrorView):
+    message = "Fishing Entity and EEZ not existing"
+    view = "check_exist_fishing_entity_eez"
+    col = ""
+
+class TaxonKeysExisting(ErrorView):
+    message = "Taxon key not existing in taxon table"
+    view = "taxonkeys_existing"
+    col = ""
+
+class CheckNAFO(ErrorView):
+    message = "NAFO Division not existing"
+    view = "check_nafo"
+    col = ""
+
+class LayerSector(ErrorView):
+    message = "Layer 3 with sector type industrial"
+    view = "layer_sector"
+    col = ""
+
+class CheckNAFOIFA(ErrorView):
+    message = "Sector Type Industrial and NAFO Division True Excluding NAFO combo with both is_ifa true and false"
+    view = "check_nafo_ifa"
+    col = ""
+
+class CheckEEZIFA(ErrorView):
+    message = "Sector Type Industrial fishing in IFA"
+    view = "check_eez_ifa"
+    col = ""
 
 class HighSeasMismatch(ErrorView):
     message = "High Seas ID mismatch"
@@ -381,6 +420,15 @@ class RawCatchNafoComboMismatch(NafoComboMismatch, RawCatchMixin): pass
 class RawCatchEezIcesComboIfaMismatch(EezIcesComboIfaMismatch, RawCatchMixin): pass
 class RawCatchEezNafoComboIfaMismatch(EezNafoComboIfaMismatch, RawCatchMixin): pass
 class RawCatchEezCcamlrComboIfaMismatch(CcamlrComboIfaMismatch, RawCatchMixin): pass
+
+class RawCatchCheckAssessAgreements(CheckAssessAgreements, RawCatchMixin): pass
+class RawCatchCheckFishingEntityHomeEEZ(CheckFishingEntityHomeEEZ, RawCatchMixin): pass
+class RawCatchCheckExistFishingEntityEEZ(CheckExistFishingEntityEEZ, RawCatchMixin): pass
+class RawCatchTaxonKeysExisting(TaxonKeysExisting, RawCatchMixin): pass
+class RawCatchCheckNAFO(CheckNAFO, RawCatchMixin): pass
+class RawCatchLayerSector(LayerSector, RawCatchMixin): pass
+class RawCatchCheckNAFOIFA(CheckNAFOIFA, RawCatchMixin): pass
+class RawCatchCheckEEZIFA(CheckEEZIFA, RawCatchMixin): pass
                               
                                                
 class CatchAmountGreaterThanThreshold(AmountGreaterThanThreshold, CatchMixin): pass
