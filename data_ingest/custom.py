@@ -8,7 +8,7 @@ class Custom:
     @classmethod
     def view_list(cls):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT table_name FROM INFORMATION_SCHEMA.views WHERE table_name LIKE 'v_custom_%';")
+            cursor.execute("SELECT table_name FROM INFORMATION_SCHEMA.views WHERE table_name LIKE 'v_custom_%' Order by table_name;")
             return [cls(row[0]) for row in cursor.fetchall()]
 
     # an instance of this class represents a specific custom view
@@ -22,7 +22,7 @@ class Custom:
     # converts a view name like "v_custom_rfmo_view" to "RFMO view"
     def pretty_title(self):
         uppercase_words = [
-            "id", "eez", "lme", "rfmo", "fao", "ices", "nafo"
+            "id", "eez", "lme", "rfmo", "fao", "ices", "nafo", "meow"
         ]
         name = self.view_name \
             .replace('v_custom_', '') \
