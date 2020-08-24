@@ -716,15 +716,15 @@ class AccessAgreement(models.Model):
         ]
     )
     duration_type = models.CharField(max_length=255, null=True, blank=True)
-    duration_details = models.CharField(max_length=255, null=True, blank=True)
+    duration_details = models.CharField(max_length=1000, null=True, blank=True)
     functional_group_id = models.CharField(
         max_length=255, null=True, blank=True, validators=[aa_functional_group_validator]
     )
     functional_group_details = models.CharField(max_length=255, null=True, blank=True)
     fees = models.CharField(max_length=255, null=True, blank=True)
-    quotas = models.CharField(max_length=255, null=True, blank=True)
-    other_restrictions = models.CharField(max_length=255, null=True, blank=True)
-    notes_on_agreement = models.CharField(max_length=255, null=True, blank=True)
+    quotas = models.CharField(max_length=1000, null=True, blank=True)
+    other_restrictions = models.CharField(max_length=1000, null=True, blank=True)
+    notes_on_agreement = models.CharField(max_length=1000, null=True, blank=True)
     ref_id = models.IntegerField(null=True, blank=True)
     source_link = models.CharField(max_length=255, null=True, blank=True)
     pdf = models.CharField(max_length=255, null=True, blank=True)
@@ -738,8 +738,8 @@ class AccessAgreement(models.Model):
     pages = models.CharField(max_length=255, null=True, blank=True)
     number_of_boats = models.CharField(max_length=255, null=True, blank=True)
     gear = models.CharField(max_length=255, null=True, blank=True)
-    notes_on_the_references = models.CharField(max_length=255, null=True, blank=True)
-    change_log = models.CharField(max_length=255, null=True, blank=True)
+    notes_on_the_references = models.CharField(max_length=1000, null=True, blank=True)
+    change_log = models.CharField(max_length=1000, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Access agreement'
