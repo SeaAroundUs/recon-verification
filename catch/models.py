@@ -706,7 +706,7 @@ class AccessAgreement(models.Model):
     start_year = models.IntegerField(
         validators=[
             MinValueValidator(1890, message='Min allowable year is 1890'),
-            MaxValueValidator(2019, message='Max allowable year is 2019')
+            MaxValueValidator(2022, message='Max allowable year is 2022')
         ]
     )
     end_year = models.IntegerField(
